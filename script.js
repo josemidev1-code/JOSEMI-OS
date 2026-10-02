@@ -1,7 +1,7 @@
 /* =========================================================
    JOSEMI-OS · portfolio interactivo
    WM = motor de ventanas. Apps = contenido plug-in.
-   v1.3: + Tetris, + Pac-Man (fantasma perseguidor), + Matrix como wallpaper real.
+   v2: arranque ASCII, Arcade y Secret Vault (upgrade.js).
 
    ORDEN MENTAL DEL PROGRAMA
    1. Se recuperan los ajustes guardados.
@@ -17,7 +17,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms)), pad=n=>String(n).padStart(2,'0
 
 /* --- Estado persistente --- */
 // DEF contiene valores iniciales. Object.assign mezcla encima lo guardado en localStorage.
-const DEF={accent:'#6dff9b',bg:'#050806',wp:0,sound:true,motion:false};
+const DEF={accent:'#6dff9b',bg:'#050806',wp:0,sound:false,motion:matchMedia('(prefers-reduced-motion: reduce)').matches};
 let state=Object.assign({},DEF);
 try{ state=Object.assign(state, JSON.parse(localStorage.getItem('josemi-os')||'{}')); }catch(e){}
 if(['#6C63FF','#00C8FF','#4ade80','#f5b942'].includes(state.accent))state.accent='#6dff9b';
@@ -93,6 +93,7 @@ function stopMatrix(){
 // [FIX] Ara entén 'matrix' i només l'arrenca quan el desktop és visible.
 function applyTheme(){
   document.documentElement.style.setProperty('--accent',state.accent);
+  document.documentElement.style.setProperty('--accent-soft',state.accent+'1f');
   document.documentElement.style.setProperty('--bg',state.bg);
   const bg=$('#bg');
   const desktopVisible=!$('#desktop').classList.contains('hidden');
@@ -138,7 +139,7 @@ const PROFILE={
   nombre:'José Miguel Miralles Gandia',
   corto:'Josemi',
   rol:'Desarrollador de software en proceso',
-  estudios:'DAM · Desarrollo de Aplicaciones Multiplataforma · SSIMARRO',
+  estudios:'DAM · Desarrollo de Aplicaciones Multiplataforma · IES Dr. Lluís Simarro',
   estado:'Aprendiendo mientras construyo proyectos reales',
   ubicacion:'España',
   bio:'Soy estudiante de DAM y me interesa especialmente el mundo de la informática. Ahora mismo estoy profundizando en HTML, CSS y JavaScript construyendo este portfolio, y me gusta utilizar la IA como una herramienta para aprender, crear y resolver problemas con más posibilidades.',
@@ -157,7 +158,7 @@ const Apps={
      <div class="chips">${PROFILE.gustos.map(x=>`<span class="chip">${x}</span>`).join('')}</div>
    </section>
    <div class="content-grid">
-     <article class="content-card"><span class="card-kicker">01 / AHORA</span><h3>Qué estoy haciendo</h3><p>Estudio <strong>DAM</strong> en <strong>SSIMARRO</strong>. Este proyecto es mi forma de practicar frontend, interacción, diseño y JavaScript mientras construyo algo que realmente me representa.</p></article>
+     <article class="content-card"><span class="card-kicker">01 / AHORA</span><h3>Qué estoy haciendo</h3><p>Estudio <strong>DAM</strong> en <strong>IES Dr. Lluís Simarro</strong>. Este proyecto es mi forma de practicar frontend, interacción, diseño y JavaScript mientras construyo algo que realmente me representa.</p></article>
      <article class="content-card"><span class="card-kicker">02 / OBJETIVO</span><h3>Hacia dónde voy</h3><p>${PROFILE.aspiracion}</p></article>
      <article class="content-card"><span class="card-kicker">03 / FUERA DEL CÓDIGO</span><h3>No todo es programar</h3><p>Me gusta entrenar en el gimnasio, hacer deporte, practicar boxeo y salir a correr. También experimento con e-commerce y dropshipping.</p></article>
      <article class="content-card"><span class="card-kicker">04 / MENTALIDAD</span><h3>Build · learn · repeat</h3><p>Estoy al principio del camino, así que prefiero enseñar progreso real antes que fingir experiencia que todavía no tengo.</p></article>
@@ -199,7 +200,7 @@ const Apps={
      const print=(h,c='')=>{const d=document.createElement('div');d.className=c;d.innerHTML=h;out.appendChild(d);out.scrollTop=out.scrollHeight;};
      print('Terminal de JOSEMI-OS · escribe <span class="ok">ayuda</span>');
      inp.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const raw=inp.value.trim();inp.value='';
-       print(`<span class="p">josemi@portfolio</span>:<span class="dir">~</span>$ ${raw}`);runCommand(raw,print,openWindow);});
+       print(`<span class="p">josemi@portfolio</span>:<span class="dir">~</span>$ ${escapeHTML(raw)}`);runCommand(raw,print,openWindow);});
      b.addEventListener('click',()=>inp.focus());}},
 
  readme:{title:'README.md',icon:'📄',render:()=>`
@@ -209,7 +210,7 @@ const Apps={
      <blockquote><strong>Primer proyecto personal como desarrollador de José Miguel Miralles Gandia.</strong></blockquote>
      <p>JOSEMI-OS es mi portfolio convertido en un pequeño sistema operativo interactivo. No quería hacer una web típica de “sobre mí + proyectos + contacto”, así que decidí construir un espacio que se pueda explorar, abrir, tocar y descubrir.</p>
      <h2>¿Quién soy?</h2>
-     <p>Soy <strong>José Miguel Miralles Gandia</strong>, estudiante de <strong>DAM (Desarrollo de Aplicaciones Multiplataforma) en SSIMARRO</strong> y desarrollador de software en proceso.</p>
+     <p>Soy <strong>José Miguel Miralles Gandia</strong>, estudiante de <strong>DAM (Desarrollo de Aplicaciones Multiplataforma) en IES Dr. Lluís Simarro</strong> y desarrollador de software en proceso.</p>
      <p>Ahora mismo estoy trabajando especialmente con <code>HTML</code>, <code>CSS</code> y <code>JavaScript</code>. Me interesa la informática, la inteligencia artificial y el potencial de combinar software, automatización y creatividad.</p>
      <h2>¿Qué es esta web?</h2>
      <ul><li>Un portfolio interactivo presentado como un sistema operativo propio.</li><li>Un laboratorio para practicar frontend, interacción y JavaScript.</li><li>Un proyecto que irá creciendo conmigo.</li><li>Un sitio con aplicaciones, terminal, Arcade, easter eggs y acertijos.</li></ul>
@@ -334,6 +335,7 @@ const Apps={
          const gy=ghostY();piece.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v)drawBlock(ctx,piece.x+x,gy+y,piece.color,.2);}));
          piece.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v)drawBlock(ctx,piece.x+x,piece.y+y,piece.color);}));
        }
+       if(!running){gameOverlay(ctx,cv,piece?'FIN DE PARTIDA':'LISTO PARA JUGAR','Pulsa NUEVA PARTIDA');}
        if(paused){ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(0,0,cv.width,cv.height);ctx.fillStyle='#fff';ctx.font='bold 20px monospace';ctx.textAlign='center';ctx.fillText('PAUSA',cv.width/2,cv.height/2);}
      }
      function drawNext(){nextCtx.fillStyle='#050505';nextCtx.fillRect(0,0,nextCv.width,nextCv.height);if(!next)return;const size=18,w=next.shape[0].length*size,h=next.shape.length*size,ox=(nextCv.width-w)/2/size,oy=(nextCv.height-h)/2/size;next.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v)drawBlock(nextCtx,ox+x,oy+y,next.color,1,size);}));}
@@ -345,15 +347,15 @@ const Apps={
      function restartTimer(){if(timer)clearInterval(timer);if(running&&!paused)timer=setInterval(tick,Math.max(80,700-(level-1)*55));}
      function tick(){if(!running||paused||!piece)return;if(!collide(piece,0,1))piece.y++;else lock();draw();}
      function hardDrop(){let n=0;while(!collide(piece,0,1)){piece.y++;n++;}score+=n*2;scoreEl.textContent=score;lock();}
-     function gameOver(){running=false;if(timer)clearInterval(timer);timer=null;pauseBtn.disabled=true;toast('Tetris: fin de la partida.');draw();}
-     function start(){if(timer)clearInterval(timer);reset();running=true;pauseBtn.disabled=false;spawn();restartTimer();draw();win.focus();}
+     function gameOver(){running=false;if(timer)clearInterval(timer);timer=null;pauseBtn.disabled=true;recordScore('tetris',score);toast('Tetris: fin de la partida.');draw();}
+     function start(){recordScore('tetris',score);if(timer)clearInterval(timer);reset();running=true;pauseBtn.disabled=false;spawn();restartTimer();draw();win.focus();}
      function togglePause(){if(!running)return;paused=!paused;pauseBtn.textContent=paused?'CONTINUAR':'PAUSA';restartTimer();draw();}
-     function key(e){if(!running)return;const k=e.key.toLowerCase();if(['arrowleft','arrowright','arrowdown','arrowup',' ','x','z','p'].includes(k))e.preventDefault();if(k==='p'){togglePause();return;}if(paused)return;
+     function key(e){if(!running)return;const k=e.key.toLowerCase();if(['arrowleft','arrowright','arrowdown','arrowup',' ','x','z','p'].includes(k))e.preventDefault();if(k==='p'){if(!e.repeat)togglePause();return;}if(paused)return;
        if(k==='arrowleft'&&!collide(piece,-1,0))piece.x--;if(k==='arrowright'&&!collide(piece,1,0))piece.x++;if(k==='arrowdown'&&!collide(piece,0,1)){piece.y++;score++;scoreEl.textContent=score;}if(k==='arrowup'||k==='x')rotate(1);if(k==='z')rotate(-1);if(k===' ')hardDrop();draw();}
      win.tabIndex=0;win.addEventListener('keydown',key);cv.addEventListener('click',()=>win.focus());
      startBtn.addEventListener('click',start);pauseBtn.addEventListener('click',togglePause);
-     win.__cleanup=()=>{if(timer)clearInterval(timer);win.removeEventListener('keydown',key);};
-     reset();draw();drawNext();
+     win.__cleanup=()=>{recordScore('tetris',score);if(timer)clearInterval(timer);win.removeEventListener('keydown',key);};
+     attachGameLifecycle(win,()=>{if(running&&!paused)togglePause();});addGameControls(b,win,['ArrowLeft','ArrowUp','ArrowRight','ArrowDown',' ','p']);reset();draw();drawNext();
    }},
 
  pacman:{title:'Pac-Man',icon:pixelIcon('pacman'),render:()=>`
@@ -380,7 +382,7 @@ const Apps={
        '#.###.#.#####.#.###',
        '#.....#...#...#...#',
        '#####.###.#.###.###',
-       '.....#.......#.....',
+       '...................',
        '#####.#.###.#.#####',
        '#........P........#',
        '#.###.##.#.##.###.#',
@@ -392,49 +394,54 @@ const Apps={
        '###################'
      ];
      const ROWS=template.length,COLS=template[0].length;
-     let map=[],dots=new Set(),powers=new Set(),player,ghosts=[],score=0,lives=3,level=1,timer=null,running=false,paused=false,queued={x:0,y:0},tickNo=0,frightenedUntil=0,mouth=0;
+     let map=[],dots=new Set(),powers=new Set(),player,ghosts=[],score=0,lives=3,level=1,timer=null,running=false,paused=false,queued={x:0,y:0},tickNo=0,frightenedUntil=0,mouth=0,invulnerableUntil=0;
 
      const key=(x,y)=>`${x},${y}`;
      function walkable(x,y){if(y<0||y>=ROWS)return false;if(x<0||x>=COLS)return y===7;return map[y][x]!=='#';}
      function wrapX(x){if(x<0)return COLS-1;if(x>=COLS)return 0;return x;}
      function buildLevel(){
-       map=template.map(r=>r.split(''));dots.clear();powers.clear();
+       map=template.map(r=>(level%2===0?[...r].reverse().join(''):r).split(''));dots.clear();powers.clear();
        let px=9,py=9;
        for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){const c=map[y][x];if(c==='P'){px=x;py=y;map[y][x]=' ';}if(c==='.')dots.add(key(x,y));if(c==='o')powers.add(key(x,y));}
        player={x:px,y:py,dir:{x:0,y:0}};
        const spawn=[[9,7,'#ff3b3b'],[8,7,'#ff8de1'],[10,7,'#39d9ff']];
        ghosts=spawn.map(([x,y,color],i)=>({x,y,sx:x,sy:y,color,dir:{x:i===1?-1:1,y:0}}));
-       queued={x:0,y:0};frightenedUntil=0;tickNo=0;
+       queued={x:0,y:0};frightenedUntil=0;tickNo=0;invulnerableUntil=14;
      }
-     function resetPositions(){player.x=9;player.y=9;player.dir={x:0,y:0};queued={x:0,y:0};ghosts.forEach(g=>{g.x=g.sx;g.y=g.sy;g.dir={x:1,y:0};});}
+     function resetPositions(){invulnerableUntil=tickNo+14;frightenedUntil=0;player.x=9;player.y=9;player.dir={x:0,y:0};queued={x:0,y:0};ghosts.forEach(g=>{g.x=g.sx;g.y=g.sy;g.dir={x:1,y:0};});}
      function drawWall(x,y){ctx.fillStyle='#0d2cff';ctx.fillRect(x*CELL,y*CELL,CELL,CELL);ctx.fillStyle='#02040c';ctx.fillRect(x*CELL+4,y*CELL+4,CELL-8,CELL-8);}
      function drawPac(){const cx=player.x*CELL+10,cy=player.y*CELL+10;mouth=(mouth+.18)%(Math.PI/2);const open=.18+Math.abs(Math.sin(mouth))*.36;let ang=0;if(player.dir.x<0)ang=Math.PI;if(player.dir.y<0)ang=-Math.PI/2;if(player.dir.y>0)ang=Math.PI/2;ctx.fillStyle='#ffd51f';ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,8,ang+open,ang+Math.PI*2-open);ctx.closePath();ctx.fill();}
      function drawGhost(g,fright){const x=g.x*CELL+10,y=g.y*CELL+10;ctx.fillStyle=fright?'#194cff':g.color;ctx.beginPath();ctx.arc(x,y-1,8,Math.PI,0);ctx.lineTo(x+8,y+7);ctx.lineTo(x+4,y+4);ctx.lineTo(x,y+7);ctx.lineTo(x-4,y+4);ctx.lineTo(x-8,y+7);ctx.closePath();ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(x-5,y-2,4,5);ctx.fillRect(x+2,y-2,4,5);ctx.fillStyle=fright?'#fff':'#182050';ctx.fillRect(x-4,y,2,3);ctx.fillRect(x+3,y,2,3);}
      function draw(){ctx.fillStyle='#000';ctx.fillRect(0,0,cv.width,cv.height);for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(map[y][x]==='#')drawWall(x,y);
        ctx.fillStyle='#f6d7a7';dots.forEach(k=>{const [x,y]=k.split(',').map(Number);ctx.beginPath();ctx.arc(x*CELL+10,y*CELL+10,2,0,Math.PI*2);ctx.fill();});
        powers.forEach(k=>{const [x,y]=k.split(',').map(Number);ctx.beginPath();ctx.arc(x*CELL+10,y*CELL+10,5,0,Math.PI*2);ctx.fill();});
-       drawPac();const fright=performance.now()<frightenedUntil;ghosts.forEach(g=>drawGhost(g,fright));
+       drawPac();const fright=tickNo<frightenedUntil;ghosts.forEach(g=>drawGhost(g,fright));
+       if(!running){gameOverlay(ctx,cv,lives<=0?'FIN DE PARTIDA':'LISTO PARA JUGAR','Pulsa NUEVA PARTIDA');}
        if(paused){ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(0,0,cv.width,cv.height);ctx.fillStyle='#fff';ctx.font='bold 20px monospace';ctx.textAlign='center';ctx.fillText('PAUSA',cv.width/2,cv.height/2);}
      }
-     function eat(){const k=key(player.x,player.y);if(dots.delete(k)){score+=10;scoreEl.textContent=score;}if(powers.delete(k)){score+=50;scoreEl.textContent=score;frightenedUntil=performance.now()+6500;beep();}if(!dots.size&&!powers.size){level++;levelEl.textContent=level;toast('Pac-Man: nivel completado.');buildLevel();restartTimer();}}
+     function eat(){const k=key(player.x,player.y);if(dots.delete(k)){score+=10;scoreEl.textContent=score;}if(powers.delete(k)){score+=50;scoreEl.textContent=score;frightenedUntil=tickNo+52;beep();}if(!dots.size&&!powers.size){level++;levelEl.textContent=level;toast('Pac-Man: nivel completado.');buildLevel();restartTimer();}}
      function canDir(pos,dir){let nx=pos.x+dir.x,ny=pos.y+dir.y;if(ny===7)nx=wrapX(nx);return walkable(nx,ny);}
      function moveEntity(ent,dir){let nx=ent.x+dir.x,ny=ent.y+dir.y;if(ny===7)nx=wrapX(nx);if(walkable(nx,ny)){ent.x=nx;ent.y=ny;ent.dir={...dir};return true;}return false;}
      function chooseGhost(g){
        const dirs=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].filter(d=>canDir(g,d));
        const noBack=dirs.filter(d=>!(d.x===-g.dir.x&&d.y===-g.dir.y));const pool=noBack.length?noBack:dirs;if(!pool.length)return g.dir;
-       const fright=performance.now()<frightenedUntil;if(fright||Math.random()<.15)return pool[Math.floor(Math.random()*pool.length)];
-       return pool.reduce((best,d)=>{const nx=wrapX(g.x+d.x),ny=g.y+d.y,dist=Math.abs(nx-player.x)+Math.abs(ny-player.y);return dist<best.dist?{d,dist}:best;},{d:pool[0],dist:Infinity}).d;
+       // BFS measures actual corridor distance, so ghosts never chase through walls.
+       const distances=new Map([[key(player.x,player.y),0]]),queue=[{x:player.x,y:player.y}];
+       for(let i=0;i<queue.length;i++){const p=queue[i];for(const d of [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}]){if(!canDir(p,d))continue;const x=wrapX(p.x+d.x),y=p.y+d.y,k=key(x,y);if(!distances.has(k)){distances.set(k,distances.get(key(p.x,p.y))+1);queue.push({x,y});}}}
+       const fright=tickNo<frightenedUntil,scatter=tickNo%160<35&&g.color!=='#ff3b3b';
+       if(scatter)return pool[Math.floor(Math.random()*pool.length)];
+       return pool.reduce((best,d)=>{const dist=distances.get(key(wrapX(g.x+d.x),g.y+d.y))??999;return (fright?dist>best.dist:dist<best.dist)?{d,dist}:best;},{d:pool[0],dist:fright?-1:Infinity}).d;
      }
-     function collision(){for(const g of ghosts){if(g.x===player.x&&g.y===player.y){if(performance.now()<frightenedUntil){score+=200;scoreEl.textContent=score;g.x=g.sx;g.y=g.sy;toast('+200 · fantasma capturado');}else{lives--;livesEl.textContent=lives;if(lives<=0){gameOver();}else{toast(`Te quedan ${lives} vidas.`);resetPositions();}return;}}}}
-     function step(){if(!running||paused)return;if(canDir(player,queued))player.dir={...queued};if(player.dir.x||player.dir.y)moveEntity(player,player.dir);eat();collision();tickNo++;if(tickNo%2===0){ghosts.forEach(g=>moveEntity(g,chooseGhost(g)));collision();}draw();}
+     function collision(){if(tickNo<invulnerableUntil)return false;for(const g of ghosts){if(g.x===player.x&&g.y===player.y){if(tickNo<frightenedUntil){score+=200;scoreEl.textContent=score;g.x=g.sx;g.y=g.sy;toast('+200 · fantasma capturado');}else{lives--;livesEl.textContent=lives;if(lives<=0){gameOver();}else{toast(`Te quedan ${lives} vidas.`);resetPositions();}return true;}}}return false;}
+     function step(){if(!running||paused)return;if(canDir(player,queued))player.dir={...queued};if(player.dir.x||player.dir.y)moveEntity(player,player.dir);eat();if(collision()){draw();return;}tickNo++;if(tickNo%2===0){ghosts.forEach(g=>moveEntity(g,chooseGhost(g)));collision();}draw();}
      function restartTimer(){if(timer)clearInterval(timer);if(running&&!paused)timer=setInterval(step,Math.max(80,125-(level-1)*5));}
-     function start(){if(timer)clearInterval(timer);score=0;lives=3;level=1;scoreEl.textContent=0;livesEl.textContent=3;levelEl.textContent=1;running=true;paused=false;pauseBtn.disabled=false;pauseBtn.textContent='PAUSA';buildLevel();restartTimer();draw();win.focus();}
-     function gameOver(){running=false;if(timer)clearInterval(timer);timer=null;pauseBtn.disabled=true;toast('Pac-Man: fin de la partida.');draw();}
+     function start(){recordScore('pacman',score);if(timer)clearInterval(timer);score=0;lives=3;level=1;scoreEl.textContent=0;livesEl.textContent=3;levelEl.textContent=1;running=true;paused=false;pauseBtn.disabled=false;pauseBtn.textContent='PAUSA';buildLevel();restartTimer();draw();win.focus();}
+     function gameOver(){running=false;if(timer)clearInterval(timer);timer=null;pauseBtn.disabled=true;recordScore('pacman',score);toast('Pac-Man: fin de la partida.');draw();}
      function togglePause(){if(!running)return;paused=!paused;pauseBtn.textContent=paused?'CONTINUAR':'PAUSA';restartTimer();draw();}
-     function keydown(e){const k=e.key.toLowerCase();const dirs={arrowleft:{x:-1,y:0},arrowright:{x:1,y:0},arrowup:{x:0,y:-1},arrowdown:{x:0,y:1}};if(dirs[k]){e.preventDefault();queued=dirs[k];}else if(k==='p'){e.preventDefault();togglePause();}}
+     function keydown(e){if(!running)return;const k=e.key.toLowerCase();const dirs={arrowleft:{x:-1,y:0},arrowright:{x:1,y:0},arrowup:{x:0,y:-1},arrowdown:{x:0,y:1}};if(dirs[k]){e.preventDefault();queued=dirs[k];}else if(k==='p'){e.preventDefault();if(!e.repeat)togglePause();}}
      win.tabIndex=0;win.addEventListener('keydown',keydown);cv.addEventListener('click',()=>win.focus());startBtn.addEventListener('click',start);pauseBtn.addEventListener('click',togglePause);
-     win.__cleanup=()=>{if(timer)clearInterval(timer);win.removeEventListener('keydown',keydown);};
-     buildLevel();draw();
+     win.__cleanup=()=>{recordScore('pacman',score);if(timer)clearInterval(timer);win.removeEventListener('keydown',keydown);};
+     attachGameLifecycle(win,()=>{if(running&&!paused)togglePause();});addGameControls(b,win,['ArrowLeft','ArrowUp','ArrowRight','ArrowDown','p']);buildLevel();draw();
    }},
 
  easter:{title:'SECRETO.sys',icon:'🥚',render:()=>`
@@ -452,19 +459,20 @@ function bar(n,v){return `<div class="res"><div class="res__top"><span>${n}</spa
    Es una IIFE: la función se ejecuta inmediatamente y solo expone openWindow y
    closeWindow. Así, variables internas como z y open no contaminan el ámbito global.
    ========================================================= */
-const WM=(()=>{let z=10,open=new Map(),x=40,y=30;
+const WM=(()=>{let z=10,open=new Map(),x=40,y=86;
   // Desplaza cada ventana nueva para que no aparezcan todas exactamente superpuestas.
-  const nextPos=()=>{x+=28;y+=28;if(x>200)x=40;if(y>160)y=30;return{x,y};};
+  const nextPos=()=>{x+=28;y+=28;if(x>200)x=40;if(y>170)y=86;return{x,y};};
   // Un z-index mayor coloca la ventana enfocada delante de las demás.
-  function focus(win){win.style.zIndex=++z;$$('.tb-app').forEach(t=>t.classList.remove('active'));
+  function focus(win){win.style.zIndex=++z;win.focus({preventScroll:true});$$('.tb-app').forEach(t=>t.classList.remove('active'));
     const c=$(`.tb-app[data-id="${win.dataset.id}"]`);if(c){c.classList.add('active');c.classList.remove('dim');}}
   function openWindow(id){const app=Apps[id];if(!app)return;
     // Map permite saber si la app ya está abierta y evita crear duplicados.
     if(open.has(id)){const o=open.get(id);if(o.minimized){o.el.classList.remove('minimized');o.minimized=false;}focus(o.el);beep();return o.el;}
-    const p=nextPos(),win=document.createElement('section');win.className='window';win.dataset.id=id;
-    win.style.left=p.x+'px';win.style.top=p.y+'px';win.style.zIndex=++z;
+    const p=nextPos(),win=document.createElement('section');win.className='window';win.dataset.id=id;win.tabIndex=-1;
+    win.style.width=Math.min(app.size?.[0]||640,innerWidth-32)+'px';win.style.height=Math.min(app.size?.[1]||500,innerHeight-180)+'px';
+    win.style.left=Math.max(16,Math.min(p.x,innerWidth-parseFloat(win.style.width)-16))+'px';win.style.top=Math.max(82,Math.min(p.y,innerHeight-parseFloat(win.style.height)-80))+'px';win.style.zIndex=++z;
     win.innerHTML=`<div class="win__bar"><div class="win__title"><span class="t-ico">${app.icon}</span> ${app.title}</div>
-      <div class="win__btns"><button class="win-btn min"></button><button class="win-btn max"></button><button class="win-btn close"></button></div></div>
+      <div class="win__btns"><button class="win-btn min" aria-label="Minimizar"></button><button class="win-btn max" aria-label="Maximizar"></button><button class="win-btn close" aria-label="Cerrar"></button></div></div>
       <div class="win__body"></div><div class="win__resize"></div>`;
     // Primero insertamos el HTML; después bind() puede buscar sus elementos y añadir eventos.
     $('#desktop').appendChild(win);$('.win__body',win).innerHTML=app.render();if(app.bind)app.bind($('.win__body',win),win);
@@ -486,7 +494,7 @@ const WM=(()=>{let z=10,open=new Map(),x=40,y=30;
   // pointerdown guarda la posición inicial; pointermove calcula el desplazamiento del ratón.
   function drag(win,h){h.addEventListener('pointerdown',e=>{if(e.target.closest('.win-btn'))return;if(win.classList.contains('maximized'))return;
     focus(win);const sx=e.clientX,sy=e.clientY,ox=win.offsetLeft,oy=win.offsetTop;
-    const mv=ev=>{let nx=Math.max(0,Math.min(ox+ev.clientX-sx,innerWidth-120)),ny=Math.max(0,Math.min(oy+ev.clientY-sy,innerHeight-120));win.style.left=nx+'px';win.style.top=ny+'px';};
+    const mv=ev=>{let nx=Math.max(0,Math.min(ox+ev.clientX-sx,innerWidth-120)),ny=Math.max(82,Math.min(oy+ev.clientY-sy,innerHeight-150));win.style.left=nx+'px';win.style.top=ny+'px';};
     const up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);};
     document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);});}
   // El tirador inferior derecho modifica ancho y alto respetando tamaños mínimos.
@@ -505,8 +513,8 @@ function runCommand(raw,print,openWin){
   switch(c){
     case'':break;
     case'help':case'ayuda':
-      print('Comandos: <span class="ok">ayuda readme quien-soy sobre-mi proyectos habilidades contacto limpiar fecha eco ls cat sudo secreto matrix fondo tetris pacman arcade cafe hola 42</span>');break;
-    case'whoami':case'quien-soy':print('José Miguel Miralles Gandia<br>Estudiante de DAM en SSIMARRO<br>Desarrollador de software en proceso.');break;
+      print('Comandos: <span class="ok">ayuda readme quien-soy sobre-mi proyectos habilidades contacto limpiar fecha eco ls cat sudo secreto matrix fondo tetris pacman doom vault arcade cafe hola 42</span>');break;
+    case'whoami':case'quien-soy':print('José Miguel Miralles Gandia<br>Estudiante de DAM en IES Dr. Lluís Simarro<br>Desarrollador de software en proceso.');break;
     case'readme':print('Abriendo README.md...');openWin('readme');break;
     case'about':case'sobre-mi':print('Abriendo Sobre mí...');openWin('about');break;
     case'projects':case'proyectos':print('Abriendo Proyectos...');openWin('projects');break;
@@ -514,13 +522,13 @@ function runCommand(raw,print,openWin){
     case'contact':case'contacto':print('Abriendo Contacto...');openWin('contact');break;
     case'clear':case'limpiar':$('#term-out').innerHTML='';break;
     case'date':case'fecha':print(new Date().toLocaleString('es-ES'));break;
-    case'echo':case'eco':print(a||'');break;
+    case'echo':case'eco':print(escapeHTML(a||''));break;
     case'ls':print('README.md  sobre-mi.txt  suenos.txt  proyectos/  habilidades.json  contacto.txt  juegos/  secreto/');break;
     case'cat':
       if(a.toLowerCase()==='readme.md')print('JOSEMI-OS: mi primer proyecto personal como desarrollador. Portfolio interactivo con aplicaciones, terminal, Arcade, easter eggs y acertijos.');
-      else if(a==='sobre-mi.txt'||a==='about.txt')print('José Miguel Miralles Gandia · estudiante de DAM en SSIMARRO · desarrollador de software en proceso.');
+      else if(a==='sobre-mi.txt'||a==='about.txt')print('José Miguel Miralles Gandia · estudiante de DAM en IES Dr. Lluís Simarro · desarrollador de software en proceso.');
       else if(a==='sueños.txt'||a==='suenos.txt')print('Crear automatizaciones y aplicaciones para grandes empresas combinando IA, programación y creatividad.');
-      else print(`cat: ${a||'(sin archivo)'}: no existe`);break;
+      else print(`cat: ${escapeHTML(a||'(sin archivo)')}: no existe`);break;
     case'sudo':
       if(a.startsWith('rm -rf')){print('<span class="err">Buen intento. JOSEMI_OS se niega a autodestruirse.</span>');break;}
       print('Permiso concedido.\nLanzando protocolo de contacto...');openWin('contact');break;
@@ -532,11 +540,13 @@ function runCommand(raw,print,openWin){
       else print('Uso: fondo matrix|0|1|2|3');break;
     case'tetris':print('Abriendo Tetris...');openWin('tetris');break;
     case'pacman':print('Abriendo Pac-Man...');openWin('pacman');break;
+    case'doom':openWin('doom');break;
+    case'vault':openWin('easter');break;
     case'arcade':print('Abriendo Arcade...');openWin('arcade');break;
     case'coffee':case'cafe':print('Compilando...\n☕ Café cargado correctamente. Productividad +10.');toast('Café virtual servido ☕');break;
     case'hello':case'hola':print('Hola, humano. JOSEMI_OS te está observando 👀');break;
     case'42':print('<span class="ok">42.</span> La respuesta estaba aquí. La pregunta sigue pendiente.');openWin('easter');break;
-    default:print(`<span class="err">comando no encontrado: ${c}</span>`);
+    default:print(`<span class="err">comando no encontrado: ${escapeHTML(c)}</span>`);
   }
 }
 // (Opcional) Efecte temporal de Matrix 5s, usat pel mode "matrix" del boot.
@@ -549,7 +559,7 @@ function matrixMode(){const c=document.createElement('canvas');Object.assign(c.s
 
 /* ========================================================= PROYECTOS */
 const PROJECTS={
- web:{name:'JOSEMI-OS',desc:'Mi primer proyecto personal como desarrollador: un portfolio interactivo con estética de sistema operativo, aplicaciones, terminal, juegos y easter eggs.',lang:'HTML / CSS / JavaScript',db:'—',fw:'Vanilla',date:'2026',status:'dev',tags:['Portfolio','Frontend','JavaScript'],github:'https://github.com/josemidev1-code'},
+ web:{name:'JOSEMI-OS',desc:'Mi primer proyecto personal como desarrollador: un portfolio interactivo con estética de sistema operativo, aplicaciones, terminal, juegos y easter eggs.',lang:'HTML / CSS / JavaScript',db:'—',fw:'Vanilla',date:'2026',status:'dev',tags:['Portfolio','Frontend','JavaScript'],github:'https://github.com/josemidev1-code/JOSEMI-OS'},
  school:{name:'Formación DAM',desc:'Espacio para reunir proyectos y prácticas reales de Desarrollo de Aplicaciones Multiplataforma. No añado detalles concretos hasta tener cada proyecto listo para enseñar.',lang:'En formación',db:'En formación',fw:'—',date:'Actual',status:'dev',tags:['DAM','Aprendizaje']},
  auto:{name:'Automatización',desc:'Área de roadmap: quiero aprender a crear automatizaciones útiles y convertir procesos repetitivos en software.',lang:'Por definir',db:'—',fw:'—',date:'Roadmap',status:'exp',tags:['Automatización','Roadmap']},
  ai:{name:'IA + software',desc:'Área de roadmap: explorar cómo integrar inteligencia artificial en aplicaciones y flujos de trabajo de forma creativa.',lang:'Por definir',db:'—',fw:'—',date:'Roadmap',status:'exp',tags:['IA','Creatividad','Roadmap']}
@@ -588,12 +598,7 @@ function buildClock(){const t=$('#clock__time'),d=$('#clock__date');const tick=(
   t.textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}`;d.textContent=n.toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'});
   const st=$('#sys-uptime');if(st)st.textContent=Math.floor((n-startTime)/1000)+'s';const sc=$('#sys-time');if(sc)sc.textContent=t.textContent;};tick();setInterval(tick,1000);}
 // [FIX] Amb Matrix desactivem el parallax (evita vores negres en moure's el #bg).
-function buildParallax(){const bg=$('#bg');addEventListener('mousemove',e=>{if(state.wp===4){bg.style.transform='none';return;}bg.style.transform=`translate(${(e.clientX/innerWidth-.5)*30}px,${(e.clientY/innerHeight-.5)*30}px)`;});}
-function buildCursor(){const c=$('#cursor');let x=0,y=0,tx=0,ty=0;
-  addEventListener('mousemove',e=>{tx=e.clientX;ty=e.clientY;});
-  addEventListener('mousedown',()=>{c.classList.add('click');setTimeout(()=>c.classList.remove('click'),300);});
-  addEventListener('mouseover',e=>c.classList.toggle('hover',!!e.target.closest('button,a,.icon,.folder,.win-btn,input,select')));
-  (function loop(){x+=(tx-x)*.18;y+=(ty-y)*.18;c.style.transform=`translate(${x}px,${y}px) translate(-50%,-50%)`;requestAnimationFrame(loop);})();}
+function buildParallax(){const bg=$('#bg');addEventListener('mousemove',e=>{if(state.motion||state.wp===4){bg.style.transform='none';return;}bg.style.transform=`translate(${(e.clientX/innerWidth-.5)*30}px,${(e.clientY/innerHeight-.5)*30}px)`;});}
 function buildStart(){const m=$('#menu');$('#start').onclick=e=>{e.stopPropagation();m.classList.toggle('hidden');};
   document.addEventListener('click',e=>{if(!e.target.closest('#menu')&&!e.target.closest('#start'))m.classList.add('hidden');});
   $$('.menu__power button').forEach(b=>b.onclick=()=>{m.classList.add('hidden');b.dataset.power==='shutdown'?shutdown():boot();});}
@@ -608,12 +613,12 @@ function buildContext(){const ctx=$('#ctxmenu');
     // [FIX] array de noms ara inclou 'Matrix' (5 wallpapers).
     if(a==='wallpaper'){state.wp=(state.wp+1)%WALLS.length;applyTheme();save();toast('Fondo: '+['Verde nocturno','Bosque','Azul profundo','Violeta','Matrix'][state.wp]);}
     if(a==='terminal')openWindow('terminal');if(a==='system')openWindow('system');if(a==='arcade')openWindow('arcade');});}
-function shutdown(){const s=$('#shutdown');s.classList.remove('hidden');$('#shutdown__msg').textContent='Apagando JOSEMI-OS...';
+function shutdown(){Object.keys(Apps).forEach(id=>WM.closeWindow(id));stopMatrix();const s=$('#shutdown');s.classList.remove('hidden');$('#shutdown__msg').textContent='Apagando JOSEMI-OS...';
   setTimeout(()=>{$('#shutdown__msg').textContent='Ahora puedes cerrar esta pestaña con seguridad.';$('#reboot').classList.remove('hidden');},1600);
   $('#reboot').onclick=()=>location.reload();}
 function buildKonami(){
   const s=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];let i=0;
-  addEventListener('keydown',e=>{const key=e.key.length===1?e.key.toLowerCase():e.key;if(key===s[i])i++;else if(key===s[0])i=1;else i=0;
+  addEventListener('keydown',e=>{if(e.target.closest('.game')||e.target.closest('.window')?.querySelector('.game'))return;const key=e.key.length===1?e.key.toLowerCase():e.key;if(key===s[i])i++;else if(key===s[0])i=1;else i=0;
     if(i===s.length){state.wp=4;applyTheme();save();toast('Código Konami: MODO DESARROLLADOR ACTIVADO');openWindow('easter');i=0;}});
   let clockClicks=0,clockTimer=null;
   $('#clock__time').addEventListener('click',()=>{clockClicks++;clearTimeout(clockTimer);clockTimer=setTimeout(()=>clockClicks=0,1500);if(clockClicks>=7){clockClicks=0;openWindow('easter');toast('Has forzado una anomalía temporal.');}});
@@ -632,12 +637,7 @@ const currentUser={
   auto:[]
 };
 
-const JOSEMI_ASCII=String.raw`
-  JJJ   OOO   SSS  EEEE M   M III       OOO   SSS
-    J  O   O S     E    MM MM  I       O   O S
-    J  O   O  SSS  EEE  M M M  I  ---  O   O  SSS
- J  J  O   O     S E    M   M  I       O   O     S
-  JJ    OOO   SSS  EEEE M   M III       OOO   SSS`;
+let typeLoginArt;
 
 let enteringOS=false,bootRun=0;
 const bootDelay=ms=>new Promise(r=>setTimeout(r,ms));
@@ -656,14 +656,11 @@ async function typeBootLine(text,cls,speed,run){
   const ok=await typeBootText(line,text,speed,run);line.textContent+='\n';out.scrollTop=out.scrollHeight;return ok;
 }
 
-function showReadmeNotice(){
-  const notice=$('#readmeNotice');
-  if(notice)notice.classList.remove('hidden');
-}
 
 function enterOS(){
   if(enteringOS)return;enteringOS=true;bootRun++;
-  document.documentElement.style.setProperty('--accent',currentUser.color);
+  document.documentElement.style.setProperty('--accent',state.accent);
+  document.documentElement.style.setProperty('--accent-soft',state.accent+'1f');
   $('.menu__head strong').textContent=currentUser.nom;
   $('.menu__head small').textContent=currentUser.rol;
   buildIcons();buildMenu();
@@ -672,52 +669,20 @@ function enterOS(){
     login.classList.add('hidden');
     $('#desktop').classList.remove('hidden');
     startTime=Date.now();applyTheme();
-    toast('JOSEMI-OS iniciado. README.md pendiente de lectura.');
-    showReadmeNotice();
+    toast('Bienvenido a JOSEMI-OS. Explora, juega, descubre.');
   },420);
-}
-
-async function typeLoginArt(){
-  const run=++bootRun;enteringOS=false;
-  const login=$('#login'),out=$('#bootTerminalOutput'),cmd=$('#bootCommand');
-  login.classList.remove('hidden','out');out.innerHTML='';cmd.textContent='';
-
-  await typeBootText(cmd,'./boot-josemi-os --portfolio',28,run);if(run!==bootRun)return;
-  await bootDelay(160);appendBoot('josemi@portfolio:~$ ./boot-josemi-os --portfolio','boot-command-history');cmd.textContent='';
-  const steps=[
-    ['[  OK  ] terminal.init()','boot-ok'],
-    ['[  OK  ] detectando visitante...','boot-dim'],
-    ['[  OK  ] montando /portfolio','boot-dim'],
-    ['[  OK  ] cargando identidad: José Miguel Miralles Gandia','boot-ok'],
-    ['[  OK  ] perfil: desarrollador de software en proceso','boot-dim'],
-    ['[  OK  ] cargando proyectos, terminal y arcade','boot-dim'],
-    ['[  OK  ] buscando bugs... se encontraron algunos. Perfecto.','boot-warn']
-  ];
-  for(const [text,cls] of steps){if(!await typeBootLine(text,cls,8,run))return;await bootDelay(80);}
-  appendBoot('');
-  for(const line of JOSEMI_ASCII.split('\n')){if(run!==bootRun)return;await typeBootLine(line,'boot-logo',2,run);}
-  appendBoot('');
-  await typeBootLine('PORTFOLIO INTERACTIVO // BUILD · LEARN · REPEAT','boot-accent',10,run);
-  await typeBootLine('AVISO: README.md es obligatorio en el primer arranque.','boot-warn',10,run);
-  await typeBootLine('[ READY ] iniciando interfaz...','boot-ok',10,run);
-  await bootDelay(420);if(run===bootRun)enterOS();
 }
 
 function showLogin(){
   $('#desktop').classList.add('hidden');stopMatrix();
-  const notice=$('#readmeNotice');if(notice)notice.classList.add('hidden');
   typeLoginArt();
 }
 
 function initDirectAccess(){
   $('#skipBoot').addEventListener('click',enterOS);
-  $('#openReadmeNotice').addEventListener('click',()=>{
-    $('#readmeNotice').classList.add('hidden');openWindow('readme');
-  });
   addEventListener('keydown',e=>{
     if(!$('#login').classList.contains('hidden')&&e.key==='Enter'){e.preventDefault();enterOS();}
   });
 }
 
 /* ========================================================= INICIO */
-buildIcons();buildMenu();buildClock();buildParallax();buildCursor();buildStart();buildContext();buildKonami();initDirectAccess();typeLoginArt();

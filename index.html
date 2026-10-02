@@ -14,7 +14,7 @@
 </head>
 <body>
   <div id="bg" aria-hidden="true"></div>
-  <div id="cursor" aria-hidden="true"></div>
+
 
   <!-- Primer contacto: una terminal que construye el sistema en pantalla. -->
   <section id="login" class="login" aria-label="Secuencia de inicio de JOSEMI-OS">
@@ -72,19 +72,7 @@
     </footer>
   </main>
 
-  <!-- Esta advertencia bloquea el primer acceso hasta abrir README.md. -->
-  <div id="readmeNotice" class="readme-notice hidden" role="dialog" aria-modal="true" aria-labelledby="readmeNoticeTitle">
-    <div class="readme-notice__card">
-      <span class="eyebrow">FIRST_BOOT / IMPORTANTE</span>
-      <div class="readme-notice__icon">README.md</div>
-      <h2 id="readmeNoticeTitle">Lectura obligatoria antes de explorar</h2>
-      <p>JOSEMI-OS es un portfolio interactivo, no una web convencional. El README explica cómo funciona el sistema y qué estás a punto de encontrar.</p>
-      <button id="openReadmeNotice" class="btn btn--accent" type="button">ABRIR README.md</button>
-      <small>Después de abrirlo podrás explorar el sistema libremente.</small>
-    </div>
-  </div>
 
-  <div id="windows" aria-live="polite"></div>
 
   <div id="shutdown" class="shutdown hidden">
     <div class="shutdown__mark">&gt;_</div>
@@ -94,5 +82,6 @@
 
   <div id="toasts" class="toasts" aria-live="polite"></div>
   <script src="script.js"></script>
+  <script src="upgrade.js"></script>
 </body>
 </html>
