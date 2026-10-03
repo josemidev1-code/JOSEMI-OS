@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="shell.css">
 </head>
 <body>
   <div id="bg" aria-hidden="true"></div>
@@ -44,7 +45,7 @@
       <div class="desktop__status"><span class="status-dot"></span> SISTEMA EN LÍNEA</div>
     </header>
 
-    <div class="desktop__hint">DOBLE CLIC PARA ABRIR · CLIC DERECHO PARA MÁS OPCIONES</div>
+    <div class="desktop__hint">ENTER ABRE · CTRL + K BUSCA · CLIC DERECHO EXPLORA</div>
     <div class="icons" id="icons"></div>
 
     <div id="menu" class="menu hidden">
@@ -83,5 +84,6 @@
   <div id="toasts" class="toasts" aria-live="polite"></div>
   <script src="script.js"></script>
   <script src="upgrade.js"></script>
+  <script src="shell.js"></script>
 </body>
 </html>

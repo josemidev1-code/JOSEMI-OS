@@ -478,18 +478,18 @@ const WM=(()=>{let z=10,open=new Map(),x=40,y=86;
     $('#desktop').appendChild(win);$('.win__body',win).innerHTML=app.render();if(app.bind)app.bind($('.win__body',win),win);
     requestAnimationFrame(()=>win.classList.add('open'));
     $('.close',win).onclick=()=>closeWindow(id);
-    $('.min',win).onclick=()=>{win.classList.add('minimized');open.get(id).minimized=true;const c=$(`.tb-app[data-id="${id}"]`);if(c)c.classList.add('dim');beep();};
-    $('.max',win).onclick=()=>win.classList.toggle('maximized');
+    $('.min',win).onclick=()=>{const finish=()=>{if(!open.has(id))return;win.classList.add('minimized');open.get(id).minimized=true;const c=$(`.tb-app[data-id="${id}"]`);if(c)c.classList.add('dim');beep();};typeof minimizeWithMotion==='function'?minimizeWithMotion(win,finish):finish();};
+    $('.max',win).onclick=()=>typeof maximizeWithMotion==='function'?maximizeWithMotion(win):win.classList.toggle('maximized');
     win.addEventListener('pointerdown',()=>focus(win));
     drag(win,$('.win__bar',win));resize(win,$('.win__resize',win));addChip(id,app);
     open.set(id,{el:win,minimized:false});beep();return win;}
   // [FIX] closeWindow ara crida win.__cleanup() perquè els jocs no deixen intervals corrent.
-  function closeWindow(id){const o=open.get(id);if(!o)return;if(o.el.__cleanup)o.el.__cleanup();o.el.classList.remove('open');setTimeout(()=>o.el.remove(),220);open.delete(id);
+  function closeWindow(id){const o=open.get(id);if(!o)return;o.el.__transition?.cancel();if(o.el.__cleanup)o.el.__cleanup();o.el.classList.remove('open');setTimeout(()=>o.el.remove(),220);open.delete(id);
     const c=$(`.tb-app[data-id="${id}"]`);if(c)c.remove();beep();}
   function addChip(id,app){const b=document.createElement('button');b.className='tb-app active';b.dataset.id=id;
     b.innerHTML=`<span>${app.icon}</span> <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${app.title}</span>`;
     b.onclick=()=>{const o=open.get(id);if(!o)return;if(o.minimized){o.el.classList.remove('minimized');o.minimized=false;focus(o.el);}
-      else if(o.el.style.zIndex==z){o.el.classList.add('minimized');o.minimized=true;b.classList.add('dim');}else focus(o.el);};
+      else if(o.el.style.zIndex==z){$('.min',o.el).click();}else focus(o.el);};
     $('#taskbar__apps').appendChild(b);}
   // pointerdown guarda la posición inicial; pointermove calcula el desplazamiento del ratón.
   function drag(win,h){h.addEventListener('pointerdown',e=>{if(e.target.closest('.win-btn'))return;if(win.classList.contains('maximized'))return;
