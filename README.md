@@ -30,6 +30,12 @@ Fuera del código me gusta entrenar en el gimnasio, hacer deporte, practicar box
 - Abre la **Terminal** y escribe `ayuda` para descubrir comandos.
 - Entra en **Arcade** si te apetece jugar un rato.
 
+## Escritorio animado
+
+Abre **Ajustes** para elegir entre cuatro temas, cinco cursores, tres tamaños y la intensidad del movimiento. Puedes elegir el efecto de arranque de tu nombre y activar un salvapantallas ASCII. **ASCII Studio** permite probar los tres efectos; **Ctrl+K** busca aplicaciones y juegos.
+
+Las referencias de Omarchy y PostHog, las decisiones de diseño y las comprobaciones están documentadas en [DESIGN.md](DESIGN.md). Para verificar la lógica: `node tests/arcade.cjs` y `node tests/shell.cjs`.
+
 ## Easter eggs y acertijos
 
 Hay secretos escondidos por el sistema: comandos que no están a simple vista, interacciones poco obvias, referencias geek y algún que otro acertijo.

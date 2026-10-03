@@ -5,7 +5,7 @@ function recordScore(id,n){try{const key='josemi-best-'+id,best=Math.max(n,Numbe
 function bestScore(id){try{return Number(localStorage.getItem('josemi-best-'+id))||0;}catch{return 0;}}
 function gameOverlay(ctx,cv,title,sub){ctx.fillStyle='rgba(0,0,0,.76)';ctx.fillRect(0,0,cv.width,cv.height);ctx.textAlign='center';ctx.fillStyle='#6dff9b';ctx.font='bold 17px monospace';ctx.fillText(title,cv.width/2,cv.height/2-10);ctx.font='10px monospace';ctx.fillStyle='#dbe8df';ctx.fillText(sub,cv.width/2,cv.height/2+16);}
 function attachGameLifecycle(win,pause){
-  const check=()=>{if(win.classList.contains('minimized')||document.hidden||!win.contains(document.activeElement))pause();};
+  const check=()=>{if(win.classList.contains('minimized')||win.classList.contains('minimizing')||document.hidden||!win.contains(document.activeElement))pause();};
   const observer=new MutationObserver(check);observer.observe(win,{attributes:true,attributeFilter:['class']});
   document.addEventListener('visibilitychange',check);document.addEventListener('focusin',check);window.addEventListener('blur',pause);
   const cleanup=win.__cleanup;win.__cleanup=()=>{cleanup?.();observer.disconnect();document.removeEventListener('visibilitychange',check);document.removeEventListener('focusin',check);window.removeEventListener('blur',pause);};
@@ -105,4 +105,3 @@ Apps.doom={title:'DOOM · Sector 13',icon:'▣',render:()=>`<div class="game gam
   win.__cleanup=()=>{recordScore('doom',score);cancelAnimationFrame(raf);held.clear();win.removeEventListener('keydown',down);window.removeEventListener('keyup',up);};attachGameLifecycle(win,()=>{if(running&&!paused)pause();});loadLevel();hud();raf=requestAnimationFrame(loop);
 }};
 Apps.arcade.size=[940,650];Apps.tetris.size=[620,700];Apps.pacman.size=[650,650];Apps.doom.size=[880,740];Apps.easter.size=[740,740];
-buildIcons();buildMenu();buildClock();buildParallax();buildStart();buildContext();buildKonami();initDirectAccess();typeLoginArt();
