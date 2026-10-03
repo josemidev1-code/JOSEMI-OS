@@ -32,7 +32,9 @@ Fuera del código me gusta entrenar en el gimnasio, hacer deporte, practicar box
 
 ## Escritorio animado
 
-Abre **Ajustes** para elegir entre cuatro temas, cinco cursores, tres tamaños y la intensidad del movimiento. Puedes elegir el efecto de arranque de tu nombre y activar un salvapantallas ASCII. **ASCII Studio** permite probar los tres efectos; **Ctrl+K** busca aplicaciones y juegos.
+Abre **Ajustes** para elegir entre siete temas, cinco cursores, tres tamaños y la intensidad del movimiento. El arranque escribe **JOSEMI-OS** completo con ocho efectos, incluida una secuencia orbital y láser. **ASCII Studio** permite probarlos; **Ctrl+K** busca aplicaciones y juegos.
+
+Hay seis fondos ASCII animados: tormenta con rayos de `//`, lluvia, aurora, constelaciones, paisaje topográfico y código en cascada. Puedes regular densidad y velocidad, ocultar la bienvenida para disfrutar del fondo y reducir el movimiento. Los fondos descansan mientras juegas o cambias de pestaña.
 
 Las referencias de Omarchy y PostHog, las decisiones de diseño y las comprobaciones están documentadas en [DESIGN.md](DESIGN.md). Para verificar la lógica: `node tests/arcade.cjs` y `node tests/shell.cjs`.
 
