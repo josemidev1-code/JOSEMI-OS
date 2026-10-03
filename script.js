@@ -533,11 +533,11 @@ function runCommand(raw,print,openWin){
       if(a.startsWith('rm -rf')){print('<span class="err">Buen intento. JOSEMI_OS se niega a autodestruirse.</span>');break;}
       print('Permiso concedido.\nLanzando protocolo de contacto...');openWin('contact');break;
     case'secret':case'secreto':print('<span class="ok">🔓 Easter egg desbloqueado.</span>');openWin('easter');toast('Has encontrado SECRETO.sys');break;
-    case'matrix':state.wp=4;applyTheme();save();print('<span class="ok">Fondo Matrix activado.</span> Usa "fondo 0" para salir.');break;
+    case'matrix':state.wp=4;state.atmosphere='matrix';applyTheme();save();print('<span class="ok">Código en cascada activado.</span> Usa "fondo 0" para salir.');break;
     case'wallpaper':case'fondo':
-      if(a==='matrix'){state.wp=4;applyTheme();save();print('Matrix activado.');}
-      else if(['0','1','2','3'].includes(a)){state.wp=+a;applyTheme();save();print('Fondo cambiado.');}
-      else print('Uso: fondo matrix|0|1|2|3');break;
+      if(['matrix','storm','rain','aurora','stars','terrain'].includes(a)){state.atmosphere=a;applyTheme();save();print('Fondo ASCII activado.');}
+      else if(['0','1','2','3'].includes(a)){state.wp=+a;state.atmosphere='none';applyTheme();save();print('Fondo estático activado.');}
+      else print('Uso: fondo storm|rain|aurora|stars|terrain|matrix|0|1|2|3');break;
     case'tetris':print('Abriendo Tetris...');openWin('tetris');break;
     case'pacman':print('Abriendo Pac-Man...');openWin('pacman');break;
     case'doom':openWin('doom');break;
@@ -611,7 +611,7 @@ function buildContext(){const ctx=$('#ctxmenu');
   ctx.querySelectorAll('button').forEach(b=>b.onclick=()=>{const a=b.dataset.act;ctx.classList.add('hidden');
     if(a==='refresh'){buildIcons();toast('Escritorio actualizado.');}
     // [FIX] array de noms ara inclou 'Matrix' (5 wallpapers).
-    if(a==='wallpaper'){state.wp=(state.wp+1)%WALLS.length;applyTheme();save();toast('Fondo: '+['Verde nocturno','Bosque','Azul profundo','Violeta','Matrix'][state.wp]);}
+    if(a==='wallpaper'){state.wp=(state.wp+1)%WALLS.length;state.atmosphere=state.wp===4?'matrix':'none';applyTheme();save();toast('Fondo: '+['Aurora','Bosque','Azul profundo','Violeta','Matrix'][state.wp]);}
     if(a==='terminal')openWindow('terminal');if(a==='system')openWindow('system');if(a==='arcade')openWindow('arcade');});}
 function shutdown(){Object.keys(Apps).forEach(id=>WM.closeWindow(id));stopMatrix();const s=$('#shutdown');s.classList.remove('hidden');$('#shutdown__msg').textContent='Apagando JOSEMI-OS...';
   setTimeout(()=>{$('#shutdown__msg').textContent='Ahora puedes cerrar esta pestaña con seguridad.';$('#reboot').classList.remove('hidden');},1600);
