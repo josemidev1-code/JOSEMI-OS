@@ -1,0 +1,7 @@
+# Configuración privada del servidor; nunca se publica en GitHub Pages.
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+.wrangler/
+node_modules/

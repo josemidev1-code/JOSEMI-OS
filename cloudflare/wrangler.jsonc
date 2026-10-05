@@ -1,0 +1,9 @@
+{
+  "name": "josemi-assistant",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-05",
+  "vars": {
+    "ALLOWED_ORIGIN": "https://josemidev1-code.github.io",
+    "GEMINI_MODEL": "gemini-3.8-flash"
+  }
+}

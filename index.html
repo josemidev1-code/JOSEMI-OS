@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+<!-- IA / CONTEXTO: empieza por docs/LLEGIX-PRIMER-IA.md y docs/CONTEXT-PER-CONTINUAR.txt. -->
 <!-- CONFIGURACIÓN: idioma, tamaño adaptable, título, fuentes y estilos. -->
   <head>
   <meta charset="UTF-8">
@@ -7,13 +8,12 @@
   <meta name="description" content="JOSEMI-OS — portfolio interactivo de José Miguel Miralles Gandia, estudiante de DAM y desarrollador de software en proceso.">
   <meta name="theme-color" content="#050806">
   <title>JOSEMI-OS · Portfolio interactivo</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="shell.css">
-  <link rel="stylesheet" href="experience.css">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
 </head>
 <body>
   <!-- FONDO: Canvas decorativo añadido por JavaScript; aria-hidden lo oculta al lector de pantalla. -->
@@ -89,10 +89,7 @@
 
   <!-- AVISOS: mensajes temporales; aria-live anuncia novedades sin interrumpir. -->
   <div id="toasts" class="toasts" aria-live="polite"></div>
-  <!-- ORDEN: núcleo → utilidades arcade → plataformas → interfaz. Los archivos posteriores usan los anteriores. -->
+  <!-- Frontend fusionado: núcleo → Arcade → plataformas → shell → configuración → música. -->
   <script src="script.js"></script>
-  <script src="upgrade.js"></script>
-  <script src="platformer.js"></script>
-  <script src="shell.js"></script>
 </body>
 </html>

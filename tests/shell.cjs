@@ -1,5 +1,6 @@
+const section=require('./source.cjs');
 const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
-const root=path.resolve(__dirname,'..'),source=fs.readFileSync(path.join(root,'shell.js'),'utf8'),upgrade=fs.readFileSync(path.join(root,'upgrade.js'),'utf8');
+const root=path.resolve(__dirname,'..'),source=section('shell.js'),upgrade=section('upgrade.js');
 const artSource=upgrade.slice(upgrade.indexOf('const NAME_ART='),upgrade.indexOf('];',upgrade.indexOf('const NAME_ART='))+2);
 const engine=source.slice(source.indexOf('function seededNoise('),source.indexOf('let currentBootAnimation='));
 const frames=new Map();let id=0;const context={Math,Promise,state:{motion:false},requestAnimationFrame:fn=>{frames.set(++id,fn);return id;},cancelAnimationFrame:n=>frames.delete(n)};vm.createContext(context);vm.runInContext(artSource+engine,context);
@@ -27,6 +28,6 @@ const flush=now=>{const pending=[...frames.values()];frames.clear();pending.forE
   const cancelled=run('animateAscii(el,"gather")');cancelled.cancel();assert.equal(await cancelled.done,false);assert.equal(frames.size,0);tests.push('Cancellation releases frames and resolves the waiting boot');
   const detached=run('animateAscii(el,"beams")');context.el.isConnected=false;flush(0);assert.equal(await detached.done,false);context.el.isConnected=true;tests.push('Detached windows stop their animation');
   context.state.motion=true;const reduced=run('animateAscii(el,"gather")');flush(0);assert(await reduced.done);assert.equal(context.el.textContent,art.join('\n'));assert.equal(frames.size,0);tests.push('Reduced motion draws the final name immediately');
-  for(const file of ['style.css','shell.css','experience.css']){const css=fs.readFileSync(path.join(root,file),'utf8');assert.equal((css.match(/\{/g)||[]).length,(css.match(/\}/g)||[]).length);}tests.push('All stylesheets have balanced rules');
+  for(const file of ['style.css']){const css=fs.readFileSync(path.join(root,file),'utf8');assert.equal((css.match(/\{/g)||[]).length,(css.match(/\}/g)||[]).length);}tests.push('All stylesheets have balanced rules');
   console.log(JSON.stringify({result:'PASS',tests},null,2));
 })().catch(e=>{console.error(e);process.exitCode=1;});

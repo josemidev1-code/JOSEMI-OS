@@ -1,0 +1,124 @@
+JOSEMI-OS — CONTEXT PER CONTINUAR A CASA
+Actualitzat: 5 d’octubre de 2026. Usuari: José Miguel Miralles Gandia (Josemi).
+
+INSTRUCCIÓ PER AL PRÒXIM CHATGPT / CODEX
+Llig este document, docs/CLOUDFLARE-SETUP.md, docs/avaluacio/ i el codi actual abans de modificar res. Treballa sobre els fitxers, explica en llenguatge senzill i conserva les funcions existents. No dones per configurades les APIs. No publiques ni faces push sense una instrucció de Josemi. Si hi ha canvis posteriors en el seu repositori, compara abans de substituir-los per este ZIP.
+
+1. PERSONA I PROJECTE
+Josemi estudia Desenvolupament d’Aplicacions Multiplataforma al IES Dr. Lluís Simarro. Està aprenent HTML, CSS, JavaScript, Git i GitHub. Li interessen IA, automatització, webs i apps, gimnàs, boxa i córrer. Vol aprendre a crear productes i serveis digitals. Explica des de zero; prefereix passos pràctics i ordres per copiar i pegar.
+GitHub: josemidev1-code. Repositori consultat en este xat: https://github.com/josemidev1-code/JOSEMI-OS (main). El clon consultat tenia HEAD cb8a185a5242ba76266215d709194c0b7408918e; això no substituïx consultar l’estat real en arribar a casa.
+Contacte públic ja present: josemidev1@gmail.com. El LinkedIn actual és una cerca de persones, no un perfil exacte; cal que Josemi done l’enllaç correcte.
+
+JOSEMI-OS és un portfolio amb aspecte de sistema operatiu: intro Matrix/ASCII, escriptori, finestres, icones, aplicacions personals, terminal, personalització, salvapantalles, Arcade (Tetris, Pac-Man i plataformes), Secret Vault i secrets. Conservar la personalitat del sistema.
+
+2. QUÈ HA PASSAT EN ESTE XAT
+- Josemi va demanar revisar un lag d’arrancada en el PC Linux de classe.
+- Es va clonar i llegir el repo. La intro dura aproximadament 11 segons intencionadament; l’animació del nom usa temps real. Els desenfocaments i el fons poden carregar equips modestos. No es va demostrar la causa amb una mesura de FPS.
+- Josemi va indicar que el navegador de classe era antic i va decidir continuar amb millores. No s’ha confirmat que actualitzar-lo resolga tots els problemes.
+- Va aportar la taula d’anatomia de marca personal i tres tutorials del professor: widget API, chatbot i mitjans multimèdia. Les còpies originals estan íntegres en docs/avaluacio/.
+- Es va fer una auditoria del contingut: els blocs estan dispersos en apps; falta millorar proves de projectes, contacte directe, LinkedIn exacte i peu professional. No s’ha implementat una landing amb els sis blocs; seguix pendent decidir com encaixar-los amb l’OS.
+- Es va proposar GitHub API, però Josemi ho va rebutjar perquè diu que ja té els repositoris al museu de JOSEMI. No afegir un widget redundant de repositoris sense que ho demane. Comprovar el museu en la seua versió real: la menció no prova que este ZIP tinga tots els seus canvis.
+- Josemi va triar música controlada des del chatbot: «reprodueix esta cançó de X».
+- Es va parlar de Spotify (reproducció SDK amb requisits de compte/Premium), però es va triar YouTube.
+- YouTube s’integra amb vídeo visible; no extraure àudio ni ocultar el reproductor. Josemi va acceptar el vídeo i la targeta baix a la dreta amb títol i imatge. La imatge és una miniatura del vídeo, no una portada d’àlbum verificada; el canal no és necessàriament l’artista.
+- Es va crear JOSEMI Music amb ordres locals, reproductor persistent visible, pausa, volum, enllaços, cerca amb servidor i alternatives de vídeo.
+- Josemi va provar els enllaços i va confirmar que funcionaven. La cerca per nom no funcionava perquè faltava servidor configurat i clau.
+- El PC de classe tenia Node v12.22.9. El servidor inicial necessitava Node modern i fallava en ?. Es va adaptar el servidor local amb HTTPS natiu. Les proves es van executar en el runtime disponible, no amb Node 12 real.
+- Es va explicar Node (JS fora del navegador), localhost (servidor en el propi PC) i Python com a alternativa per servir fitxers estàtics. Python no activa la cerca per nom.
+- Josemi va aclarir que vol tot funcionant a GitHub Pages sense encendre el PC. Es va preparar Cloudflare Workers per a la cerca de YouTube i Gemini. No està desplegat.
+- La benvinguda inicial era un rectangle fix i es va provar una ocultació amb temporitzador. La versió ACTUAL ja no usa eixe panell ni el temporitzador: és una finestra normal amb X i «Ya lo he leído · Cerrar». Tancar-la marca state.welcomeWindowRead i no s’obri automàticament altra vegada en eixe navegador. El storage és per navegador/origen; un altre navegador la veurà de nou.
+- Josemi està a classe. Vol transportar-ho en USB i fer configuració, commits i push a casa. No s’han fet commits, push o desplegaments en este xat.
+- Última petició: organitzar i fusionar el frontend en tres fitxers; preparar este context, requisits d’avaluació i noms dels commits.
+
+3. ORGANITZACIÓ ACTUAL
+Arrel: index.html, style.css, script.js.
+assets/: favicon.svg.
+cloudflare/: worker.mjs i wrangler.jsonc (servidor públic a desplegar, separat del navegador).
+docs/: context, guies, disseny, README i materials originals del professor.
+tests/: proves i lector de seccions del script fusionat.
+tools/local/: servidor local opcional, NO necessari una vegada Workers estiga configurat.
+
+CSS fusionat en ordre: base style → shell → experience → music.
+JS fusionat en ordre: core script → upgrade → platformer → shell → music-config → music.
+Separadors BEGIN/END indiquen els blocs antics i permeten estudiar-los i provar-los. No tornar a crear fitxers duplicats en l’arrel.
+La configuració pública està en script.js, secció BEGIN music-config.js: window.JOSEMI_MUSIC_API = ''. Falta posar la URL real del Worker; cap clau va ací.
+
+4. ESTAT DE LA IA, MÚSICA I APIs
+Preparat en el codi:
+- Ordres locals: pausa, continua/reanuda, volum N; enllaç directe de YouTube.
+- Si hi ha URL de Worker, missatges a POST /api/chat amb historial curt (fins a tres intercanvis).
+- Gemini respon sobre una fitxa pública i proposa accions estructurades. El Worker valida només reply, music, pause, resume, volume i open. open té una llista fixa d’apps. No executa JS generat.
+- Per music, el Worker busca en YouTube Data API v3, filtrant vídeos insertables. Retorna ID, títol i canal. El frontend carrega el primer i oferix alternatives.
+- Reproductor IFrame visible amb vídeo d’almenys 200 × 200, controls, miniatura i enllaç a YouTube. Pot exigir clic manual si el navegador bloqueja autoplay.
+- Canviar de pestanya pausa; apagar o tancar el panell deté/pausa. Minimitzar l’app d’ordres deixa el reproductor visible.
+- CORS restringit a l’origen configurat. Les claus es lliguen de secrets de Cloudflare. No hi ha secrets en el ZIP.
+- Límits per instància del Worker són de suport, no una garantia de pressupost global. CORS no és autenticació. Cal configurar quotes/gast en els proveïdors.
+
+PENDENT REAL:
+Crear/configurar claus, seleccionar model Gemini disponible, desplegar Worker, posar URL pública, verificar l’origen de Pages, publicar fitxers i provar IA/cerca/reproducció reals. El model suggerit en el codi és gemini-3.8-flash segons la documentació consultada, però no s’ha validat amb el compte de Josemi; revisar disponibilitat, preus i identificador actual abans d’usar-lo.
+
+No afirmar «IA funcional en producció» fins a provar-ho. L’allotjament gratuït no implica consum il·limitat ni APIs sempre gratuïtes. Mai pegar claus en script.js, index.html, documents o Git.
+
+5. COM ENS AVALUARÀ EL PROFESSOR
+Les fonts autoritatives entregades són els tres textos en docs/avaluacio/. No tenim rubricas.ts ni una rúbrica completa comprovada; els pesos i descripcions següents són els que reproduïxen els tutorials. No garantir una nota.
+
+Anatomia requerida per Josemi:
+1 HERO: nom, frase que el definix i CTA (projectes/contacte); entendre qui és en 10 segons.
+2 SOBRE MI: 2-4 línies en primera persona, d’on ve, estudis i motivació.
+3 QUÈ HE FET: fets i proves amb context (projectes/cursos/esport/col·laboracions), no adjectius buits.
+4 M’AGRADA: 3-6 interessos que expliquen la seua personalitat.
+5 CONTACTE: correu i GitHub/LinkedIn, accés directe i funcional.
+6 PEU: nom, any i detall personal, amb tancament professional.
+
+Criteris reproduïts en els tutorials:
+- Contacte (15): canal real que funciona; per a nivell alt, resposta automàtica i explicar el recorregut de dades. El bot no substituïx un contacte real.
+- Interactivitat (15): funció amb estat o dades, API externa real/chatbot/personalització, explicada en defensa.
+- Contingut (15): projectes reals amb problema → solució → resultat, dades pròpies i veu personal.
+- Procés (15): iteracions visibles v1→v2, commits rastrejables, ordres clau d’IA arxivades i proves.
+- Riquesa de mitjans (10): fotos pròpies optimitzades, SVG propis/animats, vídeo propi o demo gravada, animacions amb intenció i verificació de mitjans.
+- Disseny i arquitectura: els textos citen pes 15 cadascun; identitat coherent, accessibilitat/rendiment, Lighthouse ≥90 i explicació de dues decisions d’arquitectura. No s’ha mesurat Lighthouse ací.
+- Producció: web publicada sense errors, comprovar consola i Network. No s’ha comprovat la versió publicada final.
+
+Cal defensar: navegador → Worker → API → JSON → camp → pantalla; càrrega, errors, què passa sense xarxa, protecció de claus i per què cada funció encaixa amb la marca.
+Chatbot: fitxa de dades públiques, no inventar informació ni revelar dades sensibles; provar preguntes normals i intents d’alterar instruccions. Un prompt no garantix secret absolut: no donar-li secrets.
+
+PENDENTS PER A MILLORAR LA NOTA:
+Completar sis blocs i casos de projecte; enllaç LinkedIn exacte; demo pròpia/fotos si es requerixen; validar mobile, teclat i Lighthouse; fer proves reals d’APIs i fallades; arxivar resultats reals i defensa. No inventar cursos, clients, mètriques o captures.
+
+Matís sobre els tutorials: les seues afirmacions sobre APIs sense clau, quotes, preus o compatibilitat són temporals; verificar-les abans d’usar-les. file:// no bloqueja totes les APIs universalment, però per al nostre YouTube s’ha d’usar HTTP(S) amb identificació correcta.
+
+6. VERIFICACIÓ REAL FETA EN ESTA ENTREGA
+Node --check script.js: passa la sintaxi del JS fusionat (no equival a compatibilitat amb tots els navegadors).
+Proves shell, arcade, platformer, music-server i Worker passen en Node disponible.
+Proves adaptades per llegir blocs del script únic, conservant casos de física/jocs/animació.
+Worker: mocks per CORS, configuració absent, interpretació IA → cerca, llista d’accions, errors i entrada.
+No hi ha navegador de proves disponible ací: la inspecció visual final, autoplay, responsive i qualitat d’àudio estan pendents. L’usuari sí va confirmar reproducció per enllaços en una versió anterior.
+No hi ha crides reals amb claus, desplegament, commit, push o canvi del GitHub remot.
+
+7. COM CONTINUAR A CASA DES DEL USB
+1 Copiar tota la carpeta del USB al PC abans de treballar. El ZIP no té .git.
+2 Obrir Codex en la carpeta i indicar: «Llig docs/CONTEXT-PER-CONTINUAR.txt i docs/CLOUDFLARE-SETUP.md; comprova el codi i ajuda’m a continuar».
+3 Localitzar el clon original amb .git o clonar el repo actual. Revisar git status i diferències. Si hi ha treball propi nou, conservar-lo i fusionar amb cura. No fer git reset --hard ni reescriure historial.
+4 Copiar els fitxers organitzats al clon, eliminar els antics duplicats només després de verificar les referències i conservar .git.
+5 Configurar Cloudflare i secrets segons la guia. Configurar URL del Worker en script.js.
+6 Executar proves, provar al navegador, revisar diff i fer commit(s) honestos. Publicar quan Josemi ho demane.
+7 Provar Pages i anotar resultats reals al document de proves.
+
+8. COMMITS PROPOSATS (NO S’HAN CREAT)
+Codi actual acumulat: si no es poden separar les parts sense deixar versions trencades, fer un únic commit coherent:
+«Integro JOSEMI Music, preparo Workers y unifico el frontend».
+
+Si es poden construir etapes funcionals separades, propostes:
+1 «Añado JOSEMI Music con reproductor visible y órdenes locales».
+2 «Preparo asistente Gemini y búsqueda YouTube en Cloudflare Workers».
+3 «Convierto la bienvenida en ventana y recuerdo su cierre».
+4 «Unifico frontend en index.html, style.css y script.js».
+5 «Archivo contexto, criterios de evaluación y pruebas del proyecto».
+
+FUTURS, només després de realitzar l’acció:
+«Configuro URL pública del Worker para GitHub Pages».
+«Verifico asistente y búsqueda musical en producción» (amb resultats reals documentats).
+«Completo los seis bloques de marca personal con proyectos reales».
+«Añado demo propia y reviso accesibilidad y rendimiento».
+
+No crear commits buits ni fingir que estes etapes ja estan versionades. No afegir claus als commits. Abans d’afegir fitxers comprovar git diff i git status. Les ordres exactes de git dependran del clon i dels canvis presents en arribar a casa.
