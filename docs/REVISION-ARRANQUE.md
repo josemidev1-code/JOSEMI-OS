@@ -63,9 +63,26 @@ un contenedor de 314 px; la página tiene 390 px de ancho, sin desbordamiento.
 También se comprobó a 1280 × 800. Las preferencias de movimiento se probaron
 activadas y reducidas; el cierre de la bienvenida funciona como ventana normal.
 
-Se superaron las siete baterías: frontend, boot, shell, arcade, platformer, music y worker.
+Se superaron las ocho baterías: frontend, boot, shell, arcade, platformer, music, player y worker.
 La prueba musical local necesitó permiso de conexión a localhost, porque el sandbox
 bloqueaba esa conexión; después pasó. La comprobación de sintaxis también pasó.
 
 No se han medido Lighthouse ni FPS del ordenador de clase. El vídeo musical de terceros
 no sustituye la demo propia que pide el tutorial de medios.
+
+## Segunda revisión: reproducción y ventanas
+
+- El fondo base Matrix deja de arrancar un segundo motor. «Sin animación» queda
+  realmente estático y el motor ASCII respeta las pausas de juegos y pestañas ocultas.
+- ASCII Studio observa el tamaño de su contenedor, incluso al redimensionar una
+  ventana sin cambiar el tamaño del navegador. Al cerrarla desconecta el observador.
+- Pausar durante la conexión de YouTube prepara el vídeo sin arrancarlo. Ocultar
+  la pestaña o cerrar el reproductor impide una reproducción tardía; el volumen
+  elegido se conserva cuando el reproductor está listo.
+- Un intento caducado del SDK no puede crear otro reproductor ni sobrescribir
+  el estado del siguiente intento. Los resultados y las respuestas del chatbot
+  se validan antes de usarlos, con errores legibles si llega HTML o JSON incompleto.
+
+`tests/player.cjs` ejecuta esas situaciones con un SDK simulado, incluidos el cierre,
+la caducidad, el reintento y las acciones del chatbot. No demuestra reproducción
+real de vídeos externos ni una conexión de Gemini: ambas requieren red/configuración.

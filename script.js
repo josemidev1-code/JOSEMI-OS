@@ -95,17 +95,16 @@ function stopMatrix(){
 }
 
 /* --- Aplicar tema (colors + wallpaper + matrix) --- */
-// [FIX] Ara entén 'matrix' i només l'arrenca quan el desktop és visible.
+// El fondo base define los colores; shell.js controla una única animación ASCII.
 function applyTheme(){
   document.documentElement.style.setProperty('--accent',state.accent);
   document.documentElement.style.setProperty('--accent-soft',state.accent+'1f');
   document.documentElement.style.setProperty('--bg',state.bg);
   const bg=$('#bg');
-  const desktopVisible=!$('#desktop').classList.contains('hidden');
   if(state.wp===4){                                   // wallpaper = matrix
     if(bg)bg.style.background='#000';                 // fons negre sota la pluja
-    if(desktopVisible&&!state.motion)startMatrix();    // pluja actiu dins del desktop
-    else stopMatrix();
+    // La lluvia la gestiona el motor ASCII, que también pausa al abrir juegos.
+    stopMatrix();
   }else{
     stopMatrix();
     if(bg)bg.style.background=WALLS[state.wp];
@@ -1082,7 +1081,7 @@ Apps.settings={title:'Ajustes',icon:osIcon('settings'),size:[850,710],render:()=
   $('.accent-input',body).oninput=e=>{state.accent=e.target.value;applyTheme();save();};$('.preview-ascii',body).onclick=()=>openWindow('screensaver');$('.start-saver',body).onclick=()=>showScreensaver();
 }};
 // ASCII STUDIO: reproduce el efecto elegido; al cerrar cancela el bucle para liberar recursos.
-Apps.screensaver={title:'ASCII Studio',icon:osIcon('screensaver'),size:[780,560],render:()=>`<div class="ascii-studio"><span class="card-kicker">JOSEMI-OS / CHARACTER MOTION</span><h2>El texto también se mueve.</h2><pre class="ascii-stage" aria-label="Animación del nombre JOSEMI-OS"></pre><div class="ascii-actions">${Object.entries(EFFECTS).filter(([id])=>id!=='random').map(([id,name])=>`<button class="btn" data-effect="${id}">${name}</button>`).join('')}</div><p>Selecciona un efecto. Cada carácter encuentra su sitio.</p></div>`,bind(body,win){let animation;const play=effect=>{animation?.cancel();animation=animateAscii($('.ascii-stage',body),effect,{duration:state.intensity==='calm'?2200:4200});};$$('[data-effect]',body).forEach(b=>b.onclick=()=>play(b.dataset.effect));win.__cleanup=()=>animation?.cancel();play(state.bootEffect);}};
+Apps.screensaver={title:'ASCII Studio',icon:osIcon('screensaver'),size:[780,560],render:()=>`<div class="ascii-studio"><span class="card-kicker">JOSEMI-OS / CHARACTER MOTION</span><h2>El texto también se mueve.</h2><pre class="ascii-stage" aria-label="Animación del nombre JOSEMI-OS"></pre><div class="ascii-actions">${Object.entries(EFFECTS).filter(([id])=>id!=='random').map(([id,name])=>`<button class="btn" data-effect="${id}">${name}</button>`).join('')}</div><p>Selecciona un efecto. Cada carácter encuentra su sitio.</p></div>`,bind(body,win){let animation;const play=effect=>{animation?.cancel();animation=animateAscii($('.ascii-stage',body),effect,{duration:state.intensity==='calm'?2200:4200});};$$('[data-effect]',body).forEach(b=>b.onclick=()=>play(b.dataset.effect));const stage=$('.ascii-stage',body);const observer=typeof ResizeObserver==='function'?new ResizeObserver(()=>fitAsciiText(stage)):null;observer?.observe(stage);win.__cleanup=()=>{animation?.cancel();observer?.disconnect();};play(state.bootEffect);}};
 ICONS.push('screensaver');currentUser.apps.push('screensaver');
 
 // Desktop icons use one consistent illustrated SVG family.
@@ -1191,7 +1190,7 @@ function atmosphereTick(now){
 // SINCRONIZACIÓN: crea un único Canvas, aplica colores y decide iniciar o cancelar su bucle.
 function syncAtmosphere(){
   if(!atmosphereCanvas){atmosphereCanvas=document.createElement('canvas');atmosphereCanvas.id='ascii-wall';atmosphereCanvas.setAttribute('aria-hidden','true');$('#bg').append(atmosphereCanvas);atmosphereContext=atmosphereCanvas.getContext('2d');}
-  atmosphereCanvas.hidden=state.atmosphere==='none';if(state.atmosphere!=='none'||state.motion)stopMatrix();
+  atmosphereCanvas.hidden=state.atmosphere==='none';stopMatrix();
   atmosphereColors=[state.accent,THEMES[state.theme].accent,['paper','glacier'].includes(state.theme)?'#647f95':'#b7a7ec'];
   document.body.dataset.atmosphere=state.atmosphere;drawAtmosphere();
   if(!atmosphereActive()){cancelAnimationFrame(atmosphereRAF);atmosphereRAF=0;atmosphereLast=null;}else if(!atmosphereRAF)atmosphereRAF=requestAnimationFrame(atmosphereTick);
@@ -1219,7 +1218,7 @@ window.JOSEMI_MUSIC_API = ''; // Ejemplo: https://josemi-assistant.tu-subdominio
 /* JOSEMI Music: órdenes locales, búsqueda en el servidor y vídeo siempre visible. */
 (()=>{
   const $m=s=>document.querySelector(s);
-  let player,readyPromise,track=null,request=0;
+  let player,readyPromise,track=null,request=0,wantsPlayback=false;
   const panel=document.createElement('aside');panel.id='music-dock';panel.hidden=true;
   panel.setAttribute('aria-label','Reproductor de YouTube');
   panel.innerHTML='<div class="music-heading"><strong>JOSEMI MUSIC · YouTube</strong><button id="music-stop" aria-label="Cerrar reproductor">×</button></div><div id="youtube-player"></div><div class="music-track"><img id="music-cover" alt="Miniatura del vídeo"><div><small id="music-state">LISTO PARA REPRODUCIR</small><strong id="music-title"></strong><span id="music-channel"></span></div></div><div class="music-controls"><button id="music-play">Reproducir</button><button id="music-pause">Pausa</button><label>Volumen <input id="music-volume" type="range" min="0" max="100" value="65"></label></div><p id="music-status" role="status"></p><a id="music-source" target="_blank" rel="noopener">Ver en YouTube ↗</a>';
@@ -1229,36 +1228,46 @@ window.JOSEMI_MUSIC_API = ''; // Ejemplo: https://josemi-assistant.tu-subdominio
   function loadPlayer(){
     if(readyPromise)return readyPromise;
     readyPromise=new Promise((resolve,reject)=>{
-      const timeout=setTimeout(()=>reject(new Error('YouTube tarda en cargar. Comprueba la conexión y vuelve a intentarlo.')),15000);
-      function create(){player=new YT.Player('youtube-player',{width:320,height:200,playerVars:{origin:location.origin,playsinline:1},events:{onReady:()=>{clearTimeout(timeout);player.setVolume(65);resolve(player);},onStateChange:e=>{$m('#music-state').textContent=({1:'SONANDO AHORA',2:'EN PAUSA',0:'FINALIZADO',3:'CARGANDO'})[e.data]||'LISTO PARA REPRODUCIR';if(e.data===1)status('');},onAutoplayBlocked:()=>status('Pulsa Reproducir para iniciar la canción.'),onError:e=>{status(e.data===153?'Abre la web desde un servidor HTTP, no como archivo local.':'Este vídeo no se puede reproducir aquí. Prueba otro resultado o ábrelo en YouTube.');}}});}
-      if(window.YT?.Player)create();else{const previous=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=()=>{previous?.();create();};const script=document.createElement('script');script.src='https://www.youtube.com/iframe_api';script.onerror=()=>{clearTimeout(timeout);reject(new Error('No se ha podido conectar con YouTube.'));};document.head.append(script);}
+      // Un intento caducado no puede crear otro reproductor cuando llega el SDK tarde.
+      let active=true,created=false,instance;
+      const fail=message=>{if(!active)return;active=false;clearTimeout(timeout);instance?.destroy?.();if(player===instance)player=null;reject(new Error(message));};
+      const timeout=setTimeout(()=>fail('YouTube tarda en cargar. Comprueba la conexión y vuelve a intentarlo.'),15000);
+      function create(){if(!active||created)return;created=true;
+        if(!$m('#youtube-player')){const slot=document.createElement('div');slot.id='youtube-player';panel.insertBefore(slot,$m('.music-track'));}
+        try{instance=player=new YT.Player('youtube-player',{width:320,height:200,playerVars:{origin:location.origin,playsinline:1},events:{onReady:()=>{if(!active)return;clearTimeout(timeout);player.setVolume(Number($m('#music-volume').value));resolve(player);},onStateChange:e=>{if(!active)return;if(e.data===1&&(!wantsPlayback||panel.hidden||document.hidden)){player.pauseVideo();return;}$m('#music-state').textContent=({1:'SONANDO AHORA',2:'EN PAUSA',0:'FINALIZADO',3:'CARGANDO'})[e.data]||'LISTO PARA REPRODUCIR';if(e.data===1)status('');},onAutoplayBlocked:()=>status('Pulsa Reproducir para iniciar la canción.'),onError:e=>{status(e.data===153?'Abre la web desde un servidor HTTP, no como archivo local.':'Este vídeo no se puede reproducir aquí. Prueba otro resultado o ábrelo en YouTube.');}}});}catch{fail('No se ha podido iniciar el reproductor de YouTube.');}}
+      if(window.YT?.Player)create();else{window.onYouTubeIframeAPIReady=create;let script=document.querySelector('script[data-youtube-sdk]');if(!script){script=document.createElement('script');script.dataset.youtubeSdk='true';script.src='https://www.youtube.com/iframe_api';document.head.append(script);}script.onerror=()=>{script.remove();fail('No se ha podido conectar con YouTube.');};}
     }).catch(e=>{readyPromise=null;throw e;});return readyPromise;
   }
   // Los títulos externos se escriben como texto; nunca se interpretan como HTML.
   async function play(item){
-    const run=++request;track=item;panel.hidden=false;
+    if(!item||!/^[-\w]{11}$/.test(item.id)||typeof item.title!=='string'){status('El resultado de YouTube no es válido. Prueba otra búsqueda.');return;}
+    const run=++request;track=item;wantsPlayback=true;panel.hidden=false;
     $m('#music-title').textContent=item.title;$m('#music-channel').textContent=item.channel||'YouTube';
     $m('#music-cover').src=`https://i.ytimg.com/vi/${item.id}/hqdefault.jpg`;
     $m('#music-source').href=`https://www.youtube.com/watch?v=${item.id}`;
     $m('#music-state').textContent='CARGANDO';status('Conectando con YouTube…');
-    try{await loadPlayer();if(run!==request||panel.hidden)return;player.loadVideoById(item.id);status('Si no comienza, pulsa Reproducir.');}catch(e){status(e.message);}
+    try{await loadPlayer();if(run!==request||panel.hidden)return;if(wantsPlayback&&!document.hidden)player.loadVideoById(item.id);else player.cueVideoById(item.id);status('Pulsa Reproducir para iniciar o reanudar.');}catch(e){if(run===request&&!panel.hidden)status(e.message);}
   }
-  $m('#music-stop').onclick=()=>{request++;player?.stopVideo?.();panel.hidden=true;};
-  $m('#music-play').onclick=()=>player?.playVideo?.();$m('#music-pause').onclick=()=>player?.pauseVideo?.();
+  function pauseMusic(){wantsPlayback=false;player?.pauseVideo?.();}
+  function resumeMusic(){wantsPlayback=true;if(!panel.hidden&&!document.hidden)player?.playVideo?.();}
+  $m('#music-stop').onclick=()=>{request++;wantsPlayback=false;player?.stopVideo?.();panel.hidden=true;};
+  $m('#music-play').onclick=resumeMusic;$m('#music-pause').onclick=pauseMusic;
   $m('#music-volume').oninput=e=>player?.setVolume?.(Number(e.target.value));
   // Evita seguir reproduciendo con el vídeo oculto por otra pestaña o por Apagar.
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)player?.pauseVideo?.();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseMusic();});
   new MutationObserver(()=>{if(!document.querySelector('#shutdown').classList.contains('hidden'))$m('#music-stop').click();}).observe(document.querySelector('#shutdown'),{attributes:true,attributeFilter:['class']});
   function videoId(text){try{const u=new URL(text);if(u.hostname==='youtu.be')return /^[\w-]{11}$/.test(u.pathname.slice(1))?u.pathname.slice(1):null;if(['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname)){const id=u.searchParams.get('v')||u.pathname.match(/^\/(?:shorts|embed)\/([\w-]{11})/)?.[1];return /^[\w-]{11}$/.test(id||'')?id:null;}}catch{}return null;}
   async function search(query){
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
-    try{const base=window.JOSEMI_MUSIC_API||location.origin;const response=await fetch(`${base}/api/youtube/search?q=${encodeURIComponent(query)}`,{signal:controller.signal});let data;try{data=await response.json();}catch{throw new Error('La búsqueda necesita el servidor de JOSEMI Music. Puedes pegar un enlace de YouTube.');}if(!response.ok)throw new Error(data.error||'No se ha podido buscar.');return data.items||[];}finally{clearTimeout(timer);}
+    try{const base=(window.JOSEMI_MUSIC_API||location.origin).trim().replace(/\/+$/,'');const response=await fetch(`${base}/api/youtube/search?q=${encodeURIComponent(query)}`,{signal:controller.signal});let data;try{data=await response.json();}catch{throw new Error('La búsqueda necesita el servidor de JOSEMI Music. Puedes pegar un enlace de YouTube.');}if(!response.ok)throw new Error(data?.error||'No se ha podido buscar.');return validMusicItems(data?.items);}finally{clearTimeout(timer);}
   }
   async function chat(message,history){
-    const base=(window.JOSEMI_MUSIC_API||'').replace(/\/$/,'');
+    const base=(window.JOSEMI_MUSIC_API||'').trim().replace(/\/+$/,'');
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),35000);
-    try{const response=await fetch(`${base}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,history}),signal:controller.signal});const data=await response.json();if(!response.ok)throw new Error(data.error||'El asistente no ha respondido.');return data;}finally{clearTimeout(timer);}
+    try{const response=await fetch(`${base}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,history}),signal:controller.signal});let data;try{data=await response.json();}catch{throw new Error('El servidor del asistente no ha devuelto una respuesta válida.');}if(!response.ok)throw new Error(data?.error||'El asistente no ha respondido.');if(!data||typeof data.reply!=='string'||!['reply','pause','resume','volume','open','music'].includes(data.action))throw new Error('La respuesta del asistente está incompleta. Prueba otra vez.');if(data.action==='volume'&&(!Number.isFinite(data.volume)||data.volume<0||data.volume>100))throw new Error('El asistente ha devuelto un volumen inválido.');if(data.action==='music')data.items=validMusicItems(data.items);return data;}finally{clearTimeout(timer);}
   }
+  // Solo pasan al reproductor vídeos con identificador y título válidos.
+  function validMusicItems(items){if(!Array.isArray(items))throw new Error('YouTube ha devuelto una lista de vídeos inválida.');return items.filter(item=>item&&/^[-\w]{11}$/.test(item.id)&&typeof item.title==='string').map(item=>({...item,channel:typeof item.channel==='string'?item.channel:'YouTube'}));}
   const icon='<svg class="os-icon" viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="10" width="48" height="44" rx="8" fill="#bda9d5"/><path d="M26 42V23l19-4v19M26 23l19-4" fill="none" stroke="#293934" stroke-width="3"/><circle cx="21" cy="43" r="6" fill="#293934"/><circle cx="40" cy="39" r="6" fill="#293934"/></svg>';
   // Plan B para clase: respuestas escritas con datos públicos, sin IA ni red.
   // No sustituye a Gemini; permite explicar y usar el chatbot antes de conectar el Worker.
@@ -1275,13 +1284,13 @@ window.JOSEMI_MUSIC_API = ''; // Ejemplo: https://josemi-assistant.tu-subdominio
     const log=body.querySelector('.music-chat'),form=body.querySelector('form'),input=body.querySelector('input'),results=body.querySelector('.music-results');let busy=false;const history=[];
     const say=(text,who='assistant')=>{const line=document.createElement('p');line.className=who;line.textContent=(who==='user'?'Tú: ':'JOSEMI: ')+text;log.append(line);while(log.children.length>30)log.firstChild.remove();log.scrollTop=log.scrollHeight;};say('Dime qué canción quieres escuchar.');
     form.onsubmit=async e=>{e.preventDefault();if(busy)return;const raw=input.value.trim();if(!raw)return;input.value='';say(raw,'user');const normalized=raw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-      if(/^(pausa|para|deten)( la musica)?$/.test(normalized)){player?.pauseVideo?.();say(track?'Música en pausa.':'Todavía no has elegido una canción.');return;}
-      if(/^(continua|reanuda|play|reproduce)$/.test(normalized)){player?.playVideo?.();say(track?'Puedes reanudar con el botón Reproducir si el navegador lo solicita.':'Dime primero una canción.');return;}
+      if(/^(pausa|para|deten)( la musica)?$/.test(normalized)){pauseMusic();say(track?'Música en pausa.':'Todavía no has elegido una canción.');return;}
+      if(/^(continua|reanuda|play|reproduce)$/.test(normalized)){resumeMusic();say(track?'Puedes reanudar con el botón Reproducir si el navegador lo solicita.':'Dime primero una canción.');return;}
       const volume=normalized.match(/^(?:volumen|baja el volumen a|sube el volumen a)\s*(\d{1,3})\s*%?$/);if(volume){const value=Math.min(100,Number(volume[1]));player?.setVolume?.(value);$m('#music-volume').value=value;say(`Volumen: ${value} %.`);return;}
       const id=videoId(raw);if(id){say('Abro ese vídeo.');await play({id,title:'Vídeo de YouTube',channel:'Enlace elegido por ti'});return;}
       if(window.JOSEMI_MUSIC_API){busy=true;form.querySelector('button').disabled=true;results.replaceChildren();say('Consultando al asistente…');try{const data=await chat(raw,history);if(!body.isConnected)return;say(data.reply);history.push({role:'user',text:raw},{role:'model',text:data.reply});if(history.length>6)history.splice(0,history.length-6);
-        if(data.action==='pause')player?.pauseVideo?.();
-        if(data.action==='resume')player?.playVideo?.();
+        if(data.action==='pause')pauseMusic();
+        if(data.action==='resume')resumeMusic();
         if(data.action==='volume'){player?.setVolume?.(data.volume);$m('#music-volume').value=data.volume;}
         if(data.action==='open'&&['about','projects','contact','arcade','settings','readme'].includes(data.app))openWindow(data.app);
         if(data.action==='music'){const items=data.items||[];if(!items.length){say('No hay resultados. Prueba otro título o artista.');return;}items.forEach(item=>{const button=document.createElement('button');button.className='music-result';button.textContent=`${item.title} · ${item.channel}`;button.onclick=()=>play(item);results.append(button);});await play(items[0]);}
