@@ -1,6 +1,7 @@
+const section=require('./source.cjs');
 // Pruebas de comportamiento: física, rutas jugables, daño y progresión sin depender del navegador.
 const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
-const root=path.resolve(__dirname,'..'),source=fs.readFileSync(path.join(root,'platformer.js'),'utf8');
+const root=path.resolve(__dirname,'..'),source=section('platformer.js');
 const sandbox={Math};vm.createContext(sandbox);vm.runInContext(source.slice(0,source.indexOf('Apps.mario=')),sandbox);
 const run=s=>vm.runInContext(s,sandbox),tests=[],make=level=>run(`createPlatformWorld(${level})`);
 const step=(world,input={},seconds=1/120)=>{sandbox.world=world;sandbox.input=input;sandbox.dt=seconds;run('stepPlatform(world,input,dt)');};
@@ -25,5 +26,5 @@ for(let level=0;level<3;level++){
 }
 sandbox.carry={score:1234,lives:2,coinCount:12};w=run('createPlatformWorld(1,carry)');assert.equal(w.score,1234);assert.equal(w.lives,2);assert.equal(w.coinCount,12);tests.push('El siguiente mundo conserva puntos, vidas y monedas');
 w=make(0);w.status='playing';w.lives=1;w.player.y=500;step(w);assert.equal(w.status,'lost');tests.push('Sin vidas la campaña termina');
-assert(!fs.readFileSync(path.join(root,'upgrade.js'),'utf8').includes('Apps.doom'));assert(fs.readFileSync(path.join(root,'index.html'),'utf8').includes('platformer.js'));tests.push('El shooter se elimina y el nuevo juego se carga en la página');
+assert(!section('upgrade.js').includes('Apps.doom'));assert(fs.readFileSync(path.join(root,'index.html'),'utf8').includes('src="script.js"'));assert(section('platformer.js').includes('Apps.mario='));tests.push('El shooter se elimina y el nuevo juego se carga en la página');
 console.log(JSON.stringify({result:'PASS',tests},null,2));

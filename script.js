@@ -1,3 +1,8 @@
+/* IA: lee docs/LLEGIX-PRIMER-IA.md y docs/CONTEXT-PER-CONTINUAR.txt antes de editar. */
+/* JOSEMI-OS: frontend fusionado. La URL de Cloudflare se configura en la sección music-config. */
+
+;
+/* === BEGIN script.js === */
 /* =========================================================
    JOSEMI-OS · portfolio interactivo
    WM = motor de ventanas. Apps = contenido plug-in.
@@ -679,8 +684,20 @@ function appendBoot(text='',cls=''){
 // MÁQUINA DE ESCRIBIR: añade letras con pausas. bootRun cancela una secuencia que ya no está vigente.
 async function typeBootText(el,text,speed,run){
   el.textContent='';
-  for(const ch of text){if(run!==bootRun||enteringOS)return false;el.textContent+=ch;await bootDelay(speed);}
-  return true;
+  // El tiempo real decide cuántas letras mostrar: un ordenador lento no acumula
+  // un temporizador por letra. Saltar o reiniciar invalida la secuencia anterior.
+  if(!speed){el.textContent=text;return run===bootRun&&!enteringOS;}
+  return new Promise(resolve=>{
+    let start=null;
+    const frame=now=>{
+      if(run!==bootRun||enteringOS||!el.isConnected){resolve(false);return;}
+      if(start===null)start=now;
+      const count=Math.min(text.length,Math.floor((now-start)/speed)+1);
+      el.textContent=text.slice(0,count);
+      if(count===text.length)resolve(true);else requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  });
 }
 async function typeBootLine(text,cls,speed,run){
   const out=$('#bootTerminalOutput'),line=document.createElement('span');line.className=cls;out.appendChild(line);
@@ -719,3 +736,568 @@ function initDirectAccess(){
 }
 
 /* ========================================================= INICIO */
+
+/* === END script.js === */
+
+;
+/* === BEGIN upgrade.js === */
+'use strict';
+// Shared game lifecycle: time stops when the player leaves a game.
+// SEGURIDAD DEL TEXTO: convierte símbolos HTML en entidades para mostrar lo escrito sin ejecutarlo.
+const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// RÉCORDS: localStorage conserva la mayor puntuación de cada juego en este navegador.
+function recordScore(id,n){try{const key='josemi-best-'+id,best=Math.max(n,Number(localStorage.getItem(key))||0);localStorage.setItem(key,best);const label=document.querySelector(`.game-card--${id} .game-card__bottom span`);if(label)label.textContent='RÉCORD '+best;}catch{}}
+function bestScore(id){try{return Number(localStorage.getItem('josemi-best-'+id))||0;}catch{return 0;}}
+// PANTALLA DE JUEGO: dibuja un velo oscuro y un mensaje de inicio, pausa o final sobre el Canvas.
+function gameOverlay(ctx,cv,title,sub){ctx.fillStyle='rgba(0,0,0,.76)';ctx.fillRect(0,0,cv.width,cv.height);ctx.textAlign='center';ctx.fillStyle='#6dff9b';ctx.font='bold 17px monospace';ctx.fillText(title,cv.width/2,cv.height/2-10);ctx.font='10px monospace';ctx.fillStyle='#dbe8df';ctx.fillText(sub,cv.width/2,cv.height/2+16);}
+// PAUSA AUTOMÁTICA: observa minimizar, cambiar pestaña o perder foco. El cierre retira todos los listeners.
+function attachGameLifecycle(win,pause){
+  const check=()=>{if(win.classList.contains('minimized')||win.classList.contains('minimizing')||document.hidden||!win.contains(document.activeElement))pause();};
+  const observer=new MutationObserver(check);observer.observe(win,{attributes:true,attributeFilter:['class']});
+  document.addEventListener('visibilitychange',check);document.addEventListener('focusin',check);window.addEventListener('blur',pause);
+  const cleanup=win.__cleanup;win.__cleanup=()=>{cleanup?.();observer.disconnect();document.removeEventListener('visibilitychange',check);document.removeEventListener('focusin',check);window.removeEventListener('blur',pause);};
+}
+// CONTROLES TÁCTILES: botones que envían las mismas teclas que utiliza el juego.
+function addGameControls(body,win,keys){
+  const row=document.createElement('div');row.className='game-controls';const names={ArrowLeft:'←',ArrowRight:'→',ArrowUp:'↑',ArrowDown:'↓',' ':'CAÍDA',p:'PAUSA'};
+  keys.forEach(key=>{const b=document.createElement('button');b.className='btn';b.textContent=names[key]||key.toUpperCase();b.type='button';b.addEventListener('click',()=>{win.focus();win.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true}));});row.append(b);});body.querySelector('.game').append(row);
+}
+
+// Boot art is stable ASCII. Noise only reveals the glyphs, never shifts the layout.
+// FIRMA: seis líneas de caracteres forman JOSEMI-OS. La animación cambia su posición o revelado, no el nombre final.
+const NAME_ART=[
+"     ██╗ ██████╗ ███████╗███████╗███╗   ███╗██╗       ██████╗ ███████╗",
+"     ██║██╔═══██╗██╔════╝██╔════╝████╗ ████║██║      ██╔═══██╗██╔════╝",
+"     ██║██║   ██║███████╗█████╗  ██╔████╔██║██║ ████╗██║   ██║███████╗",
+"██   ██║██║   ██║╚════██║██╔══╝  ██║╚██╔╝██║██║ ╚═══╝██║   ██║╚════██║",
+"╚█████╔╝╚██████╔╝███████║███████╗██║ ╚═╝ ██║██║      ╚██████╔╝███████║",
+" ╚════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝     ╚═╝╚═╝       ╚═════╝ ╚══════╝"];
+// ARCADE: tarjetas de los tres juegos. data-game identifica qué aplicación debe abrirse.
+Apps.arcade.render=()=>`<div class="arcade-heading"><div><span class="card-kicker">JOSEMI / ARCADE COLLECTION</span><h2>Una partida más.</h2><p>Tres clásicos, una nueva vida dentro del sistema.</p></div><span class="arcade-badge">INSERT COIN<br>FREE PLAY</span></div><div class="arcade-grid arcade-grid--v2">${[
+  ['mario','1UP','Mario Bros · JOSEMI Run','Plataformas originales: tres mundos, monedas, enemigos y puntos de control.','← → · Espacio · Shift'],
+  ['pacman','●','Pac-Man','Limpia el laberinto. Tres fantasmas, energía y dificultad progresiva.','Flechas · P pausa'],
+  ['tetris','▟','Tetris','Siete piezas, sombra de caída y un nuevo nivel cada diez líneas.','Flechas · Espacio · P']
+].map(([id,mark,title,desc,keys])=>`<button class="game-shortcut game-card game-card--${id}" data-game="${id}"><span class="game-card__number">${mark}</span><span class="card-kicker">${id==='mario'?'3 MUNDOS':'NIVELES PROGRESIVOS'}</span><strong>${title}</strong><p>${desc}</p><small>${keys}</small><span class="game-card__bottom">JUGAR ↗ <span>RÉCORD ${bestScore(id)}</span></span></button>`).join('')}</div><p class="arcade-footnote">Las partidas se pausan al cambiar de ventana o pestaña. Haz clic en el juego para recuperar el teclado.</p>`;
+// BÓVEDA: tres respuestas desbloquean fases guardadas localmente. Es un juego de pistas, no seguridad real.
+Apps.easter={title:'Secret Vault',icon:'⌬',render:()=>`<section class="vault"><div class="vault-top"><span class="card-kicker">/ROOT / SECRET_VAULT</span><span class="vault-status">ACCESO LIMITADO</span></div><pre class="vault-art" aria-hidden="true">       .--------.
+      / .------. \\
+      | |      | |
+    __| |______| |__
+   [________________]
+   |       /\\       |
+   |      /__\\      |
+   |       ||       |
+   |________________|</pre><h2>Todo sistema guarda secretos.</h2><p class="vault-copy">Tres llaves. Un pequeño homenaje a quienes nunca dejan de explorar.</p><div class="vault-progress"></div><div class="vault-challenge"></div><form class="vault-form"><label for="vault-answer">CLAVE DE ACCESO</label><div><input id="vault-answer" autocomplete="off" spellcheck="false" placeholder="Escribe tu respuesta…"><button class="btn btn--accent">VALIDAR ↵</button></div></form><p class="vault-feedback" role="status"></p><button class="btn vault-hint">NECESITO UNA PISTA</button></section>`,bind(body){
+  const challenges=[['01 / LA RESPUESTA','En la guía más famosa de la galaxia, ¿qué número responde a la vida, el universo y todo lo demás?','La terminal conoce un número de dos cifras.','42'],['02 / EL CÓDIGO','↑ ↑ ↓ ↓ ← → ← → B A. ¿Qué apellido da nombre a este código?','Empieza por K. Es un estudio japonés de videojuegos.','konami'],['03 / EL CREADOR','Seis letras iluminan el arranque de este sistema. ¿Cuál es el nombre?','Mira el escritorio: JOSEMI-OS.','josemi']];
+  let stage=0;try{stage=Math.min(3,Math.max(0,Number(localStorage.getItem('josemi-vault'))||0));}catch{}
+  const render=()=>{$('.vault-progress',body).innerHTML=[0,1,2].map(i=>`<span class="${i<stage?'unlocked':''}">${i<stage?'✓':'○'} LLAVE 0${i+1}</span>`).join('');const done=stage===3;$('.vault-form',body).hidden=done;$('.vault-hint',body).hidden=done;$('.vault-status',body).textContent=done?'ACCESO CONCEDIDO':`${stage}/3 LLAVES`;$('.vault-challenge',body).innerHTML=done?`<span class="card-kicker">EL SECRETO ES SEGUIR CONSTRUYENDO</span><h3>Build. Learn. Repeat.</h3><p>No hay atajos para aprender. Sí hay curiosidad, errores y una partida más.</p><button class="btn btn--accent vault-reward">ACTIVAR TEMA ÁMBAR</button><button class="btn vault-play">VOLVER AL ARCADE</button>`:`<span class="card-kicker">${challenges[stage][0]}</span><p>${challenges[stage][1]}</p>`;$('.vault-reward',body)?.addEventListener('click',()=>{state.accent='#ffd166';applyTheme();save();toast('Secret Vault: tema ámbar desbloqueado.');});$('.vault-play',body)?.addEventListener('click',()=>openWindow('arcade'));};
+  $('.vault-form',body).addEventListener('submit',e=>{e.preventDefault();if(stage>=3)return;const input=$('#vault-answer',body);if(input.value.trim().toLowerCase()===challenges[stage][3]){stage++;try{localStorage.setItem('josemi-vault',stage);}catch{}input.value='';$('.vault-feedback',body).textContent=stage===3?'Bóveda abierta. Bienvenido al otro lado.':'Llave correcta. Siguiente cerradura.';render();}else $('.vault-feedback',body).textContent='Esa llave no encaja. Prueba con la pista.';});$('.vault-hint',body).onclick=()=>{$('.vault-feedback',body).textContent=challenges[stage]?.[2]||'';};render();
+}};
+ICONS.push('easter');currentUser.apps.push('easter');
+
+// Original raycaster, no external assets or downloads required.
+Apps.arcade.size=[940,650];Apps.tetris.size=[620,700];Apps.pacman.size=[650,650];Apps.easter.size=[740,740];
+
+/* === END upgrade.js === */
+
+;
+/* === BEGIN platformer.js === */
+'use strict';
+// Juego de plataformas original: las colisiones y la simulación están separadas del dibujo.
+// NIVELES: datos de tres mundos. Coordenadas en bloques de 32 píxeles, huecos, tuberías, plataformas y enemigos.
+const PLATFORM_LEVELS=[
+  {name:'01 / Jardines del amanecer',sky:['#9ce2ef','#e9f9d3'],ground:'#b67545',grass:'#72bc61',gaps:[[24,27],[47,50],[76,79]],pipes:[18,38,64,86],platforms:[[9,7,4],[30,7,4],[53,6,4],[69,7,3]],enemies:[14,33,42,59,70,88]},
+  {name:'02 / La mina de cristal',sky:['#111c37','#31516c'],ground:'#536780',grass:'#80e7d0',gaps:[[22,25],[43,46],[67,70],[83,86]],pipes:[16,36,58,91],platforms:[[8,7,4],[28,6,4],[49,7,4],[74,6,4]],enemies:[12,30,39,52,63,77,92]},
+  {name:'03 / Observatorio nocturno',sky:['#171c3b','#765387'],ground:'#785875',grass:'#e7acaa',gaps:[[23,26],[44,47],[65,68],[85,88]],pipes:[17,36,57,78,93],platforms:[[8,7,4],[29,6,4],[50,7,4],[72,6,4]],enemies:[13,31,41,53,61,74,81,94]}
+];
+// COLISIÓN AABB: dos rectángulos se tocan si sus intervalos horizontal y vertical se superponen.
+function platformOverlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
+// CREAR MUNDO: convierte los datos en objetos jugables; al pasar nivel conserva puntos, monedas y vidas.
+function createPlatformWorld(level=0,carry={}){
+  const spec=PLATFORM_LEVELS[level],tiles=[];
+  for(let x=0;x<100;x++)if(!spec.gaps.some(([a,b])=>x>=a&&x<b))tiles.push({x:x*32,y:320,w:32,h:64,type:'ground'});
+  for(const x of spec.pipes)tiles.push({x:x*32,y:256,w:48,h:64,type:'pipe'});
+  for(const [x,y,len] of spec.platforms)for(let i=0;i<len;i++)tiles.push({x:(x+i)*32,y:y*32,w:32,h:24,type:i===1?'question':'brick',used:false});
+  const coins=[];for(let x=7;x<95;x+=3)if(!spec.gaps.some(([a,b])=>x>=a&&x<b))coins.push({x:x*32+8,y:spec.pipes.some(p=>Math.abs(x-p)<2)?208:270,w:16,h:22,taken:false});
+  for(const [x,y,len] of spec.platforms)for(let i=0;i<len;i++)coins.push({x:(x+i)*32+8,y:y*32-40,w:16,h:22,taken:false});
+  return {level,spec,tiles,coins,enemies:spec.enemies.map(x=>({x:x*32,y:294,w:26,h:26,vx:-45-level*10,alive:true})),player:{x:64,y:270,w:22,h:30,vx:0,vy:0,ground:false,coyote:0,buffer:0,invincible:0,shield:false},score:carry.score||0,lives:carry.lives??3,coinCount:carry.coinCount||0,checkpoint:64,checkpointSet:false,time:180,elapsed:0,camera:0,status:'ready',jumpHeld:false,particles:[]};
+}
+// DAÑO: el escudo absorbe un golpe; sin escudo se pierde una vida y se vuelve al punto de control.
+function platformDamage(world){
+  const p=world.player;if(p.invincible>0)return;
+  if(p.shield){p.shield=false;p.invincible=2;return;}
+  world.lives--;if(world.lives<=0){world.status='lost';return;}
+  Object.assign(p,{x:world.checkpoint,y:260,vx:0,vy:0,ground:false,coyote:0,buffer:0,invincible:2});world.time=Math.max(60,world.time);
+}
+// FÍSICA: un paso pequeño aplica aceleración, gravedad, colisiones, monedas, enemigos y meta.
+function stepPlatform(world,input,dt){
+  if(world.status!=='playing')return;dt=Math.min(dt,.025);world.elapsed+=dt;world.time-=dt;
+  const p=world.player,wasY=p.y;
+  p.invincible=Math.max(0,p.invincible-dt);p.coyote=p.ground?.1:Math.max(0,p.coyote-dt);p.buffer=Math.max(0,p.buffer-dt);
+  if(input.jump&&!world.jumpHeld)p.buffer=.12;world.jumpHeld=!!input.jump;
+  const direction=(input.right?1:0)-(input.left?1:0),target=direction*(input.run?310:245);
+  // Aceleración suavizada: acercamos velocidad actual a la deseada, evitando empezar y frenar de golpe.
+  p.vx+=Math.max(-1500*dt,Math.min(1500*dt,target-p.vx));
+  // Coyote time permite saltar justo al salir del borde; buffer recuerda una pulsación poco antes de aterrizar.
+  if(p.buffer>0&&p.coyote>0){p.vy=-700;p.ground=false;p.buffer=0;p.coyote=0;}
+  if(!input.jump&&p.vy<-250)p.vy=-250;p.vy=Math.min(820,p.vy+1700*dt);
+  // Resolvemos primero el eje horizontal y después el vertical: así distinguimos pared, suelo y techo.
+  p.x+=p.vx*dt;p.x=Math.max(0,Math.min(3180-p.w,p.x));
+  for(const tile of world.tiles)if(platformOverlap(p,tile)){if(p.vx>0)p.x=tile.x-p.w;else if(p.vx<0)p.x=tile.x+tile.w;p.vx=0;}
+  p.y+=p.vy*dt;p.ground=false;
+  for(const tile of world.tiles)if(platformOverlap(p,tile)){
+    if(p.vy>=0){p.y=tile.y-p.h;p.ground=true;}else{p.y=tile.y+tile.h;if(tile.type==='question'&&!tile.used){tile.used=true;p.shield=true;world.score+=200;}}
+    p.vy=0;
+  }
+  // Monedas: se marcan como tomadas; nunca suman dos veces. Cada 50 monedas regalan una vida.
+  for(const coin of world.coins)if(!coin.taken&&platformOverlap(p,coin)){coin.taken=true;world.score+=100;world.coinCount++;world.particles.push({x:coin.x,y:coin.y,life:.6});if(world.coinCount%50===0)world.lives++;}
+  // Enemigos: patrullan entre bordes y tuberías. Caer sobre ellos rebota; tocarlos de lado causa daño.
+  for(const e of world.enemies){if(!e.alive)continue;const nx=e.x+e.vx*dt,next={...e,x:nx};
+    const hasFloor=world.tiles.some(t=>t.type==='ground'&&nx+e.w/2>=t.x&&nx+e.w/2<t.x+t.w);
+    if(!hasFloor||world.tiles.some(t=>t.type==='pipe'&&platformOverlap(next,t)))e.vx=-e.vx;else e.x=nx;
+    if(platformOverlap(p,e)){if(p.vy>0&&wasY+p.h<=e.y+10){e.alive=false;p.vy=-420;world.score+=200;}else platformDamage(world);}
+  }
+  // Progresión: bandera intermedia fija el punto de control y la final completa el mundo.
+  if(p.x>1600&&!world.checkpointSet){world.checkpoint=1600;world.checkpointSet=true;world.score+=250;}
+  if(p.y>440){p.shield=false;p.invincible=0;platformDamage(world);}
+  if(world.time<=0){p.shield=false;p.invincible=0;platformDamage(world);world.time=180;}
+  if(p.x>3100&&world.status==='playing'){world.score+=Math.floor(world.time)*5+500;world.status=world.level===2?'won':'complete';}
+  world.camera=Math.max(0,Math.min(3200-704,p.x-240));world.particles=world.particles.filter(s=>(s.life-=dt)>0);world.particles.forEach(s=>s.y-=dt*65);
+}
+// APLICACIÓN: registra el juego en Apps. render crea la ventana; bind conecta Canvas, botones y teclado.
+Apps.mario={title:'Mario Bros · JOSEMI Run',icon:'🍄',size:[920,720],render:()=>`<div class="game platform-game"><header class="platform-header"><div><span class="card-kicker">JOSEMI ARCADE / ORIGINAL FAN GAME</span><h2>JOSEMI RUN<span>Inspirado en Super Mario Bros.</span></h2></div><span class="platform-world">01 / 03</span></header><div class="platform-hud" aria-live="off"></div><canvas class="platform-canvas" width="704" height="384" aria-label="Juego de plataformas: flechas para moverse, espacio para saltar"></canvas><div class="platform-actions"><button class="btn btn--accent platform-start">JUGAR</button><button class="btn platform-pause" disabled>PAUSA</button><span>← → / A D mover · ESPACIO saltar · SHIFT correr · P pausa</span></div><div class="platform-touch"><button class="btn" data-control="left">←</button><button class="btn" data-control="right">→</button><button class="btn" data-control="run">CORRER</button><button class="btn" data-control="jump">SALTAR ↑</button></div><p class="platform-note">Tres mundos originales. Pisa enemigos, busca bloques ? y alcanza la bandera. Punto de control a mitad de cada mundo. Gráficos y niveles propios; homenaje a Super Mario Bros.</p></div>`,bind(body,win){
+  const cv=$('.platform-canvas',body),ctx=cv.getContext('2d'),start=$('.platform-start',body),pauseButton=$('.platform-pause',body),keys=new Set();let world=createPlatformWorld(),raf=0,last=null,accumulator=0,closed=false,hudKey='';
+  const input=()=>({left:keys.has('a')||keys.has('arrowleft')||keys.has('left'),right:keys.has('d')||keys.has('arrowright')||keys.has('right'),jump:keys.has(' ')||keys.has('w')||keys.has('arrowup')||keys.has('jump'),run:keys.has('shift')||keys.has('run')});
+  // MARCADOR: muestra datos del mundo sin mezclar el dibujo con la lógica de la partida.
+  function hud(){const key=[world.score,world.coinCount,world.lives,Math.ceil(world.time),Math.floor(world.player.x/31),world.level].join(':');if(key===hudKey)return;hudKey=key;$('.platform-hud',body).innerHTML=`<span>PUNTOS <b>${String(world.score).padStart(6,'0')}</b></span><span>MONEDAS <b>◈ ${world.coinCount}</b></span><span>VIDAS <b>♥ ${world.lives}</b></span><span>TIEMPO <b>${Math.ceil(world.time)}</b></span><span>RUTA <b>${Math.min(100,Math.floor(world.player.x/31))}%</b></span>`;$('.platform-world',body).textContent=world.spec.name;}
+  function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h);}
+  // DIBUJO: capas de cielo, montañas, suelo, objetos y personaje. La cámara resta su posición al mundo.
+  function draw(){
+    const gradient=ctx.createLinearGradient(0,0,0,384);gradient.addColorStop(0,world.spec.sky[0]);gradient.addColorStop(1,world.spec.sky[1]);ctx.fillStyle=gradient;ctx.fillRect(0,0,704,384);
+    const camera=world.camera,t=world.elapsed;
+    if(world.level>0)for(let i=0;i<40;i++)rect((i*139-camera*.12+5000)%750,12+i*37%170,2,2,'#e5fcff');
+    for(let i=0;i<9;i++){const x=i*180-camera*.25;ctx.fillStyle=world.level===0?'#81caa1':world.level===1?'#314960':'#715981';ctx.beginPath();ctx.moveTo(x-120,320);ctx.lineTo(x,145+i%3*25);ctx.lineTo(x+140,320);ctx.fill();}
+    if(world.level===0)for(let i=0;i<6;i++){const x=(i*210-camera*.14+1500)%1400-150;rect(x,48+i%3*24,80,15,'#f7fcf2');rect(x+16,37+i%3*24,42,16,'#f7fcf2');}
+    ctx.save();ctx.translate(-Math.round(camera),0);
+  // Escenario: solo dibujamos los bloques cercanos a la cámara; los demás siguen en la simulación.
+    for(const tile of world.tiles){if(tile.x<camera-64||tile.x>camera+740)continue;
+      if(tile.type==='ground'){rect(tile.x,tile.y,32,64,world.spec.ground);rect(tile.x,tile.y,32,7,world.spec.grass);rect(tile.x+3,tile.y+18,7,4,'#ffffff20');rect(tile.x+17,tile.y+41,9,4,'#00000020');}
+      else if(tile.type==='pipe'){rect(tile.x,tile.y,48,64,'#246951');rect(tile.x+5,tile.y,9,64,'#59ba83');rect(tile.x-4,tile.y,56,14,'#43a771');rect(tile.x,tile.y+2,48,3,'#99dda0');}
+      else{rect(tile.x,tile.y,31,24,tile.used?'#806e65':tile.type==='question'?'#ffcf61':'#b66b51');rect(tile.x+3,tile.y+3,25,2,'#ffffff50');ctx.fillStyle='#fff2ba';ctx.font='bold 18px monospace';if(tile.type==='question'&&!tile.used)ctx.fillText('?',tile.x+10,tile.y+19);else rect(tile.x+1,tile.y+12,29,2,'#00000025');}
+    }
+    for(const coin of world.coins)if(!coin.taken&&coin.x>camera-32&&coin.x<camera+740){const w=5+Math.abs(Math.sin(t*5+coin.x))*11;rect(coin.x+8-w/2,coin.y,w,20,'#ffc857');rect(coin.x+8-w/2+2,coin.y+3,2,12,'#fff4bf');}
+    for(const e of world.enemies)if(e.alive){rect(e.x+2,e.y+4,22,17,'#955d54');rect(e.x+6,e.y,14,7,'#bd8b72');rect(e.x+4,e.y+10,5,5,'#fff5da');rect(e.x+17,e.y+10,5,5,'#fff5da');rect(e.x+6,e.y+11,2,3,'#292c40');rect(e.x+18,e.y+11,2,3,'#292c40');rect(e.x+Math.sin(t*9)*2,e.y+23,10,3,'#352e40');rect(e.x+16,e.y+23,10,3,'#352e40');}
+    for(const [x,on] of [[1600,world.checkpointSet],[3120,true]]){rect(x,153,4,167,'#e9f8e5');rect(x+4,158,33,22,on?'#ff7479':'#8e9bab');rect(x+8,162,4,4,'#fff7de');}
+    rect(3150,224,48,96,'#687584');rect(3160,209,12,16,'#687584');rect(3180,209,12,16,'#687584');rect(3165,288,18,32,'#263340');
+  // Personaje: los rectángulos forman un sprite propio; el parpadeo indica inmunidad tras recibir daño.
+    const p=world.player;if(!p.invincible||Math.floor(t*14)%2){const x=p.x,y=p.y,bob=p.ground&&Math.abs(p.vx)>20?Math.sin(t*18)*2:0;
+      rect(x+3,y,17,5,'#ef6676');rect(x,y+5,23,4,'#ef6676');rect(x+5,y+9,14,9,'#ffd9a0');rect(x+16,y+10,3,4,'#34384a');rect(x+2,y+10,4,7,'#5e4550');rect(x+3,y+18,17,8,'#5d91c2');rect(x+1,y+18,5,6,'#ef6676');rect(x+17,y+18,5,6,'#ef6676');rect(x+4,y+26,6,4+bob,'#354359');rect(x+14,y+26,6,4-bob,'#354359');
+      if(p.shield){ctx.strokeStyle='#c6fff4';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x+11,y+15,24,0,Math.PI*2);ctx.stroke();}}
+    for(const s of world.particles){ctx.globalAlpha=s.life/.6;ctx.fillStyle='#fff4a5';ctx.font='bold 12px monospace';ctx.fillText('+100',s.x,s.y);}ctx.globalAlpha=1;ctx.restore();
+    if(world.status!=='playing'){const titles={ready:'UNA NUEVA AVENTURA',paused:'PAUSA',complete:'MUNDO COMPLETADO',won:'LOS TRES MUNDOS SON TUYOS',lost:'FIN DE LA PARTIDA'};gameOverlay(ctx,cv,titles[world.status],world.status==='ready'?'JUGAR para comenzar':world.status==='complete'?'SIGUIENTE MUNDO para continuar':world.status==='paused'?'P o CONTINUAR para volver':'NUEVA PARTIDA para volver a jugar');}
+    hud();
+  }
+  // BUCLE: acumula tiempo y simula a 120 pasos por segundo. Dibuja una vez por fotograma y se detiene en pausa.
+  function loop(now){raf=0;if(closed)return;if(world.status==='playing'){if(last!==null)accumulator+=Math.min(.08,(now-last)/1000);last=now;while(accumulator>=1/120){stepPlatform(world,input(),1/120);accumulator-=1/120;}draw();if(world.status==='playing')raf=requestAnimationFrame(loop);else{keys.clear();last=null;recordScore('mario',world.score);start.textContent=world.status==='complete'?'SIGUIENTE MUNDO':'NUEVA PARTIDA';pauseButton.disabled=true;}}}
+  // CONTINUAR: reinicia el reloj del bucle para que la pausa no cuente como tiempo jugado.
+  function resume(){world.status='playing';last=null;accumulator=0;pauseButton.disabled=false;pauseButton.textContent='PAUSA';if(!raf)raf=requestAnimationFrame(loop);}
+  // PAUSA: cancela requestAnimationFrame y limpia teclas pulsadas para no dejar al personaje moviéndose.
+  function pause(){if(world.status==='playing'){world.status='paused';cancelAnimationFrame(raf);raf=0;last=null;keys.clear();pauseButton.textContent='CONTINUAR';draw();}else if(world.status==='paused')resume();}
+  start.onclick=()=>{win.focus();cancelAnimationFrame(raf);raf=0;world=world.status==='complete'?createPlatformWorld(world.level+1,world):createPlatformWorld();keys.clear();resume();start.textContent='REINICIAR';draw();};pauseButton.onclick=()=>{win.focus();pause();};
+  // ENTRADA: guarda teclas activas en un Set. Soltar la tecla la elimina; táctil usa el mismo mecanismo.
+  function down(e){const key=e.key.toLowerCase();if(['arrowleft','arrowright','arrowup','a','d','w',' ','shift','p'].includes(key)){e.preventDefault();if(key==='p'){if(!e.repeat)pause();}else{keys.add(key);if([' ','w','arrowup'].includes(key)&&!e.repeat)world.player.buffer=.12;}}}
+  const up=e=>keys.delete(e.key.toLowerCase());win.tabIndex=0;win.addEventListener('keydown',down);window.addEventListener('keyup',up);cv.onclick=()=>win.focus();
+  for(const button of $$('[data-control]',body)){button.onpointerdown=e=>{e.preventDefault();win.focus();button.setPointerCapture(e.pointerId);keys.add(button.dataset.control);};for(const event of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(event,()=>keys.delete(button.dataset.control));}
+  win.__cleanup=()=>{closed=true;recordScore('mario',world.score);cancelAnimationFrame(raf);keys.clear();win.removeEventListener('keydown',down);window.removeEventListener('keyup',up);};attachGameLifecycle(win,()=>{if(world.status==='playing')pause();});draw();
+}};
+
+/* === END platformer.js === */
+
+;
+/* === BEGIN shell.js === */
+'use strict';
+// Browser-native interpretation of per-character terminal animation.
+// PREFERENCIAS: valores por defecto y validación de lo guardado para evitar opciones inexistentes.
+const SHELL_DEFAULTS={theme:'violet',cursor:'system',cursorSize:24,bootEffect:'cinematic',intensity:'full',idle:0,grain:true,atmosphere:'storm',weatherDensity:55,weatherSpeed:1,welcomeVisible:true};
+for(const [key,value] of Object.entries(SHELL_DEFAULTS))if(state[key]===undefined)state[key]=value;
+// TEMAS: nombre, color principal y fondo. El CSS usa variables para cambiar toda la interfaz.
+const THEMES={night:{name:'Terminal nocturna',accent:'#8be9a8',bg:'#090e14'},paper:{name:'Estudio de papel',accent:'#a65d24',bg:'#eee8d8'},violet:{name:'Órbita violeta',accent:'#c3a6ff',bg:'#100e1a'},ocean:{name:'Océano profundo',accent:'#75d5ec',bg:'#08161d'}};
+Object.assign(THEMES,{sunset:{name:'Atardecer coral',accent:'#ffae91',bg:'#302133'},glacier:{name:'Glaciar azul',accent:'#3879b5',bg:'#e0edf2'},copper:{name:'Cobre cálido',accent:'#f5bc7c',bg:'#292119'}});
+const EFFECTS={cinematic:'Singularidad → órbita → firma',storm:'Tormenta eléctrica //',orbit:'Anillos orbitales',laser:'Grabado láser',decrypt:'Descifrado',beams:'Barrido de luz',rain:'Lluvia de caracteres',gather:'Convergencia',random:'Aleatorio'};
+const ATMOSPHERES={none:'Sin animación',matrixBlue:'Matrix / verde + cian',matrixDepth:'Matrix / profundidad',storm:'Tormenta //',rain:'Lluvia diagonal',aurora:'Aurora de ondas',stars:'Constelaciones',terrain:'Paisaje topográfico',matrix:'Matrix / verde clásico'};
+if(state.shellVersion!==4){if(state.theme==='night'||state.theme===undefined){state.theme='violet';state.accent=THEMES.violet.accent;state.bg=THEMES.violet.bg;}state.bootEffect='cinematic';state.shellVersion=4;}
+if(!ATMOSPHERES[state.atmosphere])state.atmosphere='storm';
+state.weatherDensity=Math.max(15,Math.min(90,Number(state.weatherDensity)||55));state.weatherSpeed=[.5,1,1.5].includes(Number(state.weatherSpeed))?Number(state.weatherSpeed):1;
+const CURSORS={system:'Sistema',pixel:'Pixel',terminal:'Terminal',crosshair:'Mira',arrow:'Flecha clara'};
+if(!THEMES[state.theme])state.theme='night';if(!CURSORS[state.cursor])state.cursor='system';if(!EFFECTS[state.bootEffect])state.bootEffect='beams';
+state.cursorSize=[20,24,32].includes(Number(state.cursorSize))?Number(state.cursorSize):24;
+if(!['full','calm'].includes(state.intensity))state.intensity='full';state.idle=[0,60,180].includes(Number(state.idle))?Number(state.idle):0;
+// ICONOS SVG: pequeños dibujos vectoriales que comparten tamaño, trazo y paleta.
+const ICON_PATHS={
+ readme:'<path d="M13 8h23l9 9v34H13z" fill="#dfe5d6"/><path d="M36 8v10h9M20 26h18M20 33h18M20 40h11"/>',
+ about:'<rect x="8" y="11" width="48" height="40" rx="5" fill="#b9d3bc"/><circle cx="23" cy="27" r="7" fill="#edf0de"/><path d="M13 43q10-16 20 0M38 25h10M38 33h10M38 41h7"/>',
+ projects:'<path d="M7 17h19l5 6h26v29H7z" fill="#d9a555"/><path d="M7 29l6-5h45l-5 28H7z" fill="#f3c778"/>',
+ skills:'<path d="M34 6L12 34h17l-3 24 25-33H34z" fill="#edc16c"/>',
+ terminal:'<rect x="7" y="10" width="50" height="43" rx="5" fill="#213a36"/><path d="M7 21h50M17 30l8 7-8 7M31 44h14" stroke="#adf0b7"/><circle cx="14" cy="16" r="1" fill="#ffd080"/>',
+ contact:'<rect x="7" y="15" width="50" height="35" rx="4" fill="#a9c6dd"/><path d="M8 17l24 19 24-19M8 49l17-17M56 49L39 32"/>',
+ arcade:'<path d="M18 8h30l-2 23 8 21H10l8-21z" fill="#bda9d5"/><rect x="23" y="14" width="20" height="15" rx="2" fill="#203032"/><path d="M22 42h10M27 37v10"/><circle cx="41" cy="41" r="3" fill="#e6aa64"/>',
+ settings:'<path d="M27 7h10l2 8 7 3 8-2 5 9-6 6v8l6 5-5 9-8-2-7 4-2 7H27l-2-7-7-4-8 2-5-9 6-5v-8l-6-6 5-9 8 2 7-3z" fill="#a7b9c3"/><circle cx="32" cy="34" r="10" fill="#e8eadc"/>',
+ system:'<rect x="6" y="10" width="52" height="35" rx="4" fill="#aec9bc"/><rect x="11" y="15" width="42" height="25" fill="#243b39"/><path d="M17 32h6l4-9 7 13 5-8h9M27 45v9M37 45v9M20 55h24" stroke="#9adeaa"/>',
+ trash:'<path d="M17 19h30l-3 35H20z" fill="#9fb2b5"/><path d="M13 19h38M25 11h14v8M26 26v20M37 26v20"/>',
+ easter:'<rect x="10" y="24" width="44" height="31" rx="4" fill="#d4b073"/><path d="M21 24v-8a11 11 0 0122 0v8" fill="none"/><circle cx="32" cy="38" r="4" fill="#263733"/><path d="M32 42v6"/>',
+ screensaver:'<rect x="7" y="10" width="50" height="36" rx="4" fill="#aac7d3"/><path d="M17 23l6 5-6 5M30 34h15M27 46v8M37 46v8M21 55h22"/>',
+ mario:'<path d="M9 32a23 23 0 0146 0z" fill="#ee8f91"/><path d="M21 32h22v19H21z" fill="#f4dbb4"/><circle cx="24" cy="23" r="5" fill="#fff4dc"/><circle cx="42" cy="25" r="4" fill="#fff4dc"/><path d="M27 38v5M37 38v5"/>',
+ pacman:'<path d="M48 17A23 23 0 1048 47L32 32z" fill="#efcb64"/><circle cx="31" cy="18" r="3" fill="#29312f"/>',
+ tetris:'<path d="M12 12h14v14h14V12h14v28H40v14H26V40H12z" fill="#c1a4d9"/><path d="M12 26h42M26 26v14M40 26v14"/>'
+};
+function osIcon(id){return `<svg class="os-icon os-icon--${id}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="#293934" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round">${ICON_PATHS[id]||ICON_PATHS.projects}</g></svg>`;}
+for(const id of Object.keys(ICON_PATHS))if(Apps[id])Apps[id].icon=osIcon(id);
+
+// CURSORES: genera un SVG y lo convierte en una URL de datos para la propiedad cursor del navegador.
+function cursorSVG(kind,size){const color=THEMES[state.theme].accent;const paths={pixel:`<path d="M3 2h4v4h4v4h4v4h4v4h-8v8H7V14H3z" fill="${color}" stroke="#17251f" stroke-width="2"/>`,terminal:`<path d="M10 3h12M16 3v26M10 29h12" stroke="${color}" stroke-width="3"/><path d="M11 5h10M18 5v22" stroke="#07100b"/>`,crosshair:`<path d="M16 1v10M16 21v10M1 16h10M21 16h10" stroke="${color}" stroke-width="2"/><rect x="13" y="13" width="6" height="6" fill="${color}"/>`,arrow:'<path d="M5 2v25l7-7 6 10 5-3-6-10h10z" fill="#f4f0df" stroke="#17241e" stroke-width="2"/>'};return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 32 32">${paths[kind]}</svg>`;}
+// APARIENCIA: aplica tema, textura, cursor y fondo al DOM. Los atributos data-* activan reglas CSS.
+function applyShell(){
+  document.body.dataset.theme=state.theme;document.body.dataset.intensity=state.intensity;document.body.classList.toggle('with-grain',!!state.grain);document.body.classList.toggle('immersive-desktop',!state.welcomeVisible);
+  const value=state.cursor==='system'?'auto':`url("data:image/svg+xml,${encodeURIComponent(cursorSVG(state.cursor,state.cursorSize))}") ${state.cursor==='crosshair'||state.cursor==='terminal'?Math.round(state.cursorSize/2):2} ${state.cursor==='crosshair'?Math.round(state.cursorSize/2):2}, auto`;
+  document.documentElement.style.setProperty('--os-cursor',value);document.documentElement.style.setProperty('--os-pointer',state.cursor==='system'?'pointer':value);document.documentElement.style.setProperty('--motion-ms',state.intensity==='calm'?'180ms':'400ms');
+  $('#shell-theme-name')?.replaceChildren(document.createTextNode(THEMES[state.theme].name));
+  syncAtmosphere();
+}
+const baseApplyTheme=applyTheme;applyTheme=function(){baseApplyTheme();applyShell();};
+function chooseTheme(id){if(!THEMES[id])return;state.theme=id;state.accent=THEMES[id].accent;state.bg=THEMES[id].bg;applyTheme();save();}
+
+// MINIMIZAR: mide ventana y botón del dock, anima entre ambos y después oculta la ventana.
+function minimizeWithMotion(win,finish){
+  if(win.classList.contains('minimizing'))return;
+  if(state.motion||!win.animate){finish();return;}
+  const dock=$(`.tb-app[data-id="${win.dataset.id}"]`),start=win.getBoundingClientRect(),end=dock?.getBoundingClientRect();
+  if(!end){finish();return;}win.classList.add('minimizing');
+  win.__transition=win.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${end.x-start.x}px,${end.y-start.y}px) scale(${end.width/start.width},${end.height/start.height})`,opacity:0}],{duration:state.intensity==='calm'?180:360,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
+  win.__transition.finished.catch(()=>{}).then(()=>{finish();win.__transition?.cancel();win.__transition=null;win.classList.remove('minimizing');});
+}
+// MAXIMIZAR: técnica FLIP. Mide antes y después y anima la diferencia para evitar un salto brusco.
+function maximizeWithMotion(win){
+  win.__transition?.cancel();const before=win.getBoundingClientRect();win.classList.toggle('maximized');const after=win.getBoundingClientRect();
+  if(state.motion||!win.animate)return;
+  win.__transition=win.animate([{transform:`translate(${before.x-after.x}px,${before.y-after.y}px) scale(${before.width/after.width},${before.height/after.height})`},{transform:'none'}],{duration:state.intensity==='calm'?180:420,easing:'cubic-bezier(.16,1,.3,1)'});
+}
+
+// Text coordinates stay on a fixed grid. Animation is based on elapsed time,
+// so 60 Hz and 120 Hz displays settle at the same moment.
+// AZAR ESTABLE: el mismo número devuelve siempre el mismo ruido; los caracteres no vibran sin control.
+// Ajusta la firma al ancho real de su contenedor; sirve también al girar un móvil.
+// Courier es local: el dibujo no cambia de medidas al llegar una fuente de Google.
+function fitAsciiText(el){
+  const container=el.closest('.boot-shell__body')||el;
+  const available=Math.max(1,container.clientWidth-(el===container?32:48));
+  const columns=Math.max(...NAME_ART.map(row=>row.length));
+  el.style.setProperty('--ascii-size',`${Math.max(4,Math.min(18,available/(columns*.61)))}px`);
+}
+function seededNoise(n){const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x);}
+// FOTOGRAMA ASCII: construye una rejilla vacía y coloca caracteres según el efecto y progreso de 0 a 1.
+function signatureFrame(art,effect,p){
+  const h=art.length,w=Math.max(...art.map(l=>l.length)),grid=Array.from({length:h},()=>Array(w).fill(' '));
+  if(p>=1)return art.join('\n');
+  const put=(x,y,ch)=>{x=Math.round(x);y=Math.round(y);if(x>=0&&x<w&&y>=0&&y<h)grid[y][x]=ch;};
+  if(effect==='cinematic'){
+    // Tres actos: ruido digital, partículas que convergen y una onda que fija la firma.
+    if(p<.24){const q=p/.24;for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(seededNoise(x+y*w+Math.floor(p*90))>.64-q*.12)put(x,y,'01/<>*'[Math.floor(seededNoise(x+y*71+Math.floor(p*70))*6)]);return grid.map(row=>row.join('')).join('\n');}
+    if(p<.70){effect='orbit';p=(p-.24)/.46;}else{const q=(p-.70)/.30;for(let y=0;y<h;y++)for(let x=0;x<art[y].length;x++){const ch=art[y][x];if(ch===' ')continue;const distance=Math.abs(x-w/2)/(w/2),front=q*1.35;if(distance<front-.08)put(x,y,ch);else if(distance<front+.06)put(x,y,'▓');else put(x,y,seededNoise(x+y*w+Math.floor(q*30))>.8?'+':ch);}return grid.map(row=>row.join('')).join('\n');}
+  }
+  if(effect==='storm'){
+    for(let i=0;i<w;i++){const y=Math.floor((p*24+seededNoise(i)*h*3)%h);if(seededNoise(i)> .62)put(i,y,'/');}
+    const strike=Math.floor(p*4),phase=(p*4)%1,root=seededNoise(strike+400)*w;
+    if(phase<.35)for(let y=0;y<h;y++){const x=root+Math.sin(y*2+strike)*3;put(x,y,'/');put(x+1,y,'/');}
+  }
+  const scan=p*(w+9);
+  for(let y=0;y<h;y++)for(let x=0;x<art[y].length;x++){
+    const ch=art[y][x];if(ch===' ')continue;const seed=y*w+x,n=seededNoise(seed);
+    if(effect==='orbit'){
+      const q=Math.max(0,Math.min(1,(p-n*.16)/.78)),ease=q*q*(3-2*q),angle=n*Math.PI*2+(1-q)*Math.PI*3;
+      const ox=w/2+Math.cos(angle)*(w*.46),oy=h/2+Math.sin(angle)*(h*.43);
+      put(ox+(x-ox)*ease,oy+(y-oy)*ease,q>.84?ch:['.','+','*'][seed%3]);
+    }else if(effect==='laser'){
+      if(x<scan-3)put(x,y,ch);else if(Math.abs(x-scan)<2)put(x,y,'#');
+      else if(x<scan+7&&n>.76)put(x,y,['.','+','*'][seed%3]);
+    }else if(effect==='decrypt'){
+      const threshold=n*.65+y/h*.13;put(x,y,p>threshold?ch:'01/+<>*'[Math.floor(seededNoise(seed+Math.floor(p*60))*7)]);
+    }else if(effect==='storm'&&(p>.82||n<p*.85))put(x,y,ch);
+  }
+  if(effect==='laser'&&scan<w)for(let y=0;y<h;y++)put(scan,y,'|');
+  return grid.map(row=>row.join('')).join('\n');
+}
+// EFECTOS: usa la rejilla para lluvia, barrido o convergencia. En progreso 1 devuelve la firma exacta.
+function asciiFrame(art,effect,progress){
+  const height=art.length,width=Math.max(...art.map(l=>l.length)),grid=Array.from({length:height},()=>Array(width).fill(' '));progress=Math.max(0,Math.min(1,progress));
+  if(['cinematic','storm','orbit','laser','decrypt'].includes(effect))return signatureFrame(art,effect,progress);
+  for(let y=0;y<height;y++)for(let x=0;x<art[y].length;x++){
+    const ch=art[y][x];if(ch===' ')continue;const seed=y*width+x,delay=seededNoise(seed)*.22,p=Math.max(0,Math.min(1,(progress-delay)/.72));
+    if(effect==='gather'){const ease=1-(1-p)**3,ox=Math.round(x+(seededNoise(seed+9)*width-x)*(1-ease)),oy=Math.round(y+(seededNoise(seed+21)*height-y)*(1-ease));grid[Math.max(0,Math.min(height-1,oy))][Math.max(0,Math.min(width-1,ox))]=p>.9?ch:'·';}
+    else if(effect==='rain'){const fall=Math.max(0,Math.min(1,(progress-x/width*.2)/.72));const cy=Math.round(-height+(y+height)*fall);if(cy>=0)grid[cy][x]=fall>.97?ch:['0','1','│','╎'][Math.floor(seededNoise(seed+Math.floor(progress*35))*4)];}
+    else{const sweep=progress*(width+8);grid[y][x]=x<sweep-5?ch:x<sweep?['░','▒','▓'][Math.min(2,Math.floor((sweep-x)/2))]:' ';}
+  }
+  return progress>=1?art.join('\n'):grid.map(row=>row.join('')).join('\n');
+}
+// ANIMACIÓN: requestAnimationFrame aporta el tiempo real; cancel() termina el bucle y resuelve la promesa.
+function animateAscii(el,effect,{duration=1900,signal=()=>false}={}){
+  if(typeof fitAsciiText==='function')fitAsciiText(el);
+  if(effect==='random')effect=['cinematic','storm','orbit','laser','decrypt','beams','rain','gather'][Math.floor(Math.random()*8)];let handle=0,resolveDone,settled=false,start=null,last=0;
+  const done=new Promise(resolve=>resolveDone=resolve);const end=value=>{if(settled)return;settled=true;cancelAnimationFrame(handle);resolveDone(value);};
+  const frame=now=>{if(signal()||!el.isConnected){end(false);return;}if(state.motion){el.textContent=NAME_ART.join('\n');end(true);return;}if(start===null)start=now;const p=Math.min(1,(now-start)/duration);if(now-last>28||p===1){el.textContent=asciiFrame(NAME_ART,effect,p);last=now;}if(p===1)end(true);else handle=requestAnimationFrame(frame);};
+  handle=requestAnimationFrame(frame);return {done,cancel:()=>end(false)};
+}
+let currentBootAnimation=null;
+// Arranque cancelable: las frases aparecen una a una; después se anima la firma.
+// Cada espera comprueba bootRun para que Saltar nunca deje otra intro en marcha.
+typeLoginArt=async function(){
+  currentBootAnimation?.cancel();const run=++bootRun;enteringOS=false;
+  const login=$('#login'),out=$('#bootTerminalOutput'),command=$('#bootCommand');
+  login.classList.remove('hidden','out');login.classList.add('boot-v5');login.dataset.phase='matrix';out.innerHTML='';command.textContent='';
+  const active=()=>run===bootRun&&!enteringOS;
+  const line=appendBoot('','matrix-message');
+  for(const text of ['Wake up, Neo','The Matrix has you']){
+    if(!active())return;
+    if(!await typeBootText(line,text,state.motion?0:state.intensity==='calm'?42:80,run))return;
+    await bootDelay(state.motion?900:1100);if(!active())return;
+    if(text==='Wake up, Neo'){while(line.textContent.length){line.textContent=line.textContent.slice(0,-1);if(!state.motion)await bootDelay(23);if(!active())return;}if(!state.motion)await bootDelay(320);}
+  }
+  if(!state.motion)await bootDelay(450);if(!active())return;
+  login.dataset.phase='signature';out.innerHTML='';appendBoot('JOSEMI-OS / PERSONAL COMPUTING','boot-dim');appendBoot('');
+  const logo=appendBoot('','boot-logo boot-logo--hero');
+  currentBootAnimation=animateAscii(logo,state.bootEffect,{duration:state.intensity==='calm'?2300:4600,signal:()=>!active()});
+  if(!await currentBootAnimation.done||!active())return;
+  appendBoot('\nJOSÉ MIGUEL MIRALLES GANDIA','boot-accent');appendBoot('BUILD · LEARN · PLAY','boot-dim');
+  command.textContent='Tu universo está listo.';await bootDelay(state.motion?1100:1600);if(active())enterOS();
+};
+
+// AJUSTES: render crea los controles; bind lee sus cambios, actualiza state, aplica el tema y guarda.
+Apps.settings={title:'Ajustes',icon:osIcon('settings'),size:[850,710],render:()=>`<div class="preferences"><aside class="preferences-nav"><span class="card-kicker">PERSONALIZA TU ESPACIO</span><h2>Ajustes</h2><a href="#pref-theme">01 / Apariencia</a><a href="#pref-cursor">02 / Cursor</a><a href="#pref-motion">03 / Movimiento</a><a href="#pref-screen">04 / Salvapantallas</a><div class="preferences-note">Se guarda en este navegador.<br>Tu escritorio, a tu manera.</div></aside><div class="preferences-main">
+  <section id="pref-theme"><span class="card-kicker">01 / APARIENCIA</span><h3>Un ambiente para cada idea.</h3><div class="theme-picker">${Object.entries(THEMES).map(([id,t])=>`<button data-theme="${id}" class="theme-option ${state.theme===id?'selected':''}" aria-pressed="${state.theme===id}"><span class="theme-mini" style="--sample-bg:${t.bg};--sample-color:${t.accent}"><i></i><b>J</b><em></em></span>${t.name}</button>`).join('')}</div><label class="pref-row">Color de acento<input class="accent-input" type="color" value="${state.accent}" aria-label="Color de acento"></label><div class="weather-preferences"><span class="card-kicker">LIENZOS ASCII VIVOS</span><label class="pref-row">Fondo animado<select data-setting="atmosphere">${Object.entries(ATMOSPHERES).map(([id,label])=>`<option value="${id}">${label}</option>`).join('')}</select></label><label class="pref-row">Densidad<input type="range" min="15" max="90" step="5" data-setting="weatherDensity" aria-label="Densidad del fondo"></label><label class="pref-row">Velocidad<select data-setting="weatherSpeed"><option value="0.5">Contemplativa</option><option value="1">Natural</option><option value="1.5">Enérgica</option></select></label><p>Los rayos se dibujan con // y se ramifican entre la lluvia. El fondo descansa mientras juegas o cambias de pestaña.</p></div><label class="pref-row">Base del fondo<select data-setting="wp"><option value="0">Aurora</option><option value="1">Bosque</option><option value="2">Azul profundo</option><option value="3">Violeta</option><option value="4">Matrix</option></select></label></section>
+  <section id="pref-cursor"><span class="card-kicker">02 / CURSOR</span><h3>Elige cómo señalar el mundo.</h3><div class="cursor-picker">${Object.entries(CURSORS).map(([id,label])=>`<button data-cursor="${id}" class="cursor-option ${state.cursor===id?'selected':''}" aria-pressed="${state.cursor===id}"><span>${id==='system'?'↖':cursorSVG(id,30)}</span>${label}</button>`).join('')}</div><label class="pref-row">Tamaño<select data-setting="cursorSize"><option value="20">Pequeño</option><option value="24">Mediano</option><option value="32">Grande</option></select></label><div class="cursor-test">Prueba el cursor aquí. No hay círculo ni rastro.</div></section>
+  <section id="pref-motion"><span class="card-kicker">03 / MOVIMIENTO</span><h3>Que el sistema respire.</h3><label class="pref-row">Animación ASCII<select data-setting="bootEffect">${Object.entries(EFFECTS).map(([id,label])=>`<option value="${id}">${label}</option>`).join('')}</select></label><label class="pref-row">Intensidad<select data-setting="intensity"><option value="full">Expresiva</option><option value="calm">Suave</option></select></label><label class="pref-row">Reducir movimiento<input type="checkbox" data-setting="motion" ${state.motion?'checked':''}></label><label class="pref-row">Textura de papel<input type="checkbox" data-setting="grain" ${state.grain?'checked':''}></label><label class="pref-row">Sonidos del sistema<input type="checkbox" data-setting="sound" ${state.sound?'checked':''}></label><button class="btn preview-ascii">VER ANIMACIÓN ASCII ↗</button></section>
+  <section id="pref-screen"><span class="card-kicker">04 / SALVAPANTALLAS</span><h3>Arte cuando te tomas un descanso.</h3><label class="pref-row">Iniciar tras inactividad<select data-setting="idle"><option value="0">Solo manualmente</option><option value="60">1 minuto</option><option value="180">3 minutos</option></select></label><button class="btn start-saver">ABRIR SALVAPANTALLAS ↗</button></section></div></div>`,bind(body){
+  for(const el of $$('[data-setting]',body)){const key=el.dataset.setting;if(el.type!=='checkbox')el.value=String(state[key]);el.addEventListener(el.type==='range'?'input':'change',()=>{state[key]=el.type==='checkbox'?el.checked:['idle','wp','cursorSize','weatherDensity','weatherSpeed'].includes(key)?Number(el.value):el.value;applyTheme();save();});}
+  $$('[data-theme]',body).forEach(button=>button.onclick=()=>{chooseTheme(button.dataset.theme);$$('[data-theme]',body).forEach(b=>{const on=b===button;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',on);});$('.accent-input',body).value=state.accent;});
+  $$('[data-cursor]',body).forEach(button=>button.onclick=()=>{state.cursor=button.dataset.cursor;applyShell();save();$$('[data-cursor]',body).forEach(b=>{const on=b===button;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',on);});});
+  $('.accent-input',body).oninput=e=>{state.accent=e.target.value;applyTheme();save();};$('.preview-ascii',body).onclick=()=>openWindow('screensaver');$('.start-saver',body).onclick=()=>showScreensaver();
+}};
+// ASCII STUDIO: reproduce el efecto elegido; al cerrar cancela el bucle para liberar recursos.
+Apps.screensaver={title:'ASCII Studio',icon:osIcon('screensaver'),size:[780,560],render:()=>`<div class="ascii-studio"><span class="card-kicker">JOSEMI-OS / CHARACTER MOTION</span><h2>El texto también se mueve.</h2><pre class="ascii-stage" aria-label="Animación del nombre JOSEMI-OS"></pre><div class="ascii-actions">${Object.entries(EFFECTS).filter(([id])=>id!=='random').map(([id,name])=>`<button class="btn" data-effect="${id}">${name}</button>`).join('')}</div><p>Selecciona un efecto. Cada carácter encuentra su sitio.</p></div>`,bind(body,win){let animation;const play=effect=>{animation?.cancel();animation=animateAscii($('.ascii-stage',body),effect,{duration:state.intensity==='calm'?2200:4200});};$$('[data-effect]',body).forEach(b=>b.onclick=()=>play(b.dataset.effect));win.__cleanup=()=>animation?.cancel();play(state.bootEffect);}};
+ICONS.push('screensaver');currentUser.apps.push('screensaver');
+
+// Desktop icons use one consistent illustrated SVG family.
+// ACCESOS: botones con doble clic, Enter o un toque en móvil. Los iconos tienen etiquetas accesibles.
+buildIcons=function(){const container=$('#icons');container.innerHTML='';currentUser.apps.forEach((id,i)=>{const app=Apps[id];if(!app)return;const button=document.createElement('button');button.type='button';button.className='icon';button.dataset.id=id;button.style.setProperty('--icon-index',i);button.setAttribute('aria-label',`Abrir ${app.title}`);button.innerHTML=`<span class="glyph">${app.icon}</span><span class="lbl">${app.title}</span>`;button.onclick=()=>{if(matchMedia('(pointer: coarse)').matches)openWindow(id);else{$$('.icon').forEach(el=>el.classList.remove('sel'));button.classList.add('sel');}};button.ondblclick=()=>openWindow(id);button.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();openWindow(id);}};container.append(button);});};
+
+let saverAnimation=null,saverCycle=0,idleTimer=0,lastInput=Date.now();
+function hideScreensaver(){const overlay=$('#os-screensaver');if(!overlay||overlay.hidden)return;overlay.hidden=true;saverCycle++;saverAnimation?.cancel();lastInput=Date.now();$('#launch-saver')?.focus({preventScroll:true});}
+// SALVAPANTALLAS: encadena animaciones mientras el diálogo está abierto; salir invalida el ciclo.
+async function showScreensaver(){if($('#desktop').classList.contains('hidden')||!$('#shutdown').classList.contains('hidden'))return;const overlay=$('#os-screensaver');overlay.hidden=false;overlay.focus();const cycle=++saverCycle;let effectIndex=0;
+  do{saverAnimation=animateAscii($('.saver-art',overlay),['cinematic','storm','orbit','laser','decrypt'][effectIndex++%5],{duration:4200,signal:()=>cycle!==saverCycle||document.hidden});if(!await saverAnimation.done)break;if(state.motion)break;await bootDelay(1700);}while(cycle===saverCycle&&!overlay.hidden);
+}
+// ESCRITORIO: crea bienvenida, barra de herramientas y salvapantallas; registra actividad para el temporizador.
+function setupDesktop(){
+  // La bienvenida usa el mismo gestor de ventanas; no se dibuja ningún panel de fondo.
+  Apps.welcome={title:'Bienvenido a JOSEMI-OS',icon:osIcon('readme'),size:[660,500],render:()=>`<section class="welcome-window"><span class="card-kicker">TU ESCRITORIO PERSONAL</span><h2>Ideas en marcha.<br>Sistema en vivo.</h2><p>Soy José Miguel Miralles Gandia, estudiante de DAM. Estoy aprendiendo a construir webs, software y automatizaciones con HTML, CSS, JavaScript e IA.</p><p>Explora las aplicaciones del escritorio, mis proyectos y el Arcade. En JOSEMI Music puedes pedir canciones al asistente.</p><div class="welcome-actions"><button class="btn btn--accent" data-welcome-open="projects">VER PROYECTOS</button><button class="btn" data-welcome-open="about">SOBRE MÍ</button><button class="btn" id="welcome-read">YA LO HE LEÍDO · CERRAR</button></div></section>`,bind(body,win){const done=()=>{state.welcomeWindowRead=true;state.welcomeVisible=false;save();};win.__cleanup=done;$('#welcome-read',body).onclick=()=>WM.closeWindow('welcome');$$('[data-welcome-open]',body).forEach(button=>button.onclick=()=>{WM.closeWindow('welcome');openWindow(button.dataset.welcomeOpen);});}};
+  const welcomeObserver=new MutationObserver(()=>{if(!$('#desktop').classList.contains('hidden')){welcomeObserver.disconnect();if(!state.welcomeWindowRead)openWindow('welcome');}});welcomeObserver.observe($('#desktop'),{attributes:true,attributeFilter:['class']});
+  const toolbar=document.createElement('div');toolbar.className='shell-tools';toolbar.innerHTML='<button id="launch-search" title="Buscar aplicaciones · Ctrl+K">⌕ <span>Buscar</span><kbd>Ctrl K</kbd></button><button id="launch-saver" title="Salvapantallas ASCII">✦</button><button id="launch-settings" title="Ajustes">'+osIcon('settings')+'</button>';$('.desktop__topbar').insertBefore(toolbar,$('.desktop__status'));$('#launch-search').onclick=()=>togglePalette(true);$('#launch-saver').onclick=showScreensaver;$('#launch-settings').onclick=()=>openWindow('settings');
+  const saver=document.createElement('section');saver.id='os-screensaver';saver.hidden=true;saver.tabIndex=-1;saver.setAttribute('role','dialog');saver.setAttribute('aria-modal','true');saver.setAttribute('aria-label','Salvapantallas de JOSEMI');saver.innerHTML='<span class="saver-caption">JOSEMI-OS / AFTER HOURS</span><pre class="saver-art" aria-label="JOSEMI-OS"></pre><p>BUILD · LEARN · REPEAT</p><button class="btn saver-exit">VOLVER AL ESCRITORIO</button>';document.body.append(saver);$('.saver-exit',saver).onclick=hideScreensaver;saver.addEventListener('keydown',e=>{e.preventDefault();hideScreensaver();});saver.addEventListener('pointerdown',hideScreensaver);
+  document.addEventListener('pointermove',()=>{lastInput=Date.now();if(!saver.hidden)hideScreensaver();},{passive:true});document.addEventListener('keydown',()=>lastInput=Date.now());document.addEventListener('pointerdown',()=>lastInput=Date.now(),{passive:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)hideScreensaver();lastInput=Date.now();});
+  idleTimer=setInterval(()=>{if(state.idle&&!document.hidden&&!$('#desktop').classList.contains('hidden')&&saver.hidden&&Date.now()-lastInput>state.idle*1000&&!document.activeElement?.closest('.game')&&!$$('.window').some(w=>!w.classList.contains('minimized')&&w.querySelector('.game')))showScreensaver();},5000);
+  $('#desktop').addEventListener('pointermove',e=>{if(state.motion||state.intensity==='calm')return;const target=e.target.closest('.icon');if(!target)return;const rect=target.getBoundingClientRect();target.style.setProperty('--tilt-x',`${(e.clientY-rect.top-rect.height/2)/16}deg`);target.style.setProperty('--tilt-y',`${-(e.clientX-rect.left-rect.width/2)/16}deg`);},{passive:true});$('#icons').addEventListener('pointerout',e=>{const icon=e.target.closest('.icon');if(icon){icon.style.setProperty('--tilt-x','0deg');icon.style.setProperty('--tilt-y','0deg');}});
+}
+
+let paletteFocus=null,paletteIndex=0;
+// BUSCADOR: abre un diálogo con foco en el campo y devuelve el foco anterior al cerrar.
+function togglePalette(show){const modal=$('#command-palette');if(show){if($('#desktop').classList.contains('hidden'))return;paletteFocus=document.activeElement;modal.hidden=false;$('#palette-query').value='';paletteIndex=0;renderPalette();$('#palette-query').focus();}else{modal.hidden=true;paletteFocus?.focus({preventScroll:true});}}
+// RESULTADOS: filtra nombres e identificadores; cada botón abre la aplicación correspondiente.
+function renderPalette(){const query=$('#palette-query').value.trim().toLowerCase(),ids=[...currentUser.apps,'mario','pacman','tetris'].filter(id=>`${Apps[id].title} ${id}`.toLowerCase().includes(query));paletteIndex=Math.min(paletteIndex,Math.max(0,ids.length-1));const list=$('#palette-results');list.innerHTML=ids.length?ids.map((id,i)=>`<button role="option" aria-selected="${i===paletteIndex}" class="${i===paletteIndex?'current':''}" data-launch="${id}">${Apps[id].icon}<span>${Apps[id].title}</span><small>ABRIR ↵</small></button>`).join(''):'<p class="palette-empty">No hay aplicaciones con ese nombre.</p>';$$('[data-launch]',list).forEach(b=>b.onclick=()=>{const id=b.dataset.launch;togglePalette(false);openWindow(id);});}
+// TECLADO: Ctrl+K abre, flechas seleccionan, Enter ejecuta, Escape cierra y Tab permanece en el diálogo.
+function setupPalette(){const overlay=document.createElement('div');overlay.id='command-palette';overlay.hidden=true;overlay.innerHTML='<section role="dialog" aria-modal="true" aria-label="Buscar aplicaciones"><div class="palette-head"><span>⌕</span><input id="palette-query" placeholder="Busca en tu escritorio…" aria-label="Buscar aplicación" autocomplete="off"><button class="btn palette-close">ESC</button></div><div id="palette-results" role="listbox" aria-label="Aplicaciones"></div><footer>↑ ↓ seleccionar · ENTER abrir · ESC cerrar</footer></section>';document.body.append(overlay);$('.palette-close',overlay).onclick=()=>togglePalette(false);overlay.onclick=e=>{if(e.target===overlay)togglePalette(false);};const query=$('#palette-query');query.oninput=()=>{paletteIndex=0;renderPalette();};query.onkeydown=e=>{const count=$$('[data-launch]',$('#palette-results')).length;if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();paletteIndex=Math.max(0,Math.min(count-1,paletteIndex+(e.key==='ArrowDown'?1:-1)));renderPalette();}if(e.key==='Enter'){e.preventDefault();$$('[data-launch]',$('#palette-results'))[paletteIndex]?.click();}};document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();togglePalette(overlay.hidden);}if(e.key==='Escape'&&!overlay.hidden){e.preventDefault();togglePalette(false);}if(e.key==='Tab'&&!overlay.hidden){const nodes=$$('input,button',overlay);const first=nodes[0],last=nodes[nodes.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});}
+
+// Animate the desktop only on entry, not endlessly behind work windows.
+const shellEnterOS=enterOS;enterOS=function(){if(enteringOS)return;currentBootAnimation?.cancel();shellEnterOS();};
+const windowObserver=new MutationObserver(records=>{for(const record of records)for(const node of record.addedNodes)if(node.nodeType===1&&node.classList.contains('window')){const originalClose=$('.close',node).onclick;$('.close',node).onclick=()=>{node.classList.add('closing');originalClose();};$('.win__bar',node).addEventListener('dblclick',e=>{if(!e.target.closest('button'))maximizeWithMotion(node);});}});
+// A single bounded character canvas; no per-particle DOM or accumulating timers.
+// FONDOS: devuelve una matriz de caracteres y brillo. Es cálculo puro: todavía no dibuja nada.
+function atmosphereFrame(kind,w,h,t,density=55){
+  const cells=Array.from({length:h},()=>Array.from({length:w},()=>({ch:' ',light:0}))),put=(x,y,ch,light=.4)=>{x=Math.floor(x);y=Math.floor(y);if(x>=0&&x<w&&y>=0&&y<h)cells[y][x]={ch,light:Math.max(0,Math.min(1,light))};};
+  if(kind==='storm'||kind==='rain'){
+    for(let i=0;i<Math.floor(w*h*density/1400);i++){
+      const speed=6+seededNoise(i+32)*9,y=(seededNoise(i+20)*h+t*speed)%(h+8)-4,x=(seededNoise(i+1)*w-t*speed*.36+w*100)%w;
+      for(let tail=0;tail<3;tail++)put(x+tail*.4,y-tail,'/',.22+(3-tail)*.08);
+    }
+    if(kind==='storm'){
+      const cycle=Math.floor(t/6),phase=t%6;
+      if(phase>.7&&phase<1.45){
+        const root=w*(.15+seededNoise(cycle+88)*.7),growth=Math.min(h,(phase-.7)*h*5),light=Math.max(.3,1-(phase-1)*1.8);
+        for(let y=0;y<growth;y++){
+          const x=root+Math.sin(y*.6+cycle)*3-y*.28;put(x,y,'/',light);put(x+1,y,'/',light);
+          if(y>h*.24&&y<h*.7&&y%5===0)for(let b=0;b<7;b++)put(x+b,y+b*.55,'/',light*.7);
+        }
+        const impactX=root+Math.sin((h-1)*.6+cycle)*3-(h-1)*.28;
+        if(growth>=h)for(let s=0;s<18;s++){const angle=s*.7,r=(phase-.9)*20;put(impactX+Math.cos(angle)*r,h-2-Math.abs(Math.sin(angle)*r*.35),s%2?'*':'+',light*.7);}
+      }
+    }
+  }else if(kind==='aurora'||kind==='terrain'){
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+      const value=kind==='aurora'?Math.sin(x*.09+t*.35)+Math.cos(y*.23+x*.03-t*.5)+Math.sin(x*.035+y*.12+t*.3):Math.sin(x*.08+t*.06)*1.8+Math.cos(y*.16-t*.04)+Math.sin(x*.05+y*.09);
+      const band=Math.abs(Math.sin(value*(kind==='terrain'?5:2)));
+      if(band<density/700)put(x,y,kind==='terrain'?(band<.04?'+':'.'):'~',.22+Math.abs(value)*.13);
+    }
+  }else if(kind==='stars'){
+    for(let i=0;i<Math.floor(w*h*density/1100);i++){
+      const x=seededNoise(i+3)*w,y=seededNoise(i+7)*h,light=.28+(Math.sin(t*.8+i)+1)*.2;put(x,y,i%6===0?'+':'.',light);
+      if(i%9===0)for(let j=1;j<5;j++)put(x+j,y+j*.2,'.',.16);
+    }
+    const cycle=Math.floor(t/9),phase=t%9;if(phase<2)for(let tail=0;tail<7;tail++)put(w-phase*w*.4+tail,seededNoise(cycle+300)*h+phase*4-tail*.15,tail?'·':'*',.8-tail*.09);
+  }else if(['matrix','matrixBlue','matrixDepth'].includes(kind)){
+    // Cada columna tiene su velocidad y longitud. La cabeza brilla y la cola se desvanece.
+    const glyphs='012345789アイウエオカキクケコサシスセソタチツテトナニヌネノ<>/{}';
+    for(let x=0;x<w;x++){
+      const layer=seededNoise(x+230),speed=3+layer*11,span=h+26;
+      const head=(t*speed+seededNoise(x+90)*span)%span-8;
+      const length=5+Math.floor(density/4+layer*10);
+      if(seededNoise(x+600)>density/100+.12)continue;
+      for(let tail=0;tail<length;tail++){
+        const y=Math.floor(head-tail);if(y<0||y>=h)continue;
+        const light=tail===0?1:Math.pow(1-tail/length,1.7)*(.35+layer*.5);
+        put(x,y,glyphs[Math.floor(seededNoise(x*73+y*19+Math.floor(t*(layer+1)*4))*glyphs.length)],kind==='matrixDepth'?light*(.3+layer*.7):light);
+        if(cells[y]?.[x])cells[y][x].ink=tail===0?'head':kind==='matrixBlue'&&(x%7<2||layer>.8)?'cyan':'green';
+      }
+    }
+  }
+
+  return cells;
+}
+let atmosphereCanvas=null,atmosphereContext=null,atmosphereRAF=0,atmosphereTime=0,atmosphereLast=null,atmosphereDrawn=-Infinity,atmosphereSize='',atmosphereColors=[];
+// RENDIMIENTO: el fondo solo se anima si el escritorio es visible y no hay un juego o salvapantallas delante.
+function atmosphereActive(){return !document.hidden&&!state.motion&&state.atmosphere!=='none'&&!$('#desktop').classList.contains('hidden')&&$('#shutdown').classList.contains('hidden')&&$('#os-screensaver')?.hidden&&!$$('.window').some(w=>!w.classList.contains('minimized')&&w.querySelector('.game'));}
+// LIENZO: limita resolución y número de celdas, obtiene la matriz y dibuja cada carácter con Canvas 2D.
+function drawAtmosphere(){
+  if(!atmosphereContext)return;const width=innerWidth,height=innerHeight,cell=Math.max(innerWidth<600?13:15,width/180),line=Math.max(19,height/65),cols=Math.ceil(width/cell),rows=Math.ceil(height/line),dpr=Math.min(devicePixelRatio||1,1.5),size=`${width}:${height}:${dpr}`;
+  if(size!==atmosphereSize){atmosphereSize=size;atmosphereCanvas.width=Math.round(width*dpr);atmosphereCanvas.height=Math.round(height*dpr);atmosphereContext.setTransform(dpr,0,0,dpr,0,0);}
+  atmosphereContext.clearRect(0,0,width,height);atmosphereContext.font=state.atmosphere.startsWith('matrix')?'14px monospace':'12px monospace';atmosphereContext.textBaseline='top';
+  const cells=atmosphereFrame(state.atmosphere,Math.min(cols,180),Math.min(rows,65),state.motion?3.5:atmosphereTime,state.weatherDensity);
+  for(let y=0;y<cells.length;y++)for(let x=0;x<cells[y].length;x++){const c=cells[y][x];if(c.ch===' ')continue;atmosphereContext.globalAlpha=c.light*(state.intensity==='calm'?.65:1);atmosphereContext.fillStyle=c.ink?(c.ink==='head'?'#defff3':c.ink==='cyan'?'#52d8ec':'#36dd87'):atmosphereColors[Math.floor(x/cols*3)%3];atmosphereContext.fillText(c.ch,x*cell,y*line);}
+  atmosphereContext.globalAlpha=1;
+}
+// TIEMPO DEL FONDO: limita los fotogramas y evita saltos al volver de otra pestaña.
+function atmosphereTick(now){
+  atmosphereRAF=0;if(!atmosphereActive()){atmosphereLast=null;return;}
+  if(atmosphereLast!==null)atmosphereTime+=Math.min(.1,(now-atmosphereLast)/1000)*state.weatherSpeed;atmosphereLast=now;
+  if(now-atmosphereDrawn>(state.intensity==='calm'?83:42)){drawAtmosphere();atmosphereDrawn=now;}atmosphereRAF=requestAnimationFrame(atmosphereTick);
+}
+// SINCRONIZACIÓN: crea un único Canvas, aplica colores y decide iniciar o cancelar su bucle.
+function syncAtmosphere(){
+  if(!atmosphereCanvas){atmosphereCanvas=document.createElement('canvas');atmosphereCanvas.id='ascii-wall';atmosphereCanvas.setAttribute('aria-hidden','true');$('#bg').append(atmosphereCanvas);atmosphereContext=atmosphereCanvas.getContext('2d');}
+  atmosphereCanvas.hidden=state.atmosphere==='none';if(state.atmosphere!=='none'||state.motion)stopMatrix();
+  atmosphereColors=[state.accent,THEMES[state.theme].accent,['paper','glacier'].includes(state.theme)?'#647f95':'#b7a7ec'];
+  document.body.dataset.atmosphere=state.atmosphere;drawAtmosphere();
+  if(!atmosphereActive()){cancelAnimationFrame(atmosphereRAF);atmosphereRAF=0;atmosphereLast=null;}else if(!atmosphereRAF)atmosphereRAF=requestAnimationFrame(atmosphereTick);
+}
+setupDesktop();setupPalette();windowObserver.observe($('#desktop'),{childList:true});
+new MutationObserver(records=>{if(records.some(r=>r.type==='attributes'&&(r.target.id==='desktop'||r.target.classList.contains('window'))||r.type==='childList'&&[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&n.classList.contains('window'))))syncAtmosphere();}).observe($('#desktop'),{attributes:true,attributeFilter:['class'],childList:true,subtree:true});
+new MutationObserver(syncAtmosphere).observe($('#shutdown'),{attributes:true,attributeFilter:['class']});
+new MutationObserver(syncAtmosphere).observe($('#os-screensaver'),{attributes:true,attributeFilter:['hidden']});
+document.addEventListener('visibilitychange',syncAtmosphere);window.addEventListener('resize',syncAtmosphere);
+window.addEventListener('resize',()=>$$('.boot-logo--hero,.ascii-stage,.saver-art').forEach(fitAsciiText));
+if(state.experienceVersion!==5){state.atmosphere='matrixBlue';state.bootEffect='cinematic';state.theme='night';state.accent=THEMES.night.accent;state.bg=THEMES.night.bg;state.experienceVersion=5;}
+applyTheme();save();buildIcons();buildMenu();buildClock();buildParallax();buildStart();buildContext();buildKonami();initDirectAccess();typeLoginArt();
+
+/* === END shell.js === */
+
+;
+/* === BEGIN music-config.js === */
+// Solo una URL pública: NUNCA pegues claves de API en este archivo.
+window.JOSEMI_MUSIC_API = ''; // Ejemplo: https://josemi-assistant.tu-subdominio.workers.dev
+
+/* === END music-config.js === */
+
+;
+/* === BEGIN music.js === */
+/* JOSEMI Music: órdenes locales, búsqueda en el servidor y vídeo siempre visible. */
+(()=>{
+  const $m=s=>document.querySelector(s);
+  let player,readyPromise,track=null,request=0;
+  const panel=document.createElement('aside');panel.id='music-dock';panel.hidden=true;
+  panel.setAttribute('aria-label','Reproductor de YouTube');
+  panel.innerHTML='<div class="music-heading"><strong>JOSEMI MUSIC · YouTube</strong><button id="music-stop" aria-label="Cerrar reproductor">×</button></div><div id="youtube-player"></div><div class="music-track"><img id="music-cover" alt="Miniatura del vídeo"><div><small id="music-state">LISTO PARA REPRODUCIR</small><strong id="music-title"></strong><span id="music-channel"></span></div></div><div class="music-controls"><button id="music-play">Reproducir</button><button id="music-pause">Pausa</button><label>Volumen <input id="music-volume" type="range" min="0" max="100" value="65"></label></div><p id="music-status" role="status"></p><a id="music-source" target="_blank" rel="noopener">Ver en YouTube ↗</a>';
+  document.body.append(panel);
+  function status(text){$m('#music-status').textContent=text;}
+  // El SDK solo se descarga al elegir una canción, nunca durante la intro.
+  function loadPlayer(){
+    if(readyPromise)return readyPromise;
+    readyPromise=new Promise((resolve,reject)=>{
+      const timeout=setTimeout(()=>reject(new Error('YouTube tarda en cargar. Comprueba la conexión y vuelve a intentarlo.')),15000);
+      function create(){player=new YT.Player('youtube-player',{width:320,height:200,playerVars:{origin:location.origin,playsinline:1},events:{onReady:()=>{clearTimeout(timeout);player.setVolume(65);resolve(player);},onStateChange:e=>{$m('#music-state').textContent=({1:'SONANDO AHORA',2:'EN PAUSA',0:'FINALIZADO',3:'CARGANDO'})[e.data]||'LISTO PARA REPRODUCIR';if(e.data===1)status('');},onAutoplayBlocked:()=>status('Pulsa Reproducir para iniciar la canción.'),onError:e=>{status(e.data===153?'Abre la web desde un servidor HTTP, no como archivo local.':'Este vídeo no se puede reproducir aquí. Prueba otro resultado o ábrelo en YouTube.');}}});}
+      if(window.YT?.Player)create();else{const previous=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=()=>{previous?.();create();};const script=document.createElement('script');script.src='https://www.youtube.com/iframe_api';script.onerror=()=>{clearTimeout(timeout);reject(new Error('No se ha podido conectar con YouTube.'));};document.head.append(script);}
+    }).catch(e=>{readyPromise=null;throw e;});return readyPromise;
+  }
+  // Los títulos externos se escriben como texto; nunca se interpretan como HTML.
+  async function play(item){
+    const run=++request;track=item;panel.hidden=false;
+    $m('#music-title').textContent=item.title;$m('#music-channel').textContent=item.channel||'YouTube';
+    $m('#music-cover').src=`https://i.ytimg.com/vi/${item.id}/hqdefault.jpg`;
+    $m('#music-source').href=`https://www.youtube.com/watch?v=${item.id}`;
+    $m('#music-state').textContent='CARGANDO';status('Conectando con YouTube…');
+    try{await loadPlayer();if(run!==request||panel.hidden)return;player.loadVideoById(item.id);status('Si no comienza, pulsa Reproducir.');}catch(e){status(e.message);}
+  }
+  $m('#music-stop').onclick=()=>{request++;player?.stopVideo?.();panel.hidden=true;};
+  $m('#music-play').onclick=()=>player?.playVideo?.();$m('#music-pause').onclick=()=>player?.pauseVideo?.();
+  $m('#music-volume').oninput=e=>player?.setVolume?.(Number(e.target.value));
+  // Evita seguir reproduciendo con el vídeo oculto por otra pestaña o por Apagar.
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)player?.pauseVideo?.();});
+  new MutationObserver(()=>{if(!document.querySelector('#shutdown').classList.contains('hidden'))$m('#music-stop').click();}).observe(document.querySelector('#shutdown'),{attributes:true,attributeFilter:['class']});
+  function videoId(text){try{const u=new URL(text);if(u.hostname==='youtu.be')return /^[\w-]{11}$/.test(u.pathname.slice(1))?u.pathname.slice(1):null;if(['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname)){const id=u.searchParams.get('v')||u.pathname.match(/^\/(?:shorts|embed)\/([\w-]{11})/)?.[1];return /^[\w-]{11}$/.test(id||'')?id:null;}}catch{}return null;}
+  async function search(query){
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
+    try{const base=window.JOSEMI_MUSIC_API||location.origin;const response=await fetch(`${base}/api/youtube/search?q=${encodeURIComponent(query)}`,{signal:controller.signal});let data;try{data=await response.json();}catch{throw new Error('La búsqueda necesita el servidor de JOSEMI Music. Puedes pegar un enlace de YouTube.');}if(!response.ok)throw new Error(data.error||'No se ha podido buscar.');return data.items||[];}finally{clearTimeout(timer);}
+  }
+  async function chat(message,history){
+    const base=(window.JOSEMI_MUSIC_API||'').replace(/\/$/,'');
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),35000);
+    try{const response=await fetch(`${base}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,history}),signal:controller.signal});const data=await response.json();if(!response.ok)throw new Error(data.error||'El asistente no ha respondido.');return data;}finally{clearTimeout(timer);}
+  }
+  const icon='<svg class="os-icon" viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="10" width="48" height="44" rx="8" fill="#bda9d5"/><path d="M26 42V23l19-4v19M26 23l19-4" fill="none" stroke="#293934" stroke-width="3"/><circle cx="21" cy="43" r="6" fill="#293934"/><circle cx="40" cy="39" r="6" fill="#293934"/></svg>';
+  // Plan B para clase: respuestas escritas con datos públicos, sin IA ni red.
+  // No sustituye a Gemini; permite explicar y usar el chatbot antes de conectar el Worker.
+  function localPortfolioReply(text){
+    if(/\b(estudia|estudias|estudios|dam|instituto)\b/.test(text))return 'Josemi estudia DAM en el IES Dr. Lluís Simarro. Está aprendiendo HTML, CSS, JavaScript y Git/GitHub.';
+    if(/\b(proyecto|proyectos|portfolio)\b/.test(text))return 'JOSEMI-OS es su portfolio interactivo: ventanas, terminal, personalización y juegos. Puedes explorar la aplicación Proyectos y su código en GitHub.';
+    if(/\b(contacto|correo|email|contactar)\b/.test(text))return 'Puedes escribir a josemidev1@gmail.com o visitar github.com/josemidev1-code. La aplicación Contacto contiene los enlaces.';
+    if(/\b(gustos|intereses|gusta|deporte)\b/.test(text))return 'A Josemi le interesan la informática, la IA y la automatización. También le gusta el gimnasio, el boxeo y correr.';
+    if(/\b(hola|creado|quien eres|que eres)\b/.test(text))return 'Soy el asistente de JOSEMI-OS. Ahora uso respuestas locales escritas; cuando se conecte el Worker podré consultar Gemini y buscar música.';
+    return null;
+  }
+  // Con Workers configurado, Gemini interpreta preguntas y acciones; sin él hay órdenes locales.
+  Apps.music={title:'JOSEMI Music',icon,size:[570,540],render:()=>'<section class="music-app"><span class="card-kicker">JOSEMI ASSISTANT · MÚSICA Y PORTFOLIO</span><h2>¿Qué ponemos?</h2><p>Escribe «Pon canción de artista» o pega un enlace de YouTube. También entiendo «pausa», «continúa» y «volumen 30».</p><div class="music-chat" role="log" aria-live="polite"></div><form class="music-form"><label class="sr-only" for="music-query">Petición musical</label><input id="music-query" maxlength="160" placeholder="Pon Eyes Without a Face de Billy Idol" required><button class="btn" type="submit">Enviar</button></form><div class="music-results"></div><small>El vídeo permanece visible abajo a la derecha. La miniatura y el canal proceden de YouTube.</small></section>',bind(body){
+    const log=body.querySelector('.music-chat'),form=body.querySelector('form'),input=body.querySelector('input'),results=body.querySelector('.music-results');let busy=false;const history=[];
+    const say=(text,who='assistant')=>{const line=document.createElement('p');line.className=who;line.textContent=(who==='user'?'Tú: ':'JOSEMI: ')+text;log.append(line);while(log.children.length>30)log.firstChild.remove();log.scrollTop=log.scrollHeight;};say('Dime qué canción quieres escuchar.');
+    form.onsubmit=async e=>{e.preventDefault();if(busy)return;const raw=input.value.trim();if(!raw)return;input.value='';say(raw,'user');const normalized=raw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      if(/^(pausa|para|deten)( la musica)?$/.test(normalized)){player?.pauseVideo?.();say(track?'Música en pausa.':'Todavía no has elegido una canción.');return;}
+      if(/^(continua|reanuda|play|reproduce)$/.test(normalized)){player?.playVideo?.();say(track?'Puedes reanudar con el botón Reproducir si el navegador lo solicita.':'Dime primero una canción.');return;}
+      const volume=normalized.match(/^(?:volumen|baja el volumen a|sube el volumen a)\s*(\d{1,3})\s*%?$/);if(volume){const value=Math.min(100,Number(volume[1]));player?.setVolume?.(value);$m('#music-volume').value=value;say(`Volumen: ${value} %.`);return;}
+      const id=videoId(raw);if(id){say('Abro ese vídeo.');await play({id,title:'Vídeo de YouTube',channel:'Enlace elegido por ti'});return;}
+      if(window.JOSEMI_MUSIC_API){busy=true;form.querySelector('button').disabled=true;results.replaceChildren();say('Consultando al asistente…');try{const data=await chat(raw,history);if(!body.isConnected)return;say(data.reply);history.push({role:'user',text:raw},{role:'model',text:data.reply});if(history.length>6)history.splice(0,history.length-6);
+        if(data.action==='pause')player?.pauseVideo?.();
+        if(data.action==='resume')player?.playVideo?.();
+        if(data.action==='volume'){player?.setVolume?.(data.volume);$m('#music-volume').value=data.volume;}
+        if(data.action==='open'&&['about','projects','contact','arcade','settings','readme'].includes(data.app))openWindow(data.app);
+        if(data.action==='music'){const items=data.items||[];if(!items.length){say('No hay resultados. Prueba otro título o artista.');return;}items.forEach(item=>{const button=document.createElement('button');button.className='music-result';button.textContent=`${item.title} · ${item.channel}`;button.onclick=()=>play(item);results.append(button);});await play(items[0]);}
+      }catch(error){say(error.name==='AbortError'?'El asistente tarda demasiado. Prueba otra vez.':error.message);}finally{busy=false;form.querySelector('button').disabled=false;}return;}
+      const local=localPortfolioReply(normalized);if(local){say(local);return;}
+      if(!['localhost','127.0.0.1'].includes(location.hostname)){
+        say('La IA y la búsqueda musical aún necesitan conectar el Worker. Puedes pegar un enlace de YouTube o preguntarme por estudios, proyectos y contacto. Para otras preguntas: josemidev1@gmail.com.');return;
+      }
+      if(!/^(pon(?:me)?|reproduce(?:me)?|busca|quiero escuchar)\s/.test(normalized)){
+        say('No tengo esa información en mis respuestas locales. Escríbeme a josemidev1@gmail.com. Para buscar música, escribe «Pon canción de artista».');return;
+      }
+      const query=raw.replace(/^(?:pon(?:me)?|reproduce(?:me)?|busca|quiero escuchar)\s+/i,'').trim();busy=true;form.querySelector('button').disabled=true;results.replaceChildren();say('Buscando en YouTube…');
+      try{const items=await search(query);if(!body.isConnected)return;if(!items.length){say('No he encontrado resultados. Prueba con título y artista.');return;}say('Cargo el primer resultado; puedes elegir otra versión debajo.');items.forEach(item=>{const button=document.createElement('button');button.className='music-result';button.textContent=`${item.title} · ${item.channel}`;button.onclick=()=>play(item);results.append(button);});await play(items[0]);}catch(error){say(error.name==='AbortError'?'La búsqueda ha tardado demasiado. Prueba otra vez.':error.message);}finally{busy=false;form.querySelector('button').disabled=false;}
+    };
+  }};
+  currentUser.apps.push('music');buildIcons();buildMenu();
+})();
+
+/* === END music.js === */
