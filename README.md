@@ -32,11 +32,26 @@ Fuera del código me gusta entrenar en el gimnasio, hacer deporte, practicar box
 
 ## Escritorio animado
 
-Abre **Ajustes** para elegir entre siete temas, cinco cursores, tres tamaños y la intensidad del movimiento. El arranque escribe **JOSEMI-OS** completo con ocho efectos, incluida una secuencia orbital y láser. **ASCII Studio** permite probarlos; **Ctrl+K** busca aplicaciones y juegos.
+Abre **Ajustes** para elegir entre siete temas, cinco cursores, tres tamaños y la intensidad del movimiento. La intro empieza en negro con «Wake up, Neo» y «The Matrix has you», y después construye **JOSEMI-OS** con ruido digital, partículas orbitales y una onda de luz. Se puede saltar con Enter. **ASCII Studio** permite probar ocho efectos; **Ctrl+K** busca aplicaciones y juegos.
 
-Hay seis fondos ASCII animados: tormenta con rayos de `//`, lluvia, aurora, constelaciones, paisaje topográfico y código en cascada. Puedes regular densidad y velocidad, ocultar la bienvenida para disfrutar del fondo y reducir el movimiento. Los fondos descansan mientras juegas o cambias de pestaña.
+Hay ocho fondos animados: tormenta con rayos de `//`, lluvia, aurora, constelaciones, paisaje topográfico y tres variantes Matrix: verde clásico, verde con cian y profundidad. Sus columnas tienen velocidades, longitudes y brillo independientes. Puedes regular densidad y velocidad, ocultar la bienvenida y reducir el movimiento. Los fondos descansan mientras juegas o cambias de pestaña.
 
-Las referencias de Omarchy y PostHog, las decisiones de diseño y las comprobaciones están documentadas en [DESIGN.md](DESIGN.md). Para verificar la lógica: `node tests/arcade.cjs` y `node tests/shell.cjs`.
+En Arcade hay Tetris, Pac-Man y **Mario Bros · JOSEMI Run**, un homenaje de plataformas con gráficos y tres mundos originales. Incluye salto de altura variable, correr, monedas, enemigos, escudo, puntos de control y controles táctiles. Sustituye al shooter anterior.
+
+Las referencias y decisiones están documentadas en [DESIGN.md](DESIGN.md). Para verificar la lógica: `node tests/arcade.cjs`, `node tests/shell.cjs` y `node tests/platformer.cjs`.
+
+## Cómo estudiar el código para clase
+
+Los comentarios en español explican los bloques importantes sin repetir cada instrucción. Léelos siguiendo el orden de carga:
+
+1. **index.html**: estructura del escritorio y orden de estilos y scripts.
+2. **style.css**: estilos de base. **shell.css**: temas, ventanas, iconos y ajustes. **experience.css**: intro Matrix y presentación del nuevo juego.
+3. **script.js**: datos del portfolio, registro de aplicaciones, gestor de ventanas, terminal, Tetris y Pac-Man.
+4. **upgrade.js**: récords, pausa automática, firma del nombre, Arcade y Secret Vault.
+5. **platformer.js**: datos de los mundos, física, colisiones, cámara, dibujo y entrada de teclado/táctil.
+6. **shell.js**: personalización, intro, efectos del nombre, fondos animados, buscador y salvapantallas.
+
+Para cada bloque pregúntate: **qué datos recibe, qué cambia y qué muestra**. `render()` construye la vista; `bind()` conecta los eventos. En el juego, `stepPlatform()` calcula y `draw()` dibuja. Las preferencias se guardan en el navegador; la web simula un escritorio y no controla el sistema operativo real.
 
 ## Easter eggs y acertijos
 

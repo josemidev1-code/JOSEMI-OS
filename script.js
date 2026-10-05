@@ -1,14 +1,14 @@
 /* =========================================================
    JOSEMI-OS · portfolio interactivo
    WM = motor de ventanas. Apps = contenido plug-in.
-   v2: arranque ASCII, Arcade y Secret Vault (upgrade.js).
+   v5: núcleo; arcade en upgrade.js, plataformas en platformer.js e interfaz en shell.js.
 
    ORDEN MENTAL DEL PROGRAMA
    1. Se recuperan los ajustes guardados.
    2. Apps describe el contenido de cada aplicación.
    3. WM crea, mueve, redimensiona y cierra ventanas.
    4. Los build... conectan el HTML con eventos del usuario.
-   5. initLogin y typeLoginArt preparan la pantalla inicial.
+   5. shell.js aplica la interfaz y typeLoginArt prepara la intro Matrix.
    ========================================================= */
 // Atajos: $(selector) devuelve el primer elemento y $$(selector), un array con todos.
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -111,6 +111,7 @@ applyTheme();
 
 /* --- Sonido Win95 "ding" (Web Audio, sin archivos) --- */
 let AC;
+// SONIDO: crea un tono corto con Web Audio; solo suena si el usuario lo activa.
 function beep(){
   if(!state.sound)return;
   try{
@@ -135,6 +136,7 @@ function toast(m){const t=document.createElement('div');t.className='toast';t.te
    existe, conecta eventos después de insertar ese HTML en una ventana.
    Añadir una app nueva aquí y su id en ICONS basta para mostrarla en el sistema.
    ========================================================= */
+// CONTENIDO: datos del autor. Las ventanas leen este objeto para mostrar el portfolio.
 const PROFILE={
   nombre:'José Miguel Miralles Gandia',
   corto:'Josemi',
@@ -149,7 +151,9 @@ const PROFILE={
 
 const pixelIcon=tipo=>`<span class="app-pixel-icon app-pixel-icon--${tipo}" aria-hidden="true"></span>`;
 
+// APLICACIONES: cada entrada tiene título, icono, render() para el HTML y bind() para los eventos.
 const Apps={
+ // SOBRE MÍ: muestra los datos de PROFILE en una ficha personal.
  about:{title:'Sobre mí',icon:'👤',render:()=>`
    <section class="profile-hero">
      <div class="profile-hero__terminal"><span>josemi@portfolio</span><b>DESARROLLADOR EN PROCESO</b></div>
@@ -164,6 +168,7 @@ const Apps={
      <article class="content-card"><span class="card-kicker">04 / MENTALIDAD</span><h3>Build · learn · repeat</h3><p>Estoy al principio del camino, así que prefiero enseñar progreso real antes que fingir experiencia que todavía no tengo.</p></article>
    </div>`},
 
+ // PROYECTOS: tarjetas que abren detalles definidos en PROJECTS.
  projects:{title:'Proyectos',icon:'📁',render:()=>`
    <div class="app-title">/PROYECTOS</div>
    <p class="bio">Aquí separo lo que ya estoy construyendo de las áreas en las que quiero seguir experimentando. No relleno el portfolio con proyectos inventados.</p>
@@ -179,6 +184,7 @@ const Apps={
      f.addEventListener('keydown',e=>{if(e.key==='Enter')abrir();});
    });}},
 
+ // HABILIDADES: barras visuales con porcentajes; no son mediciones automáticas.
  skills:{title:'Habilidades',icon:'⚡',render:()=>`
    <div class="app-title">STACK / ESTADO ACTUAL</div>
    <div class="skill-focus">
@@ -193,6 +199,7 @@ const Apps={
      <article class="content-card"><span class="card-kicker">SIGUIENTE PASO</span><h3>Más proyectos</h3><p>La prioridad es construir, equivocarme, corregir y convertir cada proyecto en evidencia real de lo que sé hacer.</p></article>
    </div>`},
 
+ // TERMINAL: guarda el historial visible y envía cada línea al intérprete runCommand.
  terminal:{title:'Terminal',icon:'💻',render:()=>`
    <div class="term"><div class="term__out" id="term-out"></div>
    <div class="term__line"><span class="p">josemi@portfolio</span>:<span class="dir">~</span>$<input class="term__in" id="term-in" autocomplete="off" spellcheck="false"></div></div>`,
@@ -203,6 +210,7 @@ const Apps={
        print(`<span class="p">josemi@portfolio</span>:<span class="dir">~</span>$ ${escapeHTML(raw)}`);runCommand(raw,print,openWindow);});
      b.addEventListener('click',()=>inp.focus());}},
 
+ // README: vista HTML del texto de presentación, escrita en el código.
  readme:{title:'README.md',icon:'📄',render:()=>`
    <article class="markdown-view">
      <div class="md-path">~/JOSEMI-OS/README.md</div>
@@ -221,6 +229,7 @@ const Apps={
      <div class="md-sign">JOSEMI-OS // build, learn, repeat.</div>
    </article>`},
 
+ // CONTACTO: enlaces públicos y botón para copiar el correo con la API del portapapeles.
  contact:{title:'Contacto',icon:'📬',render:()=>`
    <div class="contact contact--modern">
      <span class="card-kicker">CONTACTO / NETWORK</span><h2>¿Construimos algo?</h2>
@@ -234,6 +243,7 @@ const Apps={
    </div>`,
    bind(b){$('#copy-email',b).addEventListener('click',async()=>{try{await navigator.clipboard.writeText('josemidev1@gmail.com');toast('Email copiado al portapapeles.');}catch{toast('No se ha podido acceder al portapapeles.');}});}},
 
+ // PAPELERA: archivos ficticios para la metáfora del escritorio; no borra archivos del ordenador.
  trash:{title:'Papelera',icon:'🗑',render:()=>`
    <div class="app-title">/home/josemi/.papelera</div>
    <div class="file-row" data-file="motivation.exe"><span class="g">⚙️</span> motivacion.exe</div>
@@ -243,6 +253,7 @@ const Apps={
    bind(b){b.querySelectorAll('.file-row').forEach(r=>r.addEventListener('dblclick',()=>{
      if(r.dataset.file==='motivation.exe')openWindow('motivation');else toast('Archivo corrupto. Es broma 🙂');}));}},
 
+ // AJUSTES BASE: shell.js reemplaza esta vista por el panel ampliado de preferencias.
  settings:{title:'Configuración',icon:'⚙️',render:()=>`
    <div class="app-title">CONFIGURACIÓN</div>
    <div class="setting"><div>Reducir animaciones<small>Desactiva transiciones y efectos</small></div><button class="switch ${state.motion?'on':''}" id="sw-motion"></button></div>
@@ -267,6 +278,7 @@ const Apps={
      $('#sel-dark',b).onchange=e=>{state.bg=e.target.value;applyTheme();save();};
      $$('#sw-wp .wp',b).forEach(w=>w.onclick=()=>{state.wp=+w.dataset.w;$$('#sw-wp .wp',b).forEach(x=>x.classList.remove('on'));w.classList.add('on');applyTheme();save();});}},
 
+ // MONITOR: información disponible del navegador y tiempo de sesión, no acceso a CPU o RAM real.
  system:{title:'Monitor del sistema',icon:'🖥️',render:()=>`
    <div class="app-title">JOSEMI-OS · ESTADO: <span style="color:var(--accent)">EN LÍNEA</span></div>
    <div class="sys-grid">
@@ -278,8 +290,10 @@ const Apps={
    bind(b){$('#sys-res',b).textContent=`${screen.width}×${screen.height}`;$('#sys-lang',b).textContent=navigator.language;
      const ua=navigator.userAgent;$('#sys-browser',b).textContent=/Firefox/.test(ua)?'Firefox':/Edg/.test(ua)?'Edge':/Chrome/.test(ua)?'Chrome':/Safari/.test(ua)?'Safari':'Desconocido';}},
 
+ // MOTIVACIÓN: muestra mensajes del propio portfolio.
  motivation:{title:'motivacion.exe',icon:'💡',render:()=>`<div style="text-align:center;padding:2rem 1rem"><div style="font-size:2.5rem">💡</div><p style="font-family:var(--font-mono);margin-top:1rem;line-height:1.8">Sigue construyendo.<br>Cada proyecto te acerca a lo que quieres ser.</p></div>`},
 
+ // ARCADE BASE: upgrade.js reemplaza sus tarjetas por la colección actual.
  arcade:{title:'Arcade',icon:'🕹️',render:()=>`
    <div class="app-title">C:\\JOSEMI_OS\\JUEGOS</div>
    <p class="bio">Una pequeña carpeta de juegos retro. Abre uno y usa el teclado.</p>
@@ -289,6 +303,7 @@ const Apps={
    </div>`,
    bind(b){b.querySelectorAll('[data-game]').forEach(x=>x.addEventListener('click',()=>openWindow(x.dataset.game)));}},
 
+// TETRIS: tablero de 10×20. Las piezas son matrices; colisión impide atravesar bloques y borrar filas suma puntos.
  tetris:{title:'Tetris',icon:pixelIcon('tetris'),render:()=>`
    <div class="game game--tetris">
      <div class="tetris-layout">
@@ -358,6 +373,7 @@ const Apps={
      attachGameLifecycle(win,()=>{if(running&&!paused)togglePause();});addGameControls(b,win,['ArrowLeft','ArrowUp','ArrowRight','ArrowDown',' ','p']);reset();draw();drawNext();
    }},
 
+// PAC-MAN: el mapa es una matriz de paredes. Los puntos viven en conjuntos y los fantasmas buscan caminos libres.
  pacman:{title:'Pac-Man',icon:pixelIcon('pacman'),render:()=>`
    <div class="game game--pacman">
      <div class="pac-hud">
@@ -444,6 +460,7 @@ const Apps={
      attachGameLifecycle(win,()=>{if(running&&!paused)togglePause();});addGameControls(b,win,['ArrowLeft','ArrowUp','ArrowRight','ArrowDown','p']);buildLevel();draw();
    }},
 
+ // SECRETO BASE: upgrade.js lo convierte en Secret Vault.
  easter:{title:'SECRETO.sys',icon:'🥚',render:()=>`
    <div class="secret-screen">
      <div class="secret-skull">☠</div>
@@ -459,6 +476,7 @@ function bar(n,v){return `<div class="res"><div class="res__top"><span>${n}</spa
    Es una IIFE: la función se ejecuta inmediatamente y solo expone openWindow y
    closeWindow. Así, variables internas como z y open no contaminan el ámbito global.
    ========================================================= */
+// VENTANAS: este módulo guarda las abiertas en un Map. Controla foco (z-index), arrastre, tamaño y cierre.
 const WM=(()=>{let z=10,open=new Map(),x=40,y=86;
   // Desplaza cada ventana nueva para que no aparezcan todas exactamente superpuestas.
   const nextPos=()=>{x+=28;y+=28;if(x>200)x=40;if(y>170)y=86;return{x,y};};
@@ -508,12 +526,13 @@ const WM=(()=>{let z=10,open=new Map(),x=40,y=86;
 const openWindow=WM.openWindow;
 
 /* ========================================================= TERMINAL */
+// TERMINAL: divide lo escrito en comando y argumentos. Un switch ejecuta acciones de la web, no del ordenador.
 function runCommand(raw,print,openWin){
   const p=raw.trim().split(/\s+/),c=(p[0]||'').toLowerCase(),a=p.slice(1).join(' ');
   switch(c){
     case'':break;
     case'help':case'ayuda':
-      print('Comandos: <span class="ok">ayuda readme quien-soy sobre-mi proyectos habilidades contacto limpiar fecha eco ls cat sudo secreto matrix fondo tetris pacman doom vault arcade cafe hola 42</span>');break;
+      print('Comandos: <span class="ok">ayuda readme quien-soy sobre-mi proyectos habilidades contacto limpiar fecha eco ls cat sudo secreto matrix fondo tetris pacman mario vault arcade cafe hola 42</span>');break;
     case'whoami':case'quien-soy':print('José Miguel Miralles Gandia<br>Estudiante de DAM en IES Dr. Lluís Simarro<br>Desarrollador de software en proceso.');break;
     case'readme':print('Abriendo README.md...');openWin('readme');break;
     case'about':case'sobre-mi':print('Abriendo Sobre mí...');openWin('about');break;
@@ -535,12 +554,13 @@ function runCommand(raw,print,openWin){
     case'secret':case'secreto':print('<span class="ok">🔓 Easter egg desbloqueado.</span>');openWin('easter');toast('Has encontrado SECRETO.sys');break;
     case'matrix':state.wp=4;state.atmosphere='matrix';applyTheme();save();print('<span class="ok">Código en cascada activado.</span> Usa "fondo 0" para salir.');break;
     case'wallpaper':case'fondo':
+      if(a==='matrix-blue'||a==='matrix-depth'){state.atmosphere=a==='matrix-blue'?'matrixBlue':'matrixDepth';applyTheme();save();print('Fondo Matrix activado.');break;}
       if(['matrix','storm','rain','aurora','stars','terrain'].includes(a)){state.atmosphere=a;applyTheme();save();print('Fondo ASCII activado.');}
       else if(['0','1','2','3'].includes(a)){state.wp=+a;state.atmosphere='none';applyTheme();save();print('Fondo estático activado.');}
-      else print('Uso: fondo storm|rain|aurora|stars|terrain|matrix|0|1|2|3');break;
+      else print('Uso: fondo storm|rain|aurora|stars|terrain|matrix|matrix-blue|matrix-depth|0|1|2|3');break;
     case'tetris':print('Abriendo Tetris...');openWin('tetris');break;
     case'pacman':print('Abriendo Pac-Man...');openWin('pacman');break;
-    case'doom':openWin('doom');break;
+    case'mario':openWin('mario');break;
     case'vault':openWin('easter');break;
     case'arcade':print('Abriendo Arcade...');openWin('arcade');break;
     case'coffee':case'cafe':print('Compilando...\n☕ Café cargado correctamente. Productividad +10.');toast('Café virtual servido ☕');break;
@@ -564,6 +584,7 @@ const PROJECTS={
  auto:{name:'Automatización',desc:'Área de roadmap: quiero aprender a crear automatizaciones útiles y convertir procesos repetitivos en software.',lang:'Por definir',db:'—',fw:'—',date:'Roadmap',status:'exp',tags:['Automatización','Roadmap']},
  ai:{name:'IA + software',desc:'Área de roadmap: explorar cómo integrar inteligencia artificial en aplicaciones y flujos de trabajo de forma creativa.',lang:'Por definir',db:'—',fw:'—',date:'Roadmap',status:'exp',tags:['IA','Creatividad','Roadmap']}
 };
+// PROYECTOS: crea una aplicación temporal con los detalles del proyecto elegido.
 function openProject(k){const p=PROJECTS[k];if(!p)return;const id='proj-'+k;
   Apps[id]={title:p.name,icon:'📂',render:()=>`<div class="app-title">${p.name.toUpperCase()}</div><p class="bio">${p.desc}</p>
     <div class="proj">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
@@ -580,6 +601,7 @@ function boot(){location.reload();}
 // [FIX] Añadidos 'tetris' y 'pacman' perquè tinguen acces directe.
 const ICONS=['readme','about','projects','skills','terminal','contact','arcade','settings','system','trash'];
 let startTime=Date.now();
+// ICONOS: construye accesos desde currentUser.apps. shell.js sustituye esta versión por botones SVG accesibles.
 function buildIcons(){const c=$('#icons');c.innerHTML='';
   const llista=(currentUser&&currentUser.apps)?currentUser.apps:ICONS;
   llista.forEach(id=>{const a=Apps[id];if(!a)return;
@@ -589,19 +611,24 @@ function buildIcons(){const c=$('#icons');c.innerHTML='';
     el.addEventListener('dblclick',()=>openWindow(id));
     el.addEventListener('keydown',e=>{if(e.key==='Enter')openWindow(id);});
     c.appendChild(el);});}
+// MENÚ: convierte las aplicaciones permitidas en botones que llaman al gestor de ventanas.
 function buildMenu(){const m=$('#menu__apps');m.innerHTML='';
   const llista=(currentUser&&currentUser.apps)?currentUser.apps:ICONS;
   llista.forEach(id=>{const a=Apps[id];if(!a)return;
     const b=document.createElement('button');b.innerHTML=`<span>${a.icon}</span> ${a.title}`;
     b.onclick=()=>{openWindow(id);$('#menu').classList.add('hidden');};m.appendChild(b);});}
+// RELOJ: actualiza hora y fecha una vez por segundo con Date y el idioma del navegador.
 function buildClock(){const t=$('#clock__time'),d=$('#clock__date');const tick=()=>{const n=new Date();
   t.textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}`;d.textContent=n.toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'});
   const st=$('#sys-uptime');if(st)st.textContent=Math.floor((n-startTime)/1000)+'s';const sc=$('#sys-time');if(sc)sc.textContent=t.textContent;};tick();setInterval(tick,1000);}
 // [FIX] Amb Matrix desactivem el parallax (evita vores negres en moure's el #bg).
-function buildParallax(){const bg=$('#bg');addEventListener('mousemove',e=>{if(state.motion||state.wp===4){bg.style.transform='none';return;}bg.style.transform=`translate(${(e.clientX/innerWidth-.5)*30}px,${(e.clientY/innerHeight-.5)*30}px)`;});}
+// PROFUNDIDAD: desplaza el fondo unos píxeles con el ratón. Matrix y reducir movimiento lo desactivan.
+function buildParallax(){const bg=$('#bg');addEventListener('mousemove',e=>{if(state.motion||state.wp===4||state.atmosphere?.startsWith('matrix')){bg.style.transform='none';return;}bg.style.transform=`translate(${(e.clientX/innerWidth-.5)*30}px,${(e.clientY/innerHeight-.5)*30}px)`;});}
+// INICIO: alterna la visibilidad del menú y lo cierra cuando se pulsa fuera.
 function buildStart(){const m=$('#menu');$('#start').onclick=e=>{e.stopPropagation();m.classList.toggle('hidden');};
   document.addEventListener('click',e=>{if(!e.target.closest('#menu')&&!e.target.closest('#start'))m.classList.add('hidden');});
   $$('.menu__power button').forEach(b=>b.onclick=()=>{m.classList.add('hidden');b.dataset.power==='shutdown'?shutdown():boot();});}
+// CLIC DERECHO: evita el menú nativo dentro del escritorio y coloca nuestro menú sin salir de pantalla.
 function buildContext(){const ctx=$('#ctxmenu');
   document.addEventListener('contextmenu',e=>{if(e.target.closest('.window,.menu,.taskbar'))return;e.preventDefault();
     ctx.classList.remove('hidden');const w=ctx.offsetWidth,h=ctx.offsetHeight;
@@ -613,13 +640,15 @@ function buildContext(){const ctx=$('#ctxmenu');
     // [FIX] array de noms ara inclou 'Matrix' (5 wallpapers).
     if(a==='wallpaper'){state.wp=(state.wp+1)%WALLS.length;state.atmosphere=state.wp===4?'matrix':'none';applyTheme();save();toast('Fondo: '+['Aurora','Bosque','Azul profundo','Violeta','Matrix'][state.wp]);}
     if(a==='terminal')openWindow('terminal');if(a==='system')openWindow('system');if(a==='arcade')openWindow('arcade');});}
+// APAGADO SIMULADO: cierra las ventanas y muestra una pantalla final; no apaga el ordenador.
 function shutdown(){Object.keys(Apps).forEach(id=>WM.closeWindow(id));stopMatrix();const s=$('#shutdown');s.classList.remove('hidden');$('#shutdown__msg').textContent='Apagando JOSEMI-OS...';
   setTimeout(()=>{$('#shutdown__msg').textContent='Ahora puedes cerrar esta pestaña con seguridad.';$('#reboot').classList.remove('hidden');},1600);
   $('#reboot').onclick=()=>location.reload();}
+// SECRETOS: compara las últimas teclas con el código Konami y activa pequeñas sorpresas.
 function buildKonami(){
   const s=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];let i=0;
   addEventListener('keydown',e=>{if(e.target.closest('.game')||e.target.closest('.window')?.querySelector('.game'))return;const key=e.key.length===1?e.key.toLowerCase():e.key;if(key===s[i])i++;else if(key===s[0])i=1;else i=0;
-    if(i===s.length){state.wp=4;applyTheme();save();toast('Código Konami: MODO DESARROLLADOR ACTIVADO');openWindow('easter');i=0;}});
+    if(i===s.length){state.wp=4;state.atmosphere='matrix';applyTheme();save();toast('Código Konami: MODO DESARROLLADOR ACTIVADO');openWindow('easter');i=0;}});
   let clockClicks=0,clockTimer=null;
   $('#clock__time').addEventListener('click',()=>{clockClicks++;clearTimeout(clockTimer);clockTimer=setTimeout(()=>clockClicks=0,1500);if(clockClicks>=7){clockClicks=0;openWindow('easter');toast('Has forzado una anomalía temporal.');}});
   let typed='';
@@ -642,10 +671,12 @@ let typeLoginArt;
 let enteringOS=false,bootRun=0;
 const bootDelay=ms=>new Promise(r=>setTimeout(r,ms));
 
+// SALIDA DE ARRANQUE: añade texto con textContent, evitando interpretar texto como HTML.
 function appendBoot(text='',cls=''){
   const out=$('#bootTerminalOutput');
   const line=document.createElement('span');line.className=cls;line.textContent=text+'\n';out.appendChild(line);out.scrollTop=out.scrollHeight;return line;
 }
+// MÁQUINA DE ESCRIBIR: añade letras con pausas. bootRun cancela una secuencia que ya no está vigente.
 async function typeBootText(el,text,speed,run){
   el.textContent='';
   for(const ch of text){if(run!==bootRun||enteringOS)return false;el.textContent+=ch;await bootDelay(speed);}
@@ -657,6 +688,7 @@ async function typeBootLine(text,cls,speed,run){
 }
 
 
+// ENTRAR: invalida la intro, prepara menú e iconos y cambia de login a escritorio después de la transición.
 function enterOS(){
   if(enteringOS)return;enteringOS=true;bootRun++;
   document.documentElement.style.setProperty('--accent',state.accent);
@@ -678,6 +710,7 @@ function showLogin(){
   typeLoginArt();
 }
 
+// SALTAR INTRO: botón o Enter llaman a enterOS; siempre se puede entrar sin esperar la animación.
 function initDirectAccess(){
   $('#skipBoot').addEventListener('click',enterOS);
   addEventListener('keydown',e=>{

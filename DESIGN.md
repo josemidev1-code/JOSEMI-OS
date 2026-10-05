@@ -1,4 +1,35 @@
-# JOSEMI-OS / disseny del sistema
+# JOSEMI-OS / diseño del sistema
+
+## Versión actual: Matrix y plataformas
+
+La dirección visual combina una intro cinematográfica, arte de texto animado y un escritorio que deja trabajar y jugar. La inspiración de premios se usa como referencia de jerarquía visual, respuesta de la interfaz y personalidad; no se afirma haber ganado un premio ni ser objetivamente el mejor sistema.
+
+Referencias consultadas:
+
+- [CSS Design Awards: criterios](https://www.cssdesignawards.com/about) y [selección WOTY 2025](https://www.cssdesignawards.com/woty2025/): UI, UX e innovación, y portfolios con identidad propia.
+- [Entrevista al creador del código de Matrix](https://www.wired.com/story/the-matrix-code-sushi-recipe/): caracteres japoneses estilizados y lectura vertical. El fondo verde con cian es una interpretación propia; no se ha confirmado una variante exacta de la película con esa paleta.
+- [Manual oficial de Super Mario Bros.](https://www.nintendo.co.jp/clv/manuals/en/pdf/CLV-P-NAAAE.pdf): referencia para desplazamiento lateral, saltos, enemigos, monedas y meta. JOSEMI Run tiene código, gráficos y niveles originales; no utiliza ROMs, música ni sprites de Nintendo.
+
+### Comportamiento
+
+- Intro negra: «Wake up, Neo», borrado y «The Matrix has you». Después, JOSEMI-OS pasa de ruido digital a convergencia orbital y una onda de fijación. Enter y el botón saltan cualquier fase. Un identificador de secuencia invalida las esperas anteriores.
+- Ocho efectos del nombre y ocho fondos animados. Matrix clásico usa verde; Matrix con cian añade columnas azuladas; profundidad atenúa las capas lejanas. Cada columna tiene velocidad, longitud y cabeza luminosa propia. Densidad y velocidad siguen siendo configurables.
+- Se conserva la selección de siete temas, cinco cursores, salvapantallas y ventanas animadas. La nueva experiencia propone Terminal nocturna al actualizarse por primera vez; después respeta las elecciones guardadas.
+- El shooter se ha eliminado. Arcade, terminal y buscador abren JOSEMI Run, Pac-Man y Tetris.
+- Plataformas: tres rutas originales con huecos, tuberías, bloques ?, monedas y enemigos. Saltar brevemente da un salto bajo; mantener da uno alto. Shift permite correr. El punto de control conserva progreso y el escudo absorbe un golpe. Completar un mundo conserva puntuación, vidas y monedas.
+- La simulación avanza en pasos de 1/120 s y el dibujo sigue requestAnimationFrame. Perder foco, minimizar o cambiar pestaña pausa la partida; continuar reinicia el reloj. Cerrar libera el bucle y los eventos. Los marcadores cambian solo cuando cambian sus valores, evitando reconstruirlos continuamente.
+- Los fondos descansan detrás de un juego visible, con la pestaña oculta, al apagar o durante el salvapantallas. Reducir movimiento mantiene un fotograma estático y acorta la intro.
+
+### Código para estudiar
+
+Los comentarios en castellano explican entradas, estado y resultados de los bloques importantes. El orden recomendado está en README.md. La separación clave es: `render()` crea HTML, `bind()` conecta eventos; `stepPlatform()` calcula, `draw()` dibuja. HTML es estructura, CSS presentación y JavaScript comportamiento.
+
+### Verificación
+
+`node tests/shell.cjs`, `node tests/arcade.cjs` y `node tests/platformer.cjs` comprueban animaciones acotadas, variantes Matrix, cancelación, pausa, integración, búsqueda, colisiones, enemigos, monedas, inmunidad y progresión. Un controlador automático recorre los tres mundos usando la física real, sin teletransportes ni inmunidad artificial. También se revisa la interfaz en navegador, incluidos tamaños de escritorio y móvil. Son comprobaciones concretas, no una garantía de compatibilidad universal.
+
+## Historial de diseño previo
+
 
 ## Referències investigades
 
