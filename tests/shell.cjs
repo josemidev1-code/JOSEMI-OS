@@ -9,10 +9,11 @@ for(const effect of ['beams','rain','gather','cinematic','storm','orbit','laser'
   for(const p of [0,.13,.5,.82,.99]){context.progress=p;const result=run('asciiFrame(NAME_ART,effect,progress)').split('\n');assert.equal(result.length,art.length);assert(result.every(line=>line.length===Math.max(...art.map(r=>r.length))));}
 }tests.push('All eight effects keep the character grid stable and settle to JOSEMI-OS');
 const weather=source.slice(source.indexOf('function atmosphereFrame('),source.indexOf('let atmosphereCanvas='));vm.runInContext(weather,context);
-for(const kind of ['storm','rain','aurora','terrain','stars','matrix']){
+for(const kind of ['storm','rain','aurora','terrain','stars','matrix','matrixBlue','matrixDepth']){
   context.kind=kind;const a=run('atmosphereFrame(kind,80,30,.95,55)'),b=run('atmosphereFrame(kind,80,30,4,55)');
   assert.equal(a.length,30);assert(a.every(row=>row.length===80));assert(a.flat().every(cell=>cell.ch.length===1&&Number.isFinite(cell.light)&&cell.light>=0&&cell.light<=1));assert.notDeepEqual(a,b);
-}tests.push('Six ASCII backgrounds animate within a fixed grid and bounded brightness');
+}tests.push('Eight ASCII backgrounds animate within a fixed grid and bounded brightness');
+const classic=run('atmosphereFrame("matrix",80,30,4,55)'),blue=run('atmosphereFrame("matrixBlue",80,30,4,55)'),depth=run('atmosphereFrame("matrixDepth",80,30,4,55)');assert(!classic.flat().some(c=>c.ink==='cyan'));assert(blue.flat().some(c=>c.ink==='cyan'));assert.notDeepEqual(classic,depth);tests.push('Matrix clásico usa verde, la variante azul añade cian y profundidad cambia la iluminación');
 const strike=run('atmosphereFrame("storm",80,30,1,55)');assert(strike.some(row=>row.some((cell,x)=>cell.ch==='/'&&row[x+1]?.ch==='/'&&cell.light>.7)));tests.push('Storm produces bright double-slash branching lightning');
 const quiet=run('atmosphereFrame("none",80,30,1,55)');assert(quiet.flat().every(c=>c.ch===' '));tests.push('Disabling the background produces an empty canvas');
 const wallFrames=new Map(),wallState={motion:false,atmosphere:'storm',weatherSpeed:1,intensity:'full'},wallDocument={hidden:false},flags={desktopHidden:false,shutdownHidden:true,saverHidden:true,game:false};let wallId=0,draws=0;
@@ -26,6 +27,6 @@ const flush=now=>{const pending=[...frames.values()];frames.clear();pending.forE
   const cancelled=run('animateAscii(el,"gather")');cancelled.cancel();assert.equal(await cancelled.done,false);assert.equal(frames.size,0);tests.push('Cancellation releases frames and resolves the waiting boot');
   const detached=run('animateAscii(el,"beams")');context.el.isConnected=false;flush(0);assert.equal(await detached.done,false);context.el.isConnected=true;tests.push('Detached windows stop their animation');
   context.state.motion=true;const reduced=run('animateAscii(el,"gather")');flush(0);assert(await reduced.done);assert.equal(context.el.textContent,art.join('\n'));assert.equal(frames.size,0);tests.push('Reduced motion draws the final name immediately');
-  for(const file of ['style.css','shell.css']){const css=fs.readFileSync(path.join(root,file),'utf8');assert.equal((css.match(/\{/g)||[]).length,(css.match(/\}/g)||[]).length);}tests.push('Both stylesheets have balanced rules');
+  for(const file of ['style.css','shell.css','experience.css']){const css=fs.readFileSync(path.join(root,file),'utf8');assert.equal((css.match(/\{/g)||[]).length,(css.match(/\}/g)||[]).length);}tests.push('All stylesheets have balanced rules');
   console.log(JSON.stringify({result:'PASS',tests},null,2));
 })().catch(e=>{console.error(e);process.exitCode=1;});
