@@ -13,7 +13,7 @@
    2. Apps describe el contenido de cada aplicación.
    3. WM crea, mueve, redimensiona y cierra ventanas.
    4. Los build... conectan el HTML con eventos del usuario.
-   5. shell.js aplica la interfaz y typeLoginArt prepara la intro Matrix.
+   5. shell.js aplica la interfaz y typeLoginArt escribe la intro: terminal Matrix + rótulo JOSEMI-OS descifrado.
    ========================================================= */
 // Atajos: $(selector) devuelve el primer elemento y $$(selector), un array con todos.
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -680,27 +680,17 @@ function appendBoot(text='',cls=''){
   const out=$('#bootTerminalOutput');
   const line=document.createElement('span');line.className=cls;line.textContent=text+'\n';out.appendChild(line);out.scrollTop=out.scrollHeight;return line;
 }
-// MÁQUINA DE ESCRIBIR: añade letras con pausas. bootRun cancela una secuencia que ya no está vigente.
+// MÁQUINA DE ESCRIBIR: una letra por temporizador normal (sin requestAnimationFrame), así funciona
+// igual en ordenadores lentos o con la pestaña en segundo plano. bootRun cancela una secuencia caducada.
 async function typeBootText(el,text,speed,run){
-  el.textContent='';
-  // El tiempo real decide cuántas letras mostrar: un ordenador lento no acumula
-  // un temporizador por letra. Saltar o reiniciar invalida la secuencia anterior.
-  if(!speed){el.textContent=text;return run===bootRun&&!enteringOS;}
-  return new Promise(resolve=>{
-    let start=null;
-    const frame=now=>{
-      if(run!==bootRun||enteringOS||!el.isConnected){resolve(false);return;}
-      if(start===null)start=now;
-      const count=Math.min(text.length,Math.floor((now-start)/speed)+1);
-      el.textContent=text.slice(0,count);
-      if(count===text.length)resolve(true);else requestAnimationFrame(frame);
-    };
-    requestAnimationFrame(frame);
-  });
-}
-async function typeBootLine(text,cls,speed,run){
-  const out=$('#bootTerminalOutput'),line=document.createElement('span');line.className=cls;out.appendChild(line);
-  const ok=await typeBootText(line,text,speed,run);line.textContent+='\n';out.scrollTop=out.scrollHeight;return ok;
+  const live=()=>run===bootRun&&!enteringOS;
+  if(!speed){el.textContent=text;return live();}
+  for(let i=1;i<=text.length;i++){
+    if(!live())return false;
+    el.textContent=text.slice(0,i);
+    await bootDelay(speed);
+  }
+  return live();
 }
 
 
@@ -1046,27 +1036,77 @@ function animateAscii(el,effect,{duration=1900,signal=()=>false}={}){
   handle=requestAnimationFrame(frame);return {done,cancel:()=>end(false)};
 }
 let currentBootAnimation=null;
-// Arranque cancelable: las frases aparecen una a una; después se anima la firma.
-// Cada espera comprueba bootRun para que Saltar nunca deje otra intro en marcha.
+// RÓTULO DE ARRANQUE: JOSEMI-OS dibujado con barras (estilo «slant»). Solo usa / \\ _ | y espacios,
+// que existen en cualquier fuente monoespaciada. Todas las filas miden lo mismo.
+const BOOT_ART=[
+  "       ______  _____ ________  _______     ____  _____",
+  "      / / __ \\/ ___// ____/  |/  /  _/    / __ \\/ ___/",
+  " __  / / / / /\\__ \\/ __/ / /|_/ // /_____/ / / /\\__ \\ ",
+  "/ /_/ / /_/ /___/ / /___/ /  / // /_____/ /_/ /___/ / ",
+  "\\____/\\____//____/_____/_/  /_/___/     \\____//____/  "
+];
+const BOOT_NOISE='/\\\\|_-=+<>*#01';
+const bootNoise=()=>BOOT_NOISE[Math.floor(Math.random()*BOOT_NOISE.length)];
+// Cada carácter del rótulo recibe el instante (0–1) en que deja de ser ruido: avanza de
+// izquierda a derecha con algo de azar, como un descifrado. Se calcula una sola vez.
+function bootPlan(){return BOOT_ART.map(row=>[...row].map((ch,x)=>ch===' '?-1:.12+(x/row.length)*.5+Math.random()*.2));}
+// FOTOGRAMA DEL RÓTULO: devuelve dos textos del mismo tamaño. «base» es la capa verde;
+// «hot» solo contiene los caracteres que brillan en blanco en ese instante.
+//  0 → .12  una cortina de ruido escribe el rótulo de izquierda a derecha.
+//  … → .82  cada carácter se descifra y destella al fijarse.
+//  .82 → 1  un haz de luz inclinado recorre el rótulo ya terminado.
+function bootFrame(plan,p){
+  const base=[],hot=[];
+  BOOT_ART.forEach((row,y)=>{
+    let a='',b='';
+    for(let x=0;x<row.length;x++){
+      const at=plan[y][x],typed=x/row.length<=p/.12;
+      if(at<0||!typed){a+=' ';b+=' ';continue;}
+      if(p>=1){a+=row[x];b+=' ';continue;}
+      if(p<at){const ch=bootNoise();a+=ch;b+=Math.random()<.08||(p<.12&&x/row.length>p/.12-.06)?ch:' ';continue;}
+      const beam=p>.82&&Math.abs(x+y*1.5-((p-.82)/.18)*(row.length+12)+4)<2.5;
+      a+=row[x];b+=p-at<.045||beam?row[x]:' ';
+    }
+    base.push(a);hot.push(b);
+  });
+  return{base:base.join('\n'),hot:hot.join('\n')};
+}
+// ARRANQUE: terminal negra como la de la película.
+//  1. Escribe «Wake up, Neo...», lo borra y escribe «The Matrix has you...».
+//  2. Limpia la pantalla y descifra el rótulo JOSEMI-OS en el centro.
+//  3. Entra al escritorio.
+// Solo usa texto y temporizadores (sin canvas ni requestAnimationFrame): son 5 filas de
+// caracteres, así que funciona igual en ordenadores lentos. Cada espera comprueba bootRun
+// para que Saltar nunca deje otra intro en marcha.
 typeLoginArt=async function(){
-  currentBootAnimation?.cancel();const run=++bootRun;enteringOS=false;
-  const login=$('#login'),out=$('#bootTerminalOutput'),command=$('#bootCommand');
-  login.classList.remove('hidden','out');login.classList.add('boot-v5');login.dataset.phase='matrix';out.innerHTML='';command.textContent='';
+  currentBootAnimation?.cancel();currentBootAnimation=null;const run=++bootRun;enteringOS=false;
+  const login=$('#login'),out=$('#bootTerminalOutput'),still=state.motion;
+  login.classList.remove('hidden','out');login.dataset.phase='matrix';out.innerHTML='';
   const active=()=>run===bootRun&&!enteringOS;
-  const line=appendBoot('','matrix-message');
-  for(const text of ['Wake up, Neo','The Matrix has you']){
-    if(!active())return;
-    if(!await typeBootText(line,text,state.motion?0:state.intensity==='calm'?42:80,run))return;
-    await bootDelay(state.motion?900:1100);if(!active())return;
-    if(text==='Wake up, Neo'){while(line.textContent.length){line.textContent=line.textContent.slice(0,-1);if(!state.motion)await bootDelay(23);if(!active())return;}if(!state.motion)await bootDelay(320);}
+  try{
+    const neo=appendBoot('','boot-neo boot-cursor');neo.textContent='';
+    if(!still)await bootDelay(600);if(!active())return;
+    if(!await typeBootText(neo,'Wake up, Neo...',still?0:110,run))return;
+    await bootDelay(still?900:1200);if(!active())return;
+    // Borrado: retrocede letra a letra, como si alguien pulsara la tecla de borrar.
+    if(!still)for(let n=neo.textContent.length-1;n>=0;n--){neo.textContent=neo.textContent.slice(0,n);await bootDelay(28);if(!active())return;}
+    neo.textContent='';if(!still)await bootDelay(450);if(!active())return;
+    if(!await typeBootText(neo,'The Matrix has you...',still?0:95,run))return;
+    await bootDelay(still?900:1300);if(!active())return;
+
+    out.innerHTML='';login.dataset.phase='signature';
+    const hot=appendBoot('','boot-logo boot-logo--hot'),logo=appendBoot('','boot-logo');
+    const final=BOOT_ART.join('\n'),plan=bootPlan(),steps=still?0:84;
+    for(let n=0;n<steps;n++){
+      const frame=bootFrame(plan,n/steps);logo.textContent=frame.base;hot.textContent=frame.hot;
+      await bootDelay(40);if(!active())return;
+    }
+    logo.textContent=final;hot.textContent='';
+    await bootDelay(still?1500:1100);if(active())enterOS();
+  }catch(error){
+    // Si algo falla en un navegador raro, el visitante entra igualmente al escritorio.
+    console.error('Intro de arranque:',error);if(active())enterOS();
   }
-  if(!state.motion)await bootDelay(450);if(!active())return;
-  login.dataset.phase='signature';out.innerHTML='';appendBoot('JOSEMI-OS / PERSONAL COMPUTING','boot-dim');appendBoot('');
-  const logo=appendBoot('','boot-logo boot-logo--hero');
-  currentBootAnimation=animateAscii(logo,state.bootEffect,{duration:state.intensity==='calm'?2300:4600,signal:()=>!active()});
-  if(!await currentBootAnimation.done||!active())return;
-  appendBoot('\nJOSÉ MIGUEL MIRALLES GANDIA','boot-accent');appendBoot('BUILD · LEARN · PLAY','boot-dim');
-  command.textContent='Tu universo está listo.';await bootDelay(state.motion?1100:1600);if(active())enterOS();
 };
 
 // AJUSTES: render crea los controles; bind lee sus cambios, actualiza state, aplica el tema y guarda.
