@@ -20,23 +20,10 @@
   <div id="bg" aria-hidden="true"></div>
 
 
-  <!-- Primer contacto: una terminal que construye el sistema en pantalla. -->
+  <!-- Primer contacto: terminal negra estilo Matrix. script.js escribe «Wake up, Neo...» y el rótulo JOSEMI-OS. -->
   <section id="login" class="login" aria-label="Secuencia de inicio de JOSEMI-OS">
-    <div class="boot-shell">
-      <div class="boot-shell__bar">
-        <div class="boot-shell__dots" aria-hidden="true"><span></span><span></span><span></span></div>
-        <span class="boot-shell__title">josemi@portfolio: ~/JOSEMI-OS</span>
-        <span class="boot-shell__state">BOOT</span>
-      </div>
-      <div class="boot-shell__body">
-        <pre id="bootTerminalOutput" class="boot-terminal-output" aria-live="polite"></pre>
-        <div class="boot-live-line"><span class="boot-prompt">josemi@portfolio:~$</span> <span id="bootCommand"></span><span class="boot-caret" aria-hidden="true">█</span></div>
-      </div>
-      <div class="boot-shell__footer">
-        <span>JOSEMI-OS // portfolio interactivo</span>
-        <button id="skipBoot" class="boot-skip" type="button">Saltar animación ↵</button>
-      </div>
-    </div>
+    <pre id="bootTerminalOutput" class="boot-terminal-output" aria-live="polite"></pre>
+    <button id="skipBoot" class="boot-skip" type="button">Saltar ↵</button>
   </section>
 
   <!-- ESCRITORIO: inicia oculto y se muestra al terminar o saltar la intro. -->
