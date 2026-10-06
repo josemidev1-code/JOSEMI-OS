@@ -86,3 +86,32 @@ no sustituye la demo propia que pide el tutorial de medios.
 `tests/player.cjs` ejecuta esas situaciones con un SDK simulado, incluidos el cierre,
 la caducidad, el reintento y las acciones del chatbot. No demuestra reproducción
 real de vídeos externos ni una conexión de Gemini: ambas requieren red/configuración.
+
+## Tercera revisión (6 de octubre de 2026): intro simplificada
+
+En algunos ordenadores la intro anterior (frases Matrix + firma ASCII animada por
+fotogramas) no cargaba bien. Se sustituye por una terminal negra como la de la película:
+
+1. Se escribe «Wake up, Neo...» con cursor de bloque y se borra letra a letra.
+2. Se escribe «The Matrix has you...».
+3. La pantalla se limpia y el rótulo JOSEMI-OS, dibujado con barras, se descifra en el
+   centro: una cortina de ruido lo escribe, cada carácter destella al fijarse y un haz
+   de luz lo recorre al final.
+4. Se abre el escritorio (unos 12 segundos en total; Enter o «Saltar» lo acortan).
+
+Qué cambia por dentro:
+
+- La intro ya no usa `requestAnimationFrame`, canvas, degradados recortados ni
+  desenfoques: solo texto y `setTimeout`. El rótulo son 5 filas de 54 caracteres y cada
+  fotograma cambia dos textos (capa verde y capa de destellos blancos).
+- El rótulo (`BOOT_ART` en `script.js`) solo usa `/ \ _ |` y espacios, así no depende
+  de que la fuente del ordenador tenga caracteres de bloque o de caja.
+- La letra es Courier en negrita, del propio ordenador, con halo verde; cada tamaño tiene
+  un valor de reserva por si el navegador no entiende `min()` o `clamp()`.
+- Las líneas retro del monitor son dos degradados fijos de CSS; no se animan.
+- Si la intro lanza un error, se entra igualmente al escritorio.
+
+La firma animada antigua sigue disponible en ASCII Studio y en el salvapantallas.
+`tests/boot.cjs` cubre la secuencia nueva. No se ha probado en el ordenador del instituto:
+si el navegador de allí es tan antiguo que no ejecuta `script.js`, el fallo estaría en el
+resto del sistema y no en la intro.

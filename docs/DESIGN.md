@@ -12,7 +12,7 @@ Referencias consultadas:
 
 ### Comportamiento
 
-- Intro negra: «Wake up, Neo», borrado y «The Matrix has you». Después, JOSEMI-OS pasa de ruido digital a convergencia orbital y una onda de fijación. Enter y el botón saltan cualquier fase. Un identificador de secuencia invalida las esperas anteriores.
+- Intro negra tipo monitor de Matrix (letra Courier con halo verde y líneas de barrido): se escribe «Wake up, Neo...», se borra, se escribe «The Matrix has you...» y, con la pantalla limpia, el rótulo JOSEMI-OS de barras se descifra desde ruido y lo recorre un haz de luz. Solo texto y temporizadores, para que funcione igual en ordenadores lentos. Enter y el botón saltan la intro.
 - Ocho efectos del nombre y ocho fondos animados. Matrix clásico usa verde; Matrix con cian añade columnas azuladas; profundidad atenúa las capas lejanas. Cada columna tiene velocidad, longitud y cabeza luminosa propia. Densidad y velocidad siguen siendo configurables.
 - Se conserva la selección de siete temas, cinco cursores, salvapantallas y ventanas animadas. La nueva experiencia propone Terminal nocturna al actualizarse por primera vez; después respeta las elecciones guardadas.
 - El shooter se ha eliminado. Arcade, terminal y buscador abren JOSEMI Run, Pac-Man y Tetris.
