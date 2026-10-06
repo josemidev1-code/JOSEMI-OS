@@ -1249,104 +1249,585 @@ applyTheme();save();buildIcons();buildMenu();buildClock();buildParallax();buildS
 ;
 /* === BEGIN music-config.js === */
 // Solo una URL pública: NUNCA pegues claves de API en este archivo.
-window.JOSEMI_MUSIC_API = ''; // Ejemplo: https://josemi-assistant.tu-subdominio.workers.dev
+window.JOSEMI_MUSIC_API = 'https://josemi-os-worker.josemidev1.workers.dev';
 
 /* === END music-config.js === */
 
 ;
 /* === BEGIN music.js === */
-/* JOSEMI Music: órdenes locales, búsqueda en el servidor y vídeo siempre visible. */
-(()=>{
-  const $m=s=>document.querySelector(s);
-  let player,readyPromise,track=null,request=0,wantsPlayback=false;
-  const panel=document.createElement('aside');panel.id='music-dock';panel.hidden=true;
-  panel.setAttribute('aria-label','Reproductor de YouTube');
-  panel.innerHTML='<div class="music-heading"><strong>JOSEMI MUSIC · YouTube</strong><button id="music-stop" aria-label="Cerrar reproductor">×</button></div><div id="youtube-player"></div><div class="music-track"><img id="music-cover" alt="Miniatura del vídeo"><div><small id="music-state">LISTO PARA REPRODUCIR</small><strong id="music-title"></strong><span id="music-channel"></span></div></div><div class="music-controls"><button id="music-play">Reproducir</button><button id="music-pause">Pausa</button><label>Volumen <input id="music-volume" type="range" min="0" max="100" value="65"></label></div><p id="music-status" role="status"></p><a id="music-source" target="_blank" rel="noopener">Ver en YouTube ↗</a>';
-  document.body.append(panel);
-  function status(text){$m('#music-status').textContent=text;}
-  // El SDK solo se descarga al elegir una canción, nunca durante la intro.
-  function loadPlayer(){
-    if(readyPromise)return readyPromise;
-    readyPromise=new Promise((resolve,reject)=>{
-      // Un intento caducado no puede crear otro reproductor cuando llega el SDK tarde.
-      let active=true,created=false,instance;
-      const fail=message=>{if(!active)return;active=false;clearTimeout(timeout);instance?.destroy?.();if(player===instance)player=null;reject(new Error(message));};
-      const timeout=setTimeout(()=>fail('YouTube tarda en cargar. Comprueba la conexión y vuelve a intentarlo.'),15000);
-      function create(){if(!active||created)return;created=true;
-        if(!$m('#youtube-player')){const slot=document.createElement('div');slot.id='youtube-player';panel.insertBefore(slot,$m('.music-track'));}
-        try{instance=player=new YT.Player('youtube-player',{width:320,height:200,playerVars:{origin:location.origin,playsinline:1},events:{onReady:()=>{if(!active)return;clearTimeout(timeout);player.setVolume(Number($m('#music-volume').value));resolve(player);},onStateChange:e=>{if(!active)return;if(e.data===1&&(!wantsPlayback||panel.hidden||document.hidden)){player.pauseVideo();return;}$m('#music-state').textContent=({1:'SONANDO AHORA',2:'EN PAUSA',0:'FINALIZADO',3:'CARGANDO'})[e.data]||'LISTO PARA REPRODUCIR';if(e.data===1)status('');},onAutoplayBlocked:()=>status('Pulsa Reproducir para iniciar la canción.'),onError:e=>{status(e.data===153?'Abre la web desde un servidor HTTP, no como archivo local.':'Este vídeo no se puede reproducir aquí. Prueba otro resultado o ábrelo en YouTube.');}}});}catch{fail('No se ha podido iniciar el reproductor de YouTube.');}}
-      if(window.YT?.Player)create();else{window.onYouTubeIframeAPIReady=create;let script=document.querySelector('script[data-youtube-sdk]');if(!script){script=document.createElement('script');script.dataset.youtubeSdk='true';script.src='https://www.youtube.com/iframe_api';document.head.append(script);}script.onerror=()=>{script.remove();fail('No se ha podido conectar con YouTube.');};}
-    }).catch(e=>{readyPromise=null;throw e;});return readyPromise;
+/* JOSEMI Music como mascota: chatbot, YouTube visible y APIs vía Cloudflare Worker. */
+;
+(() => {
+  const $m = s => document.querySelector(s);
+  const base = () => (window.JOSEMI_MUSIC_API || '').trim().replace(/\/+$/, '');
+  const allowedApps = ['about', 'projects', 'contact', 'arcade', 'settings', 'readme', 'mario', 'pacman', 'tetris', 'easter', 'vault'];
+  const history = [];
+
+  let player = null;
+  let readyPromise = null;
+  let track = null;
+  let request = 0;
+  let wantsPlayback = false;
+
+  const dock = document.createElement('aside');
+  dock.id = 'music-dock';
+  dock.hidden = true;
+  dock.setAttribute('aria-label', 'Reproductor de YouTube');
+  dock.innerHTML = `
+    <div class="music-heading"><strong>JOSEMI Music · YouTube</strong><button id="music-stop" aria-label="Cerrar reproductor">×</button></div>
+    <div id="youtube-player"></div>
+    <div class="music-track">
+      <img id="music-cover" alt="Miniatura del vídeo">
+      <div><small id="music-state">LISTO PARA REPRODUCIR</small><strong id="music-title"></strong><span id="music-channel"></span></div>
+    </div>
+    <div class="music-controls">
+      <button class="btn" id="music-play">Reproducir</button>
+      <button class="btn" id="music-pause">Pausa</button>
+      <label>Volumen <input id="music-volume" type="range" min="0" max="100" value="65"></label>
+    </div>
+    <p id="music-status" role="status"></p>
+    <a id="music-source" target="_blank" rel="noopener">Ver en YouTube ↗</a>
+  `;
+  document.body.append(dock);
+
+  function status(text) {
+    const el = $m('#music-status');
+    if (el) el.textContent = text;
   }
-  // Los títulos externos se escriben como texto; nunca se interpretan como HTML.
-  async function play(item){
-    if(!item||!/^[-\w]{11}$/.test(item.id)||typeof item.title!=='string'){status('El resultado de YouTube no es válido. Prueba otra búsqueda.');return;}
-    const run=++request;track=item;wantsPlayback=true;panel.hidden=false;
-    $m('#music-title').textContent=item.title;$m('#music-channel').textContent=item.channel||'YouTube';
-    $m('#music-cover').src=`https://i.ytimg.com/vi/${item.id}/hqdefault.jpg`;
-    $m('#music-source').href=`https://www.youtube.com/watch?v=${item.id}`;
-    $m('#music-state').textContent='CARGANDO';status('Conectando con YouTube…');
-    try{await loadPlayer();if(run!==request||panel.hidden)return;if(wantsPlayback&&!document.hidden)player.loadVideoById(item.id);else player.cueVideoById(item.id);status('Pulsa Reproducir para iniciar o reanudar.');}catch(e){if(run===request&&!panel.hidden)status(e.message);}
+
+  function pushHistory(role, text) {
+    history.push({ role, text });
+    if (history.length > 6) history.splice(0, history.length - 6);
   }
-  function pauseMusic(){wantsPlayback=false;player?.pauseVideo?.();}
-  function resumeMusic(){wantsPlayback=true;if(!panel.hidden&&!document.hidden)player?.playVideo?.();}
-  $m('#music-stop').onclick=()=>{request++;wantsPlayback=false;player?.stopVideo?.();panel.hidden=true;};
-  $m('#music-play').onclick=resumeMusic;$m('#music-pause').onclick=pauseMusic;
-  $m('#music-volume').oninput=e=>player?.setVolume?.(Number(e.target.value));
-  // Evita seguir reproduciendo con el vídeo oculto por otra pestaña o por Apagar.
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseMusic();});
-  new MutationObserver(()=>{if(!document.querySelector('#shutdown').classList.contains('hidden'))$m('#music-stop').click();}).observe(document.querySelector('#shutdown'),{attributes:true,attributeFilter:['class']});
-  function videoId(text){try{const u=new URL(text);if(u.hostname==='youtu.be')return /^[\w-]{11}$/.test(u.pathname.slice(1))?u.pathname.slice(1):null;if(['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname)){const id=u.searchParams.get('v')||u.pathname.match(/^\/(?:shorts|embed)\/([\w-]{11})/)?.[1];return /^[\w-]{11}$/.test(id||'')?id:null;}}catch{}return null;}
-  async function search(query){
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
-    try{const base=(window.JOSEMI_MUSIC_API||location.origin).trim().replace(/\/+$/,'');const response=await fetch(`${base}/api/youtube/search?q=${encodeURIComponent(query)}`,{signal:controller.signal});let data;try{data=await response.json();}catch{throw new Error('La búsqueda necesita el servidor de JOSEMI Music. Puedes pegar un enlace de YouTube.');}if(!response.ok)throw new Error(data?.error||'No se ha podido buscar.');return validMusicItems(data?.items);}finally{clearTimeout(timer);}
+
+  function validMusicItems(items) {
+    if (!Array.isArray(items)) throw new Error('YouTube ha devuelto una lista de vídeos inválida.');
+    return items
+      .filter(item => item && /^[-\w]{11}$/.test(item.id) && typeof item.title === 'string')
+      .map(item => ({
+        id: item.id,
+        title: item.title,
+        channel: typeof item.channel === 'string' ? item.channel : 'YouTube'
+      }));
   }
-  async function chat(message,history){
-    const base=(window.JOSEMI_MUSIC_API||'').trim().replace(/\/+$/,'');
-    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),35000);
-    try{const response=await fetch(`${base}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,history}),signal:controller.signal});let data;try{data=await response.json();}catch{throw new Error('El servidor del asistente no ha devuelto una respuesta válida.');}if(!response.ok)throw new Error(data?.error||'El asistente no ha respondido.');if(!data||typeof data.reply!=='string'||!['reply','pause','resume','volume','open','music'].includes(data.action))throw new Error('La respuesta del asistente está incompleta. Prueba otra vez.');if(data.action==='volume'&&(!Number.isFinite(data.volume)||data.volume<0||data.volume>100))throw new Error('El asistente ha devuelto un volumen inválido.');if(data.action==='music')data.items=validMusicItems(data.items);return data;}finally{clearTimeout(timer);}
-  }
-  // Solo pasan al reproductor vídeos con identificador y título válidos.
-  function validMusicItems(items){if(!Array.isArray(items))throw new Error('YouTube ha devuelto una lista de vídeos inválida.');return items.filter(item=>item&&/^[-\w]{11}$/.test(item.id)&&typeof item.title==='string').map(item=>({...item,channel:typeof item.channel==='string'?item.channel:'YouTube'}));}
-  const icon='<svg class="os-icon" viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="10" width="48" height="44" rx="8" fill="#bda9d5"/><path d="M26 42V23l19-4v19M26 23l19-4" fill="none" stroke="#293934" stroke-width="3"/><circle cx="21" cy="43" r="6" fill="#293934"/><circle cx="40" cy="39" r="6" fill="#293934"/></svg>';
-  // Plan B para clase: respuestas escritas con datos públicos, sin IA ni red.
-  // No sustituye a Gemini; permite explicar y usar el chatbot antes de conectar el Worker.
-  function localPortfolioReply(text){
-    if(/\b(estudia|estudias|estudios|dam|instituto)\b/.test(text))return 'Josemi estudia DAM en el IES Dr. Lluís Simarro. Está aprendiendo HTML, CSS, JavaScript y Git/GitHub.';
-    if(/\b(proyecto|proyectos|portfolio)\b/.test(text))return 'JOSEMI-OS es su portfolio interactivo: ventanas, terminal, personalización y juegos. Puedes explorar la aplicación Proyectos y su código en GitHub.';
-    if(/\b(contacto|correo|email|contactar)\b/.test(text))return 'Puedes escribir a josemidev1@gmail.com o visitar github.com/josemidev1-code. La aplicación Contacto contiene los enlaces.';
-    if(/\b(gustos|intereses|gusta|deporte)\b/.test(text))return 'A Josemi le interesan la informática, la IA y la automatización. También le gusta el gimnasio, el boxeo y correr.';
-    if(/\b(hola|creado|quien eres|que eres)\b/.test(text))return 'Soy el asistente de JOSEMI-OS. Ahora uso respuestas locales escritas; cuando se conecte el Worker podré consultar Gemini y buscar música.';
+
+  function videoId(text) {
+    try {
+      const u = new URL(text);
+      if (u.hostname === 'youtu.be') return /^[\w-]{11}$/.test(u.pathname.slice(1)) ? u.pathname.slice(1) : null;
+      if (['youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(u.hostname)) {
+        const id = u.searchParams.get('v') || u.pathname.match(/^\/(?:shorts|embed)\/([\w-]{11})/)?.[1];
+        return /^[\w-]{11}$/.test(id || '') ? id : null;
+      }
+    } catch {}
     return null;
   }
-  // Con Workers configurado, Gemini interpreta preguntas y acciones; sin él hay órdenes locales.
-  Apps.music={title:'JOSEMI Music',icon,size:[570,540],render:()=>'<section class="music-app"><span class="card-kicker">JOSEMI ASSISTANT · MÚSICA Y PORTFOLIO</span><h2>¿Qué ponemos?</h2><p>Escribe «Pon canción de artista» o pega un enlace de YouTube. También entiendo «pausa», «continúa» y «volumen 30».</p><div class="music-chat" role="log" aria-live="polite"></div><form class="music-form"><label class="sr-only" for="music-query">Petición musical</label><input id="music-query" maxlength="160" placeholder="Pon Eyes Without a Face de Billy Idol" required><button class="btn" type="submit">Enviar</button></form><div class="music-results"></div><small>El vídeo permanece visible abajo a la derecha. La miniatura y el canal proceden de YouTube.</small></section>',bind(body){
-    const log=body.querySelector('.music-chat'),form=body.querySelector('form'),input=body.querySelector('input'),results=body.querySelector('.music-results');let busy=false;const history=[];
-    const say=(text,who='assistant')=>{const line=document.createElement('p');line.className=who;line.textContent=(who==='user'?'Tú: ':'JOSEMI: ')+text;log.append(line);while(log.children.length>30)log.firstChild.remove();log.scrollTop=log.scrollHeight;};say('Dime qué canción quieres escuchar.');
-    form.onsubmit=async e=>{e.preventDefault();if(busy)return;const raw=input.value.trim();if(!raw)return;input.value='';say(raw,'user');const normalized=raw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-      if(/^(pausa|para|deten)( la musica)?$/.test(normalized)){pauseMusic();say(track?'Música en pausa.':'Todavía no has elegido una canción.');return;}
-      if(/^(continua|reanuda|play|reproduce)$/.test(normalized)){resumeMusic();say(track?'Puedes reanudar con el botón Reproducir si el navegador lo solicita.':'Dime primero una canción.');return;}
-      const volume=normalized.match(/^(?:volumen|baja el volumen a|sube el volumen a)\s*(\d{1,3})\s*%?$/);if(volume){const value=Math.min(100,Number(volume[1]));player?.setVolume?.(value);$m('#music-volume').value=value;say(`Volumen: ${value} %.`);return;}
-      const id=videoId(raw);if(id){say('Abro ese vídeo.');await play({id,title:'Vídeo de YouTube',channel:'Enlace elegido por ti'});return;}
-      if(window.JOSEMI_MUSIC_API){busy=true;form.querySelector('button').disabled=true;results.replaceChildren();say('Consultando al asistente…');try{const data=await chat(raw,history);if(!body.isConnected)return;say(data.reply);history.push({role:'user',text:raw},{role:'model',text:data.reply});if(history.length>6)history.splice(0,history.length-6);
-        if(data.action==='pause')pauseMusic();
-        if(data.action==='resume')resumeMusic();
-        if(data.action==='volume'){player?.setVolume?.(data.volume);$m('#music-volume').value=data.volume;}
-        if(data.action==='open'&&['about','projects','contact','arcade','settings','readme'].includes(data.app))openWindow(data.app);
-        if(data.action==='music'){const items=data.items||[];if(!items.length){say('No hay resultados. Prueba otro título o artista.');return;}items.forEach(item=>{const button=document.createElement('button');button.className='music-result';button.textContent=`${item.title} · ${item.channel}`;button.onclick=()=>play(item);results.append(button);});await play(items[0]);}
-      }catch(error){say(error.name==='AbortError'?'El asistente tarda demasiado. Prueba otra vez.':error.message);}finally{busy=false;form.querySelector('button').disabled=false;}return;}
-      const local=localPortfolioReply(normalized);if(local){say(local);return;}
-      if(!['localhost','127.0.0.1'].includes(location.hostname)){
-        say('La IA y la búsqueda musical aún necesitan conectar el Worker. Puedes pegar un enlace de YouTube o preguntarme por estudios, proyectos y contacto. Para otras preguntas: josemidev1@gmail.com.');return;
-      }
-      if(!/^(pon(?:me)?|reproduce(?:me)?|busca|quiero escuchar)\s/.test(normalized)){
-        say('No tengo esa información en mis respuestas locales. Escríbeme a josemidev1@gmail.com. Para buscar música, escribe «Pon canción de artista».');return;
-      }
-      const query=raw.replace(/^(?:pon(?:me)?|reproduce(?:me)?|busca|quiero escuchar)\s+/i,'').trim();busy=true;form.querySelector('button').disabled=true;results.replaceChildren();say('Buscando en YouTube…');
-      try{const items=await search(query);if(!body.isConnected)return;if(!items.length){say('No he encontrado resultados. Prueba con título y artista.');return;}say('Cargo el primer resultado; puedes elegir otra versión debajo.');items.forEach(item=>{const button=document.createElement('button');button.className='music-result';button.textContent=`${item.title} · ${item.channel}`;button.onclick=()=>play(item);results.append(button);});await play(items[0]);}catch(error){say(error.name==='AbortError'?'La búsqueda ha tardado demasiado. Prueba otra vez.':error.message);}finally{busy=false;form.querySelector('button').disabled=false;}
-    };
-  }};
-  currentUser.apps.push('music');buildIcons();buildMenu();
-})();
 
+  function loadPlayer() {
+    if (readyPromise) return readyPromise;
+
+    readyPromise = new Promise((resolve, reject) => {
+      let active = true;
+      let created = false;
+      let instance;
+
+      const fail = message => {
+        if (!active) return;
+        active = false;
+        clearTimeout(timeout);
+        instance?.destroy?.();
+        if (player === instance) player = null;
+        reject(new Error(message));
+      };
+
+      const timeout = setTimeout(() => fail('YouTube tarda en cargar. Comprueba la conexión y vuelve a intentarlo.'), 15000);
+
+      function create() {
+        if (!active || created) return;
+        created = true;
+
+        if (!$m('#youtube-player')) {
+          const slot = document.createElement('div');
+          slot.id = 'youtube-player';
+          const trackBox = $m('.music-track');
+          if (trackBox) dock.insertBefore(slot, trackBox);
+        }
+
+        try {
+          instance = player = new YT.Player('youtube-player', {
+            width: 320,
+            height: 200,
+            playerVars: { origin: location.origin, playsinline: 1 },
+            events: {
+              onReady: () => {
+                if (!active) return;
+                clearTimeout(timeout);
+                player.setVolume(Number($m('#music-volume')?.value || 65));
+                resolve(player);
+              },
+              onStateChange: e => {
+                if (!active) return;
+                if (e.data === 1 && (!wantsPlayback || dock.hidden || document.hidden)) {
+                  player.pauseVideo();
+                  return;
+                }
+                const stateText = { 1: 'SONANDO AHORA', 2: 'EN PAUSA', 0: 'FINALIZADO', 3: 'CARGANDO' };
+                const stateEl = $m('#music-state');
+                if (stateEl) stateEl.textContent = stateText[e.data] || 'LISTO PARA REPRODUCIR';
+                if (e.data === 1) status('');
+              },
+              onAutoplayBlocked: () => status('Pulsa Reproducir para iniciar la canción.'),
+              onError: e => {
+                status(e.data === 153 ? 'Abre la web desde un servidor HTTP, no como archivo local.' : 'Este vídeo no se puede reproducir aquí. Prueba otro resultado o ábrelo en YouTube.');
+              }
+            }
+          });
+        } catch {
+          fail('No se ha podido iniciar el reproductor de YouTube.');
+        }
+      }
+
+      if (window.YT?.Player) {
+        create();
+      } else {
+        const old = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = () => {
+          try { old?.(); } catch {}
+          create();
+        };
+
+        let script = document.querySelector('script[data-youtube-sdk]');
+        if (!script) {
+          script = document.createElement('script');
+          script.dataset.youtubeSdk = 'true';
+          script.src = 'https://www.youtube.com/iframe_api';
+          document.head.append(script);
+        }
+
+        script.onerror = () => {
+          script.remove();
+          fail('No se ha podido conectar con YouTube.');
+        };
+      }
+    }).catch(e => {
+      readyPromise = null;
+      throw e;
+    });
+
+    return readyPromise;
+  }
+
+  async function play(item) {
+    if (!item || !/^[-\w]{11}$/.test(item.id) || typeof item.title !== 'string') {
+      status('El resultado de YouTube no es válido. Prueba otra búsqueda.');
+      return;
+    }
+
+    const run = ++request;
+    track = item;
+    wantsPlayback = true;
+    dock.hidden = false;
+
+    $m('#music-title').textContent = item.title;
+    $m('#music-channel').textContent = item.channel || 'YouTube';
+    $m('#music-cover').src = `https://i.ytimg.com/vi/${item.id}/hqdefault.jpg`;
+    $m('#music-source').href = `https://www.youtube.com/watch?v=${item.id}`;
+    $m('#music-state').textContent = 'CARGANDO';
+    status('Conectando con YouTube…');
+
+    try {
+      await loadPlayer();
+      if (run !== request || dock.hidden) return;
+      if (wantsPlayback && !document.hidden) player.loadVideoById(item.id);
+      else player.cueVideoById(item.id);
+      status('Pulsa Reproducir para iniciar o reanudar.');
+    } catch (e) {
+      if (run === request && !dock.hidden) status(e.message);
+    }
+  }
+
+  function pauseMusic() {
+    wantsPlayback = false;
+    player?.pauseVideo?.();
+    const stateEl = $m('#music-state');
+    if (stateEl) stateEl.textContent = 'EN PAUSA';
+  }
+
+  function resumeMusic() {
+    wantsPlayback = true;
+    if (!dock.hidden && !document.hidden) player?.playVideo?.();
+  }
+
+  function setVolume(v) {
+    const value = Math.max(0, Math.min(100, Number(v) || 0));
+    player?.setVolume?.(value);
+    const input = $m('#music-volume');
+    if (input) input.value = String(value);
+  }
+
+  async function searchYouTube(query) {
+    const b = base();
+    if (!b) throw new Error('Necesitas configurar el Worker para buscar música por nombre.');
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
+
+    try {
+      const res = await fetch(`${b}/api/youtube/search?q=${encodeURIComponent(query)}`, { signal: controller.signal });
+      let data;
+      try { data = await res.json(); } catch { throw new Error('La búsqueda necesita el servidor de JOSEMI Music. Puedes pegar un enlace de YouTube.'); }
+      if (!res.ok) throw new Error(data?.error || 'No se ha podido buscar.');
+      return validMusicItems(data.items);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function getWeather(city) {
+    const b = base();
+    if (!b) throw new Error('Necesitas configurar el Worker para consultar el clima.');
+    const res = await fetch(`${b}/api/weather?city=${encodeURIComponent(city)}`);
+    let data;
+    try { data = await res.json(); } catch { throw new Error('El servidor del clima no ha devuelto una respuesta válida.'); }
+    if (!res.ok) throw new Error(data?.error || 'No se ha podido consultar el clima.');
+    return data;
+  }
+
+  async function getBooks(query) {
+    const b = base();
+    if (!b) throw new Error('Necesitas configurar el Worker para consultar libros.');
+    const res = await fetch(`${b}/api/books?q=${encodeURIComponent(query)}`);
+    let data;
+    try { data = await res.json(); } catch { throw new Error('El servidor de libros no ha devuelto una respuesta válida.'); }
+    if (!res.ok) throw new Error(data?.error || 'No se ha podido consultar libros.');
+    return data;
+  }
+
+  async function chat(message, historyArg = []) {
+    const b = base();
+    if (!b) throw new Error('El asistente necesita el Worker de Cloudflare.');
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 35000);
+
+    try {
+      const res = await fetch(`${b}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, history: historyArg.slice(-6) }),
+        signal: controller.signal
+      });
+
+      let data;
+      try { data = await res.json(); } catch { throw new Error('El servidor del asistente no ha devuelto una respuesta válida.'); }
+      if (!res.ok) throw new Error(data?.error || 'El asistente no ha respondido.');
+      if (!data || typeof data.reply !== 'string' || !['reply', 'pause', 'resume', 'volume', 'open', 'music', 'weather', 'books'].includes(data.action)) {
+        throw new Error('La respuesta del asistente está incompleta.');
+      }
+      if (data.action === 'volume' && (!Number.isFinite(data.volume) || data.volume < 0 || data.volume > 100)) {
+        throw new Error('El asistente ha devuelto un volumen inválido.');
+      }
+      if (data.action === 'music') data.items = validMusicItems(data.items || []);
+      return data;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function localPortfolioReply(text) {
+    const t = String(text || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+    if (/\b(estudia|estudias|estudios|dam|instituto)\b/.test(t)) {
+      return 'Josemi estudia DAM en el IES Dr. Lluís Simarro. Está aprendiendo HTML, CSS, JavaScript y Git/GitHub.';
+    }
+
+    if (/\b(proyecto|proyectos|portfolio|josemi-os|museu|grec)\b/.test(t)) {
+      return 'JOSEMI-OS es su portfolio interactivo: ventanas, terminal, personalización y juegos. También está el Museu grec y su GitHub.';
+    }
+
+    if (/\b(contacto|correo|email|contactar|linkedin|github)\b/.test(t)) {
+      return 'Contacto: josemidev1@gmail.com, GitHub josemidev1-code, LinkedIn José Miguel Miralles Gandia.';
+    }
+
+    if (/\b(gustos|intereses|gusta|deporte|gimnasio|cine|lectura|ciencia ficcion)\b/.test(t)) {
+      return 'A Josemi le gustan el gimnasio, el deporte, programar, proyectos, ciencia ficción, cine y lectura.';
+    }
+
+    if (/\b(hola|creado|quien eres|que eres|asistente)\b/.test(t)) {
+      return 'Soy la mascota de JOSEMI-OS. Puedo responder sobre Josemi, sus proyectos y, si el Worker está activo, música, clima y libros.';
+    }
+
+    if (/\b(pon|busca|reproduce|musica|cancion)\b/.test(t)) {
+      return 'Para música por nombre necesito el Worker de Cloudflare. Puedes pegar un enlace de YouTube o configurar JOSEMI_MUSIC_API.';
+    }
+
+    if (/\b(clima|tiempo|weather|temperatura)\b/.test(t)) {
+      return 'Para clima necesito el Worker. Ejemplo: clima Madrid.';
+    }
+
+    if (/\b(libros|books)\b/.test(t)) {
+      return 'Para libros necesito el Worker. Ejemplo: libros Isaac Asimov.';
+    }
+
+    return null;
+  }
+
+  // Con Workers configurado, Gemini puede responder acciones reales.
+  const icon = '<svg class="os-icon" viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="10" width="48" height="44" rx="8" fill="#bda9d5"/><path d="M26 42V23l19-4v19M26 23l19-4" fill="none" stroke="#293934" stroke-width="3"/><circle cx="21" cy="43" r="6" fill="#293934"/><circle cx="40" cy="39" r="6" fill="#293934"/></svg>';
+
+  // Mascota fija abajo a la izquierda.
+  const mascot = document.createElement('button');
+  mascot.id = 'mascot-button';
+  mascot.type = 'button';
+  mascot.setAttribute('aria-label', 'Abrir asistente de Josemi');
+  mascot.setAttribute('aria-expanded', 'false');
+  mascot.innerHTML = '<svg class="mascot-svg" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h8v2H4zM2 4h2v8H2zM12 4h2v8h-2zM6 10h4v2H6z"/></svg>';
+
+  const panel = document.createElement('section');
+  panel.id = 'mascot-chat';
+  panel.hidden = true;
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-modal', 'false');
+  panel.setAttribute('aria-label', 'Asistente de Josemi');
+  panel.innerHTML = `
+    <div class="mascot-head"><strong>JOSEMI Assistant</strong><button id="mascot-close" aria-label="Cerrar asistente">×</button></div>
+    <div id="mascot-log" class="mascot-log" aria-live="polite"></div>
+    <div id="mascot-results" class="mascot-results"></div>
+    <form id="mascot-form" class="mascot-form">
+      <label class="sr-only" for="mascot-input">Mensaje</label>
+      <input id="mascot-input" maxlength="180" placeholder="Pon música, clima Madrid, proyectos o contacto" autocomplete="off">
+      <button class="btn" type="submit">Enviar</button>
+    </form>
+    <div class="mascot-quick">
+      <button class="btn" data-q="¿Quién eres?">Quién eres</button>
+      <button class="btn" data-q="Proyectos">Proyectos</button>
+      <button class="btn" data-q="Contacto">Contacto</button>
+      <button class="btn" data-q="Clima Madrid">Clima</button>
+      <button class="btn" data-q="Pon una canción">Música</button>
+    </div>
+  `;
+
+  document.body.append(mascot, panel);
+
+  function say(text, who = 'assistant') {
+    const log = $m('#mascot-log');
+    if (!log) return;
+    const line = document.createElement('p');
+    line.className = who;
+    line.textContent = (who === 'user' ? 'Tú: ' : 'JOSEMI: ') + text;
+    log.append(line);
+    while (log.children.length > 30) log.firstChild.remove();
+    log.scrollTop = log.scrollHeight;
+    if (who === 'assistant') pushHistory('model', text);
+  }
+
+  function toggleChat() {
+    panel.hidden = !panel.hidden;
+    mascot.setAttribute('aria-expanded', String(!panel.hidden));
+    if (!panel.hidden) $m('#mascot-input')?.focus();
+  }
+
+  mascot.addEventListener('click', toggleChat);
+  $m('#mascot-close')?.addEventListener('click', () => {
+    panel.hidden = true;
+    mascot.setAttribute('aria-expanded', 'false');
+    mascot.focus();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !panel.hidden) {
+      panel.hidden = true;
+      mascot.setAttribute('aria-expanded', 'false');
+      mascot.focus();
+    }
+  });
+
+  document.querySelectorAll('.mascot-quick [data-q]').forEach(button => {
+    button.addEventListener('click', () => {
+      const input = $m('#mascot-input');
+      if (input) input.value = button.dataset.q;
+      $m('#mascot-form')?.requestSubmit();
+    });
+  });
+
+  function renderResults(items) {
+    const box = $m('#mascot-results');
+    if (!box) return;
+    box.innerHTML = '';
+    if (!items.length) {
+      box.innerHTML = '<p>No hay resultados.</p>';
+      return;
+    }
+    items.forEach(item => {
+      const button = document.createElement('button');
+      button.className = 'btn music-result';
+      button.textContent = `${item.title} · ${item.channel || 'YouTube'}`;
+      button.onclick = () => play(item);
+      box.append(button);
+    });
+  }
+
+  function openApp(app) {
+    if (typeof openWindow !== 'function') return;
+    const desktop = $m('#desktop');
+    if (desktop && desktop.classList.contains('hidden') && typeof enterOS === 'function') {
+      enterOS();
+      setTimeout(() => openWindow(app), 600);
+    } else {
+      openWindow(app);
+    }
+  }
+
+  async function handleUser(raw) {
+    const normalized = raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    pushHistory('user', raw);
+
+    if (/^(pausa|para|deten)( la musica)?$/.test(normalized)) {
+      pauseMusic();
+      say(track ? 'Música en pausa.' : 'Todavía no has elegido una canción.');
+      return;
+    }
+
+    if (/^(continua|reanuda|play|reproduce)$/.test(normalized)) {
+      resumeMusic();
+      say(track ? 'Puedes reanudar con el botón Reproducir si el navegador lo solicita.' : 'Dime primero una canción.');
+      return;
+    }
+
+    const volume = normalized.match(/^(?:volumen|baja el volumen a|sube el volumen a)\s*(\d{1,3})\s*%?$/);
+    if (volume) {
+      const value = Math.min(100, Number(volume[1]));
+      setVolume(value);
+      say(`Volumen: ${value}%.`);
+      return;
+    }
+
+    const id = videoId(raw);
+    if (id) {
+      say('Abro ese vídeo.');
+      await play({ id, title: 'Vídeo de YouTube', channel: 'Enlace elegido por ti' });
+      return;
+    }
+
+    const weatherMatch = raw.match(/(?:clima|tiempo|weather|temperatura)\s+(?:en|de|para)?\s*(.+)/i);
+    if (weatherMatch) {
+      try {
+        const w = await getWeather(weatherMatch[1]);
+        say(`Clima en ${w.city}: ${w.weather}, ${w.temperatureC}°C, viento ${w.windKmh} km/h.`);
+      } catch (e) {
+        say(e.message);
+      }
+      return;
+    }
+
+    const bookMatch = raw.match(/(?:libros|books)\s+(.+)/i);
+    if (bookMatch) {
+      try {
+        const b = await getBooks(bookMatch[1]);
+        say(b.summary || 'Libros encontrados.');
+      } catch (e) {
+        say(e.message);
+      }
+      return;
+    }
+
+    if (base()) {
+      try {
+        const data = await chat(raw, history);
+        say(data.reply);
+
+        const action = data.action || 'reply';
+
+        if (action === 'pause') pauseMusic();
+        if (action === 'resume') resumeMusic();
+        if (action === 'volume') setVolume(data.volume);
+        if (action === 'open' && allowedApps.includes(data.app)) openApp(data.app);
+
+        if (action === 'music') {
+          const items = validMusicItems(data.items || []);
+          renderResults(items);
+          if (items.length) await play(items[0]);
+        }
+
+        if (action === 'weather') {
+          if (data.weather) {
+            say(`Clima en ${data.weather.city}: ${data.weather.weather}, ${data.weather.temperatureC}°C, viento ${data.weather.windKmh} km/h.`);
+          } else if (data.city) {
+            const w = await getWeather(data.city);
+            say(`Clima en ${w.city}: ${w.weather}, ${w.temperatureC}°C, viento ${w.windKmh} km/h.`);
+          }
+        }
+
+        if (action === 'books' && data.books) {
+          say(data.books.summary || 'Libros encontrados.');
+        }
+      } catch (e) {
+        const local = localPortfolioReply(raw);
+        say(local || e.message);
+      }
+      return;
+    }
+
+    const local = localPortfolioReply(raw);
+    if (local) {
+      say(local);
+      return;
+    }
+
+    say('No tengo esa información local. Configura el Worker o usa contacto: josemidev1@gmail.com.');
+  }
+
+  $m('#mascot-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const input = $m('#mascot-input');
+    const raw = input?.value.trim();
+    if (!raw) return;
+    input.value = '';
+    say(raw, 'user');
+    await handleUser(raw);
+  });
+
+  $m('#music-stop').onclick = () => {
+    request++;
+    wantsPlayback = false;
+    player?.stopVideo?.();
+    dock.hidden = true;
+  };
+
+  $m('#music-play').onclick = () => {
+    wantsPlayback = true;
+    if (!dock.hidden && !document.hidden && player) {
+      player.playVideo();
+    } else {
+      loadPlayer().then(() => player?.playVideo?.()).catch(e => status(e.message));
+    }
+  };
+
+  $m('#music-pause').onclick = pauseMusic;
+  $m('#music-volume').oninput = e => setVolume(e.target.value);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) pauseMusic();
+  });
+
+  const shutdown = $m('#shutdown');
+  if (shutdown) {
+    new MutationObserver(() => {
+      if (!shutdown.classList.contains('hidden') && !dock.hidden) $m('#music-stop').click();
+    }).observe(shutdown, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  window.JOSEMI_MUSIC = {
+    play,
+    pause: pauseMusic,
+    resume: resumeMusic,
+    volume: setVolume,
+    search: searchYouTube,
+    weather: getWeather,
+    books: getBooks,
+    chat
+  };
+
+  say('Dime qué quieres: música, clima, libros o preguntas sobre Josemi.');
+})();
 /* === END music.js === */

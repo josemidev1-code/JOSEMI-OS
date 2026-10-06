@@ -281,3 +281,935 @@ body[data-atmosphere^="matrix"] .desktop-welcome{background:color-mix(in srgb,va
   background-image:none;filter:none;animation:none;
 }
 body.reduce-motion .login.out{filter:none}
+/* === BEGIN JOSEMI-OS UPDATE CSS === */
+
+/* Eliminar barra superior de "Sistema en línea" */
+.desktop__status{
+  display:none!important;
+}
+
+/* Escritorio más limpio, sin topbar innecesaria */
+.desktop{
+  padding-top:96px;
+}
+
+/* Mascota fija abajo a la izquierda, visible también en landing */
+#mascot-button{
+  position:fixed;
+  z-index:950;
+  left:16px;
+  bottom:14px;
+  width:46px;
+  height:46px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--shell-border,#395644);
+  border-radius:14px;
+  background:var(--shell-panel,#0b110e);
+  color:var(--accent,#6dff9b);
+  box-shadow:0 12px 35px rgba(0,0,0,.35);
+  cursor:pointer;
+  transition:transform .2s ease,border-color .2s ease,background .2s ease;
+}
+#mascot-button:hover,
+#mascot-button:focus-visible{
+  transform:translateY(-2px);
+  border-color:var(--accent,#6dff9b);
+  background:var(--shell-raised,#142019);
+  outline:2px solid var(--accent,#6dff9b);
+  outline-offset:3px;
+}
+.mascot-svg{
+  width:26px;
+  height:26px;
+  fill:currentColor;
+  image-rendering:pixelated;
+  shape-rendering:crispEdges;
+}
+
+/* Barra inferior rediseñada: deja hueco para la mascota */
+.taskbar{
+  left:18px;
+  right:18px;
+  bottom:12px;
+  height:52px;
+  padding-left:72px;
+  padding-right:10px;
+  gap:8px;
+  border-radius:14px;
+  background:rgba(7,12,9,.88);
+  border:1px solid var(--shell-border,#395644);
+  box-shadow:0 16px 46px rgba(0,0,0,.38);
+}
+.taskbar__start{
+  height:36px;
+  border-radius:10px;
+  font-weight:700;
+  letter-spacing:.08em;
+}
+.taskbar__apps{
+  gap:6px;
+}
+.tb-app{
+  height:36px;
+  border-radius:9px;
+  background:rgba(12,21,16,.72);
+  color:var(--shell-text,#edf7f0);
+}
+.tb-app.active{
+  box-shadow:inset 0 -2px var(--accent,#6dff9b);
+  color:#fff;
+}
+.tray__clock{
+  gap:2px;
+}
+.tray__clock #clock__time{
+  font-size:12px;
+}
+.tray__clock small{
+  font-size:8px;
+}
+
+/* Chatbot mascota */
+#mascot-chat{
+  position:fixed;
+  z-index:960;
+  left:18px;
+  bottom:72px;
+  width:min(390px,calc(100vw - 36px));
+  height:min(540px,calc(100dvh - 120px));
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  border:1px solid var(--shell-border,#395644);
+  border-radius:16px;
+  background:rgba(6,10,8,.96);
+  box-shadow:0 28px 90px rgba(0,0,0,.55);
+  color:var(--shell-text,#edf7f0);
+  backdrop-filter:blur(18px);
+}
+#mascot-chat[hidden]{
+  display:none!important;
+}
+.mascot-head{
+  flex:0 0 auto;
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 14px;
+  border-bottom:1px solid var(--shell-border,#395644);
+  background:rgba(10,18,13,.92);
+  font:700 11px var(--font-mono,monospace);
+  letter-spacing:.08em;
+}
+.mascot-head button{
+  border:1px solid var(--shell-border,#395644);
+  background:transparent;
+  color:var(--shell-text,#edf7f0);
+  width:28px;
+  height:28px;
+  border-radius:8px;
+  cursor:pointer;
+}
+.mascot-log{
+  flex:1;
+  min-height:0;
+  overflow:auto;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  scrollbar-width:thin;
+}
+.mascot-log p{
+  max-width:92%;
+  padding:9px 11px;
+  border-radius:10px;
+  background:rgba(17,27,21,.82);
+  border:1px solid rgba(185,255,208,.10);
+  color:#c9d9cf;
+  font-size:12px;
+  line-height:1.55;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.mascot-log .user{
+  align-self:flex-end;
+  color:#eaffef;
+  border-color:rgba(109,255,155,.24);
+  background:rgba(109,255,155,.09);
+}
+.mascot-results{
+  flex:0 0 auto;
+  max-height:120px;
+  overflow:auto;
+  padding:0 14px;
+  display:grid;
+  gap:7px;
+}
+.mascot-results:empty{
+  display:none;
+}
+.mascot-results .music-result{
+  text-align:left;
+  font-size:11px;
+  line-height:1.35;
+  padding:9px;
+  border-radius:9px;
+  border:1px solid var(--shell-border,#395644);
+  background:rgba(12,21,16,.78);
+  color:var(--shell-text,#edf7f0);
+  cursor:pointer;
+}
+.mascot-results .music-result:hover{
+  border-color:var(--accent,#6dff9b);
+  background:rgba(109,255,155,.08);
+}
+.mascot-form{
+  flex:0 0 auto;
+  display:flex;
+  gap:8px;
+  padding:12px;
+  border-top:1px solid var(--shell-border,#395644);
+  background:rgba(10,18,13,.92);
+}
+.mascot-form input{
+  min-width:0;
+  flex:1;
+  border:1px solid var(--shell-border,#395644);
+  border-radius:10px;
+  background:rgba(4,8,6,.92);
+  color:var(--shell-text,#edf7f0);
+  padding:10px;
+  font:12px var(--font-ui,sans-serif);
+}
+.mascot-form input:focus{
+  outline:2px solid var(--accent,#6dff9b);
+  outline-offset:2px;
+}
+.mascot-form .btn{
+  min-height:38px;
+  border-radius:10px;
+}
+.mascot-quick{
+  flex:0 0 auto;
+  display:flex;
+  gap:6px;
+  overflow:auto;
+  padding:0 12px 12px;
+  background:rgba(10,18,13,.92);
+}
+.mascot-quick .btn{
+  min-height:30px;
+  font-size:9px;
+  padding:0 8px;
+  white-space:nowrap;
+}
+
+/* Reproductor YouTube visible */
+#music-dock{
+  position:fixed;
+  z-index:940;
+  right:20px;
+  bottom:76px;
+  width:320px;
+  padding:12px;
+  border:1px solid var(--shell-border,#395644);
+  border-radius:14px;
+  background:rgba(6,10,8,.96);
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+  color:var(--shell-text,#edf7f0);
+}
+#music-dock[hidden]{
+  display:none;
+}
+#music-dock iframe{
+  width:100%;
+  height:200px;
+  display:block;
+  border:0;
+  margin:10px 0;
+  border-radius:10px;
+  background:#000;
+}
+.music-heading,
+.music-controls,
+.music-track{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+.music-heading{
+  justify-content:space-between;
+  font-size:10px;
+  letter-spacing:.08em;
+}
+.music-heading button,
+.music-controls button,
+.music-result{
+  background:rgba(109,255,155,.08);
+  color:inherit;
+  border:1px solid var(--shell-border,#395644);
+  border-radius:8px;
+  padding:8px;
+  cursor:pointer;
+}
+.music-track img{
+  width:52px;
+  height:52px;
+  object-fit:cover;
+  border-radius:8px;
+}
+.music-track div{
+  min-width:0;
+}
+.music-track strong,
+.music-track span,
+.music-track small{
+  display:block;
+}
+.music-track strong{
+  font-size:12px;
+  overflow-wrap:anywhere;
+}
+.music-track span,
+.music-track small{
+  font-size:9px;
+  color:var(--shell-muted,#91a49e);
+}
+.music-controls{
+  margin-top:12px;
+  flex-wrap:wrap;
+  font-size:10px;
+}
+.music-controls label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.music-controls input{
+  width:80px;
+}
+#music-status{
+  font-size:11px;
+  margin:8px 0;
+  color:var(--shell-muted,#91a49e);
+}
+#music-source{
+  color:var(--accent,#6dff9b);
+  font-size:11px;
+}
+
+/* Iconos pixel */
+.os-icon{
+  image-rendering:pixelated;
+  shape-rendering:crispEdges;
+  filter:none;
+}
+.icon .os-icon{
+  width:54px;
+  height:54px;
+}
+.win-btn .os-icon,
+.tb-app .os-icon,
+.menu__apps .os-icon,
+#palette-results .os-icon{
+  width:22px;
+  height:22px;
+}
+
+/* Secret Vault nueva */
+.vault--personal{
+  max-width:720px;
+  margin:auto;
+}
+.vault-keys{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:22px 0;
+}
+.vault-keys span{
+  display:block;
+  padding:12px;
+  border:1px solid var(--shell-border,#395644);
+  border-radius:10px;
+  background:rgba(12,21,16,.62);
+  color:var(--shell-muted,#91a49e);
+  font:700 10px var(--font-mono,monospace);
+  letter-spacing:.08em;
+}
+.vault-keys .unlocked{
+  color:var(--accent,#6dff9b);
+  border-color:rgba(109,255,155,.36);
+  background:rgba(109,255,155,.08);
+}
+.vault-question{
+  margin:18px 0;
+  padding:18px;
+  border:1px solid var(--shell-border,#395644);
+  border-radius:12px;
+  background:rgba(12,21,16,.62);
+}
+.vault-question h3{
+  margin:8px 0;
+  font:600 18px var(--font-display,sans-serif);
+}
+.vault-question p{
+  line-height:1.7;
+  color:#b7c7bd;
+}
+.vault-question form{
+  display:flex;
+  gap:8px;
+  margin-top:14px;
+}
+.vault-question form input{
+  min-width:0;
+  flex:1;
+  border:1px solid var(--shell-border,#395644);
+  border-radius:9px;
+  background:rgba(4,8,6,.9);
+  color:var(--accent,#6dff9b);
+  padding:11px;
+  font:12px var(--font-mono,monospace);
+}
+.vault-feedback{
+  min-height:24px;
+  margin:10px 0;
+  color:var(--accent,#6dff9b);
+  font:11px var(--font-mono,monospace);
+}
+.vault-reward{
+  margin-top:8px;
+}
+.vault-reward:disabled{
+  opacity:.42;
+  cursor:not-allowed;
+  transform:none;
+}
+.vault-note{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:22px;
+}
+
+/* Ajustes: fondo */
+.wallpaper-picker{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:10px;
+}
+.wallpaper-option{
+  min-height:72px;
+  padding:12px;
+  border:1px solid var(--shell-border,#395644);
+  border-radius:10px;
+  background:rgba(12,21,16,.62);
+  color:var(--shell-text,#edf7f0);
+  cursor:pointer;
+  font:10px var(--font-mono,monospace);
+  letter-spacing:.06em;
+}
+.wallpaper-option:hover{
+  border-color:var(--accent,#6dff9b);
+}
+.wallpaper-option.selected{
+  border-color:var(--accent,#6dff9b);
+  background:rgba(109,255,155,.08);
+  box-shadow:0 0 0 1px var(--accent,#6dff9b) inset;
+}
+.wallpaper-option:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+.wallpaper-option small{
+  display:block;
+  margin-top:6px;
+  color:var(--shell-muted,#91a49e);
+}
+
+/* Matrix más limpio */
+body[data-atmosphere^="matrix"] .desktop-welcome,
+body[data-atmosphere^="matrix"] .window{
+  background:rgba(5,10,8,.86)!important;
+}
+body.has-god-of-war .window,
+body.has-god-of-war .desktop-welcome{
+  background:rgba(5,10,8,.78)!important;
+}
+
+/* Mobile */
+@media(max-width:820px){
+  .desktop{
+    padding:88px 14px 78px;
+  }
+  .icons{
+    grid-template-columns:repeat(3,minmax(88px,1fr));
+  }
+  .taskbar{
+    left:8px;
+    right:8px;
+    bottom:8px;
+    padding-left:62px;
+  }
+  #mascot-button{
+    left:10px;
+    bottom:10px;
+    width:42px;
+    height:42px;
+  }
+  #mascot-chat{
+    left:8px;
+    bottom:66px;
+    width:calc(100vw - 16px);
+    height:min(68dvh,460px);
+  }
+  #music-dock{
+    right:8px;
+    bottom:66px;
+    width:260px;
+    padding:10px;
+  }
+  .vault-keys{
+    grid-template-columns:1fr;
+  }
+}
+@media(max-width:560px){
+  .icons{
+    grid-template-columns:repeat(2,minmax(88px,1fr));
+  }
+  .taskbar{
+    padding-left:58px;
+  }
+  #mascot-button{
+    left:8px;
+    bottom:8px;
+    width:40px;
+    height:40px;
+  }
+  #mascot-chat{
+    bottom:62px;
+  }
+  .mascot-quick{
+    display:none;
+  }
+  #music-dock{
+    width:220px;
+  }
+  #music-dock iframe{
+    height:160px;
+  }
+  .login{
+    padding:12vh 6vw;
+  }
+  .boot-neo{
+    font-size:18px;
+  }
+  .boot-logo{
+    font-size:min(18px,4.2vw);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #mascot-button,
+  .wallpaper-option,
+  .os-icon,
+  .btn{
+    animation:none!important;
+    transition:none!important;
+  }
+}
+
+/* === END JOSEMI-OS UPDATE CSS === */
+/* === BEGIN updates.css === */
+
+/* Ocultar estado superior si lo que molestaba era “Sistema en línea” */
+.desktop__status{
+  display:none!important;
+}
+
+/* Barra superior más limpia */
+.desktop__topbar{
+  height:50px;
+  background:color-mix(in srgb, var(--shell-panel) 88%, transparent);
+  border-color:var(--shell-border);
+}
+
+/* ---------- SECRET VAULT PERSONAL ---------- */
+
+.vault--personal{
+  max-width:780px;
+  margin:auto;
+  padding:8px 0 24px;
+  font-family:var(--font-mono);
+}
+
+.vault--personal .vault-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+}
+
+.vault-keys{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:22px 0;
+}
+
+.vault-keys span{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:44px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:rgba(10,17,13,.45);
+  color:#8fa696;
+  font:600 10px var(--font-mono);
+  letter-spacing:.08em;
+}
+
+.vault-keys .unlocked{
+  color:var(--accent);
+  border-color:color-mix(in srgb, var(--accent) 38%, transparent);
+  background:color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.vault-question{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:18px;
+  background:rgba(10,17,13,.55);
+  margin-top:16px;
+}
+
+.vault-question h3{
+  margin:10px 0 14px;
+  font:700 22px var(--font-display);
+  color:var(--shell-text);
+}
+
+.vault-question form{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.vault-question input{
+  min-width:0;
+  width:100%;
+  background:#060c08;
+  border:1px solid var(--line-strong);
+  border-radius:8px;
+  padding:12px;
+  color:var(--accent);
+  font:12px var(--font-mono);
+  outline-offset:3px;
+}
+
+.vault-feedback{
+  min-height:22px;
+  color:var(--accent);
+  font-size:11px;
+  line-height:1.6;
+  margin:12px 0;
+}
+
+.vault-reward{
+  margin-top:8px;
+}
+
+.vault-reward[disabled]{
+  opacity:.42;
+  cursor:not-allowed;
+  transform:none!important;
+  box-shadow:none!important;
+}
+
+.vault-note{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:22px;
+}
+
+@media(max-width:600px){
+  .vault-keys{
+    grid-template-columns:1fr;
+  }
+  .vault-question h3{
+    font-size:19px;
+  }
+}
+
+/* ---------- AJUSTES: FONDO ---------- */
+
+.preferences--updates{
+  display:grid;
+  grid-template-columns:180px 1fr;
+  gap:28px;
+}
+
+.wallpaper-picker{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+  margin-top:14px;
+}
+
+.wallpaper-option{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:6px;
+  min-height:86px;
+  padding:14px;
+  border:1px solid var(--shell-border);
+  border-radius:10px;
+  background:var(--shell-raised);
+  color:var(--shell-text);
+  font:600 11px var(--font-mono);
+  text-align:left;
+  cursor:pointer;
+  transition:transform .18s ease,border-color .18s ease,background .18s ease;
+}
+
+.wallpaper-option small{
+  display:block;
+  color:var(--shell-muted);
+  font-size:9px;
+  line-height:1.35;
+}
+
+.wallpaper-option:hover{
+  transform:translateY(-2px);
+  border-color:color-mix(in srgb, var(--accent) 35%, var(--shell-border));
+}
+
+.wallpaper-option.selected{
+  border-color:var(--accent);
+  background:color-mix(in srgb, var(--accent) 10%, var(--shell-raised));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.wallpaper-option[disabled]{
+  opacity:.45;
+  cursor:not-allowed;
+  transform:none;
+}
+
+@media(max-width:820px){
+  .preferences--updates{
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+}
+
+/* ---------- GOD OF WAR ---------- */
+
+body.has-god-of-war #bg{
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.38), rgba(0,0,0,.62)),
+    url('assets/god-of-war.jpg') center/cover no-repeat,
+    var(--bg) !important;
+}
+
+body.has-god-of-war #ascii-wall{
+  opacity:.12;
+}
+
+body.has-god-of-war .desktop{
+  background:transparent;
+}
+
+/* ---------- MASCOTA JOSEMI ---------- */
+
+#mascot-button{
+  position:fixed;
+  left:14px;
+  bottom:76px;
+  z-index:360;
+  width:58px;
+  height:58px;
+  display:grid;
+  place-items:center;
+  border-radius:18px;
+  background:linear-gradient(180deg,#0d1913,#07100b);
+  border:1px solid color-mix(in srgb, var(--accent) 45%, var(--shell-border));
+  color:var(--accent);
+  box-shadow:
+    0 18px 50px rgba(0,0,0,.45),
+    0 0 28px color-mix(in srgb, var(--accent) 14%, transparent);
+  cursor:pointer;
+  transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+#mascot-button:hover,
+#mascot-button:focus-visible{
+  transform:translateY(-3px);
+  border-color:var(--accent);
+  box-shadow:
+    0 22px 60px rgba(0,0,0,.55),
+    0 0 34px color-mix(in srgb, var(--accent) 24%, transparent);
+  outline:none;
+}
+
+#mascot-button .mascot-svg{
+  width:28px;
+  height:28px;
+  fill:currentColor;
+}
+
+#mascot-chat[hidden]{
+  display:none!important;
+}
+
+#mascot-chat{
+  position:fixed;
+  left:14px;
+  bottom:144px;
+  z-index:365;
+  width:min(390px, calc(100vw - 28px));
+  height:min(560px, calc(100dvh - 170px));
+  display:grid;
+  grid-template-rows:auto 1fr auto auto;
+  gap:10px;
+  padding:12px;
+  background:color-mix(in srgb, var(--shell-panel) 96%, transparent);
+  border:1px solid var(--shell-border);
+  border-radius:16px;
+  box-shadow:var(--shell-shadow);
+  backdrop-filter:blur(18px);
+  color:var(--shell-text);
+}
+
+.mascot-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  font:600 12px var(--font-display);
+  color:var(--shell-text);
+}
+
+#mascot-close{
+  width:30px;
+  height:30px;
+  border:1px solid var(--shell-border);
+  border-radius:8px;
+  background:var(--shell-raised);
+  color:var(--shell-text);
+  font-size:18px;
+  line-height:1;
+  cursor:pointer;
+}
+
+#mascot-close:hover,
+#mascot-close:focus-visible{
+  border-color:var(--accent);
+  color:var(--accent);
+  outline:none;
+}
+
+.mascot-log{
+  min-height:0;
+  overflow:auto;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:rgba(0,0,0,.22);
+  scrollbar-width:thin;
+}
+
+.mascot-log p{
+  margin:7px 0;
+  padding:7px 9px;
+  border-radius:8px;
+  font:12px/1.55 var(--font-ui);
+  white-space:pre-wrap;
+}
+
+.mascot-log .assistant{
+  background:color-mix(in srgb, var(--accent) 8%, transparent);
+  border:1px solid color-mix(in srgb, var(--accent) 16%, transparent);
+  color:var(--shell-text);
+}
+
+.mascot-log .user{
+  background:var(--shell-raised);
+  border:1px solid var(--shell-border);
+  color:var(--shell-muted);
+}
+
+.mascot-results{
+  display:grid;
+  gap:7px;
+  max-height:170px;
+  overflow:auto;
+}
+
+.mascot-results .music-result{
+  text-align:left;
+  font-size:11px;
+}
+
+.mascot-form{
+  display:flex;
+  gap:8px;
+}
+
+.mascot-form input{
+  min-width:0;
+  flex:1;
+  background:var(--shell-panel);
+  color:var(--shell-text);
+  border:1px solid var(--shell-border);
+  border-radius:8px;
+  padding:10px;
+  font:12px var(--font-ui);
+  outline-offset:3px;
+}
+
+.mascot-quick{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.mascot-quick .btn{
+  min-height:30px;
+  padding:0 9px;
+  font-size:9px;
+}
+
+@media(max-width:600px){
+  #mascot-button{
+    left:8px;
+    bottom:68px;
+    width:52px;
+    height:52px;
+  }
+  #mascot-chat{
+    left:8px;
+    right:8px;
+    bottom:132px;
+    width:auto;
+    height:min(62dvh, 520px);
+  }
+  .mascot-form{
+    flex-wrap:wrap;
+  }
+}
+
+/* Reproductor visible */
+#music-dock[hidden]{
+  display:none!important;
+}
+
+/* === END updates.css === */
