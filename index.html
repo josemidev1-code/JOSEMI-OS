@@ -28,151 +28,10 @@
     <!-- FONDO: Canvas decorativo añadido por JavaScript; aria-hidden lo oculta al lector de pantalla. -->
     <div id="bg" aria-hidden="true"></div>
 
-    <!-- PRESENTACIÓN: los seis bloques personales antes del escritorio original. -->
-    <main
-      id="os-landing"
-      class="os-landing"
-      aria-label="Presentación de Josemi"
-    >
-      <a class="os-skip" href="#os-landing-title">Saltar al contenido</a>
-      <nav class="os-landing-nav" aria-label="Presentación">
-        <a href="#os-landing-title" class="os-landing-brand">&gt;_ JOSEMI-OS</a>
-        <div>
-          <a href="#os-about">Sobre mí</a><a href="#os-projects">Proyectos</a
-          ><a href="#os-contact">Contacto</a>
-        </div>
-      </nav>
-      <section class="os-landing-hero">
-        <span class="card-kicker"
-          >JOSÉ MIGUEL MIRALLES GANDIA / ESTUDIANTE DE DAM</span
-        >
-        <h1 id="os-landing-title" tabindex="-1">
-          JOSEMI-OS<span
-            >Todo tiene código detrás.<br />Yo quiero aprender a crearlo.</span
-          >
-        </h1>
-        <p>
-          Soy Josemi. Los videojuegos despertaron mi curiosidad por la
-          tecnología.<br />Ahora construyo webs y proyectos para entender cómo
-          funcionan las cosas.
-        </p>
-        <div class="btn-row">
-          <button class="btn btn--accent" id="landing-enter">
-            ENTRAR AL ESCRITORIO ↗</button
-          ><a class="btn" href="#os-projects">VER MIS PROYECTOS ↓</a>
-        </div>
-        <small
-          >Tu recorrido: presentación → arranque Matrix → escritorio.</small
-        >
-      </section>
-      <section id="os-about" class="os-landing-section">
-        <span class="card-kicker">01 / SOBRE MÍ</span>
-        <h2>De jugar a construir.</h2>
-        <p>
-          Estudio DAM en el IES Dr. Lluís Simarro. Desde pequeño me apasiona la
-          tecnología: la televisión, el móvil y el ordenador tienen código
-          detrás. Me motiva entenderlo y crear mis propias ideas.
-        </p>
-        <div class="content-grid os-values">
-          <article class="content-card">
-            <h3>Disciplina</h3>
-            <p>Constancia para avanzar con lo que me propongo.</p>
-          </article>
-          <article class="content-card">
-            <h3>Motivación</h3>
-            <p>Curiosidad y ganas de aprender cada día.</p>
-          </article>
-          <article class="content-card">
-            <h3>Compromiso</h3>
-            <p>Me implico en lo que hago y en mis proyectos.</p>
-          </article>
-        </div>
-      </section>
-      <section id="os-projects" class="os-landing-section">
-        <span class="card-kicker">02 / LO QUE HE HECHO</span>
-        <h2>Proyectos que puedes explorar.</h2>
-        <div class="content-grid">
-          <article class="content-card">
-            <span class="card-kicker">HTML / CSS / JAVASCRIPT</span>
-            <h3>JOSEMI-OS</h3>
-            <p>
-              Quería mostrar quién soy con una web que se pudiera explorar. Este
-              portfolio lo convierte en ventanas, juegos y secretos. Es mi
-              primer proyecto personal y sigo mejorándolo.
-            </p>
-            <a
-              class="btn"
-              href="https://github.com/josemidev1-code/JOSEMI-OS"
-              target="_blank"
-              rel="noopener noreferrer"
-              >VER REPOSITORIO ↗</a
-            >
-          </article>
-          <article class="content-card">
-            <span class="card-kicker">DISEÑO WEB / FORMACIÓN</span>
-            <h3>Museu grec</h3>
-            <p>
-              Estoy construyendo una web sobre el mundo griego para practicar
-              cómo organizar información y darle una presentación cuidada. El
-              proyecto está en mi repositorio portafolio-web.
-            </p>
-            <a
-              class="btn"
-              href="https://github.com/josemidev1-code/portafolio-web"
-              target="_blank"
-              rel="noopener noreferrer"
-              >VER REPOSITORIO ↗</a
-            >
-          </article>
-        </div>
-      </section>
-      <section class="os-landing-section">
-        <span class="card-kicker">03 / ME GUSTA</span>
-        <h2>Fuera y dentro de la pantalla.</h2>
-        <div class="chips">
-          <span class="chip">Gimnasio y deporte</span
-          ><span class="chip">Programar y crear proyectos</span
-          ><span class="chip">Ciencia ficción y cine</span
-          ><span class="chip">Videojuegos · God of War</span
-          ><span class="chip">Lectura</span>
-        </div>
-        <p>
-          Matrix y Kratos también forman parte de mi escritorio. Explora la
-          Secret Vault para descubrir sus fondos.
-        </p>
-      </section>
-      <section id="os-contact" class="os-landing-section">
-        <span class="card-kicker">04 / CONTACTO</span>
-        <h2>¿Hablamos?</h2>
-        <p>Ideas, oportunidades y feedback: puedes escribirme directamente.</p>
-        <div class="btn-row">
-          <a class="btn btn--accent" href="mailto:josemidev1@gmail.com"
-            >josemidev1@gmail.com ↗</a
-          ><a
-            class="btn"
-            href="https://github.com/josemidev1-code"
-            target="_blank"
-            rel="noopener noreferrer"
-            >GITHUB ↗</a
-          ><a
-            class="btn"
-            href="https://www.linkedin.com/in/jose-miguel-miralles-gandia-74347b43a/"
-            target="_blank"
-            rel="noopener noreferrer"
-            >LINKEDIN ↗</a
-          >
-        </div>
-      </section>
-      <footer class="os-landing-footer">
-        José Miguel Miralles Gandia · 2026
-        <span>Aprender, construir, volver a probar.</span>
-      </footer>
-    </main>
-
     <!-- Primer contacto: terminal negra estilo Matrix. script.js escribe «Wake up, Neo...» y el rótulo JOSEMI-OS. -->
     <section
       id="login"
-      class="login hidden"
+      class="login"
       aria-label="Secuencia de inicio de JOSEMI-OS"
     >
       <pre
@@ -221,15 +80,7 @@
           <span class="taskbar__logo">&gt;_</span><span>JOSEMI</span>
         </button>
         <div class="taskbar__apps" id="taskbar__apps"></div>
-        <div id="desktop-tools">
-          <button
-            id="return-presentation"
-            title="Volver a la presentación"
-            aria-label="Volver a la presentación"
-          >
-            ⌂
-          </button>
-        </div>
+        <div id="desktop-tools"></div>
         <div class="taskbar__tray">
           <span class="tray__clock"
             ><span id="clock__time">--:--</span
