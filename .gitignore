@@ -1,7 +1,27 @@
-# Configuración privada del servidor; nunca se publica en GitHub Pages.
+# Claves y configuración privada.
 .env
 .env.*
+!.env.example
 .dev.vars
 .dev.vars.*
-.wrangler/
+*.key
+*credentials*.json
+*secrets*.json
+*token*.txt
+
+# Dependencias y configuración de herramientas.
 node_modules/
+.wrangler/
+.vscode/
+.idea/
+
+# Archivos temporales del sistema y editor.
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+*~
+
+# El material de clase permanece en el Escritorio.
+*.pdf
+copias-locales/
