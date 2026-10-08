@@ -1,78 +1,42 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<!-- IA / CONTEXTO: empieza por docs/LLEGIX-PRIMER-IA.md y docs/CONTEXT-PER-CONTINUAR.txt. -->
-<!-- CONFIGURACIÓN: idioma, tamaño adaptable, título, fuentes y estilos. -->
-  <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="JOSEMI-OS — portfolio interactivo de José Miguel Miralles Gandia, estudiante de DAM y desarrollador de software en proceso.">
-  <meta name="theme-color" content="#050806">
-  <title>JOSEMI-OS · Portfolio interactivo</title>
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Soy Josemi, estudiante de DAM. Conoce mis proyectos y explora mi escritorio pixel art inspirado en Matrix.">
+<meta name="theme-color" content="#080e0d">
+<title>JOSEMI-OS · El código detrás de las ideas</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23080e0d'/%3E%3Cpath d='M20 6v14h-4v4H8v-8h4v4h4V6zM22 24h6v4h-6z' fill='%238be9a8'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
 </head>
 <body>
-  <!-- FONDO: Canvas decorativo añadido por JavaScript; aria-hidden lo oculta al lector de pantalla. -->
-  <div id="bg" aria-hidden="true"></div>
+<canvas id="matrix" aria-hidden="true"></canvas>
+<a class="skip-link" href="#landing-title">Saltar al contenido</a>
+<main id="landing">
+<nav class="landing-nav" aria-label="Principal"><a class="wordmark" href="#" aria-label="JOSEMI-OS, inicio"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M20 6v14h-4v4H8v-8h4v4h4V6zM22 24h6v4h-6z"/></svg>JOSEMI-OS</a><div><a href="#historia">Sobre mí</a><a href="#proyectos">Proyectos</a><a href="#contacto">Contacto</a></div></nav>
+<section class="hero" aria-labelledby="landing-title">
+<div class="hero-copy"><p class="eyebrow"><span class="tiny-square"></span> JOSEMI / ESTUDIANTE DE DAM</p><h1 id="landing-title" tabindex="-1">Todo tiene<br>código detrás.<br><span>Yo quiero crearlo.</span></h1><p class="hero-description">Soy <strong>Josemi</strong>. Empecé explorando mundos en los videojuegos. Ahora aprendo a construir los míos con código.</p><div class="hero-actions"><button class="btn btn--accent" data-enter>EXPLORAR JOSEMI-OS ↗</button><a class="quiet-link" href="#proyectos">Ver mis proyectos ↓</a></div><p class="hero-footnote">Un portfolio. Un escritorio. Unas cuantas sorpresas.</p></div>
+<div class="hero-art" role="img" aria-label="Un ordenador pixel art con Milo, mi compañero de escritorio"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><span class="art-coordinate">IDEAS EN CONSTRUCCIÓN</span><div class="pixel-monitor"><div class="monitor-screen"><span class="screen-label">josemi@home:~</span><pre> &gt; curiosidad = true;
+ &gt; aprender();
+ &gt; construir();
 
-
-  <!-- Primer contacto: terminal negra estilo Matrix. script.js escribe «Wake up, Neo...» y el rótulo JOSEMI-OS. -->
-  <section id="login" class="login" aria-label="Secuencia de inicio de JOSEMI-OS">
-    <pre id="bootTerminalOutput" class="boot-terminal-output" aria-live="polite"></pre>
-    <button id="skipBoot" class="boot-skip" type="button">Saltar ↵</button>
-  </section>
-
-  <!-- ESCRITORIO: inicia oculto y se muestra al terminar o saltar la intro. -->
-  <main id="desktop" class="desktop hidden">
-    <header class="desktop__topbar">
-      <div class="desktop__identity">
-        <span class="brand-mark">&gt;_</span>
-        <div><strong>JOSEMI-OS</strong><small>portfolio://jose-miguel</small></div>
-      </div>
-    </header>
-
-    <div class="desktop__hint">ENTER ABRE · CTRL + K BUSCA · CLIC DERECHO EXPLORA</div>
-    <!-- ACCESOS: JavaScript inserta aquí las aplicaciones del usuario. -->
-  <div class="icons" id="icons"></div>
-
-    <div id="menu" class="menu hidden">
-      <div class="menu__head"><span class="menu__avatar">JM</span><div><strong>José Miguel</strong><small>Desarrollador en proceso · DAM</small></div></div>
-      <div class="menu__label">APLICACIONES</div>
-      <div class="menu__apps" id="menu__apps"></div>
-      <div class="menu__power"><button data-power="restart">↻ Reiniciar</button><button data-power="shutdown">⏻ Apagar</button></div>
-    </div>
-
-    <div id="ctxmenu" class="ctx hidden">
-      <button data-act="refresh">↻ Refrescar escritorio</button>
-      <button data-act="wallpaper">◫ Cambiar fondo</button>
-      <button data-act="terminal">&gt;_ Abrir terminal</button>
-      <button data-act="system">◉ Información del sistema</button>
-      <button data-act="arcade">◆ Abrir Arcade</button>
-    </div>
-
-    <!-- BARRA INFERIOR: inicio, ventanas abiertas y reloj. -->
-  <footer class="taskbar">
-      <button id="start" class="taskbar__start"><span class="taskbar__logo">&gt;_</span><span>JOSEMI</span></button>
-      <div class="taskbar__apps" id="taskbar__apps"></div>
-      <div class="taskbar__tray">
-        <span class="tray__item tray__net">NET:OK</span>
-        <span class="tray__clock"><span id="clock__time">--:--</span><small id="clock__date">—</small></span>
-      </div>
-    </footer>
-  </main>
-  <div id="shutdown" class="shutdown hidden">
-    <div class="shutdown__mark">&gt;_</div>
-    <p id="shutdown__msg">Apagando JOSEMI-OS...</p>
-    <button id="reboot" class="hidden">REINICIAR</button>
-  </div>
-
-  <div id="toasts" class="toasts" aria-live="polite"></div>
-
-  <script src="script.js"></script>
-  <script src="updates.js"></script>
+ HOLA, MUNDO<span class="terminal-cursor">_</span></pre><div class="screen-mascot mascot-art"></div></div><div class="monitor-base"></div></div><div class="art-badge"><span class="tiny-square"></span> NIVEL 01 · MUCHAS GANAS</div><span class="art-note">El siguiente proyecto empieza aquí.</span></div>
+<a class="scroll-note" href="#historia">01 / CONOCE AL CREADOR <span>↓</span></a>
+</section>
+<section id="historia" class="story section-block"><div><p class="eyebrow">01 / SOBRE MÍ</p><h2>De jugar a<br><span>construir.</span></h2></div><div class="story-content"><p>Soy José Miguel Miralles Gandia y estudio DAM en el IES Dr. Lluís Simarro. Los videojuegos despertaron mi curiosidad desde pequeño: la tele, el móvil y el ordenador tienen código detrás. Entenderlo me motiva a crear mis propias ideas.</p><div class="virtues"><article><b>01</b><h3>Disciplina</h3><p>Constancia para avanzar, paso a paso.</p></article><article><b>02</b><h3>Motivación</h3><p>Curiosidad y ganas de seguir aprendiendo.</p></article><article><b>03</b><h3>Compromiso</h3><p>Me implico en lo que hago.</p></article></div></div></section>
+<section id="proyectos" class="section-block projects-section"><div class="section-heading"><div><p class="eyebrow">02 / LO QUE HE HECHO</p><h2>Aprender haciendo.</h2></div><a class="quiet-link" href="https://github.com/josemidev1-code" target="_blank" rel="noopener noreferrer">Mi GitHub ↗</a></div><div class="project-grid">
+<article class="project-card"><div class="project-preview os-preview"><span>&gt;_</span><b>JOSEMI-OS</b><small>EXPLORE · PLAY · DISCOVER</small></div><div class="project-info"><span class="eyebrow">01 / PORTFOLIO INTERACTIVO</span><h3>Mi pequeño sistema.</h3><p>Quería mostrar quién soy en una web que se pudiera explorar. Lo convertí en un escritorio con ventanas, juegos y secretos. El resultado es este portfolio que sigo mejorando.</p><div class="project-tags">HTML · CSS · JAVASCRIPT</div><button class="quiet-link" data-enter>Explorar el escritorio ↗</button></div></article>
+<article class="project-card"><div class="project-preview museum-preview"><span>Π</span><b>MUSEU GREC</b><small>HISTORIA · DISEÑO · WEB</small></div><div class="project-info"><span class="eyebrow">02 / PROYECTO DE FORMACIÓN</span><h3>Otra forma de crear.</h3><p>Para practicar cómo presentar información, estoy construyendo una web sobre el mundo griego. Trabajo su estructura y diseño; puedes ver el proyecto en su repositorio.</p><div class="project-tags">DISEÑO WEB · APRENDIZAJE</div><a class="quiet-link" href="https://github.com/josemidev1-code/portafolio-web" target="_blank" rel="noopener noreferrer">Ver el repositorio ↗</a></div></article>
+</div></section>
+<section id="aficiones" class="section-block hobbies-section"><div><p class="eyebrow">03 / ME GUSTA</p><h2>También fuera<br><span>de la pantalla.</span></h2></div><div class="hobbies"><article><span>01</span><h3>Gimnasio & deporte</h3><p>Entrenar y ser constante también forman parte de mí.</p></article><article><span>02</span><h3>Programar & proyectos</h3><p>Probar ideas, aprender y conseguir que algo funcione.</p></article><article><span>03</span><h3>Ciencia ficción & cine</h3><p>Matrix, mundos posibles y una buena sesión de cine.</p></article><article><span>04</span><h3>Videojuegos</h3><p>God of War y Kratos tienen un lugar en mi escritorio.</p></article><article><span>05</span><h3>Lectura</h3><p>Desconectar de la pantalla y descubrir otras historias.</p></article></div></section>
+<section id="contacto" class="section-block contact-section"><p class="eyebrow">04 / CONTACTO</p><h2>La próxima idea puede<br>empezar con <span>un hola.</span></h2><a class="contact-email" href="mailto:josemidev1@gmail.com">josemidev1@gmail.com ↗</a><div class="contact-links"><a href="https://github.com/josemidev1-code" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://www.linkedin.com/in/jose-miguel-miralles-gandia-74347b43a/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><button class="quiet-link" data-chat-open>Hablar con Milo ↗</button></div></section>
+<footer class="landing-footer"><span>JOSÉ MIGUEL MIRALLES GANDIA · 2026</span><span>Hecho con código y curiosidad.</span></footer>
+</main>
+<main id="desktop" hidden aria-label="Escritorio JOSEMI-OS"><div class="desktop-title"><p class="eyebrow">TU ESPACIO PARA EXPLORAR</p><h1 tabindex="-1">JOSEMI<span>—OS</span></h1><p>Abre una idea. Descubre algo nuevo.</p></div><div id="icons" aria-label="Aplicaciones"></div><div id="windows"></div><nav id="dock" aria-label="Herramientas del escritorio"><button id="home-button" title="Volver a la presentación" aria-label="Volver a la presentación">J_</button><span class="dock-separator"></span><button id="search-button" title="Buscar aplicaciones (Ctrl+K)" aria-label="Buscar aplicaciones">⌕</button><div id="open-apps" aria-label="Ventanas abiertas"></div><button data-open="settings" title="Ajustes" aria-label="Ajustes"></button></nav></main>
+<button id="mascot-button" aria-label="Hablar con Milo, el asistente" aria-expanded="false" aria-controls="mascot-chat"><span class="mascot-art"></span><span class="mascot-label">¿Exploramos?</span></button>
+<section id="mascot-chat" hidden role="dialog" aria-label="Milo, asistente de Josemi"><header><div><strong>Milo <span class="tiny-square"></span></strong><small>Tu compañero de escritorio</small></div><button id="close-chat" aria-label="Cerrar conversación">×</button></header><div id="chat-log" role="log" aria-live="polite"><p class="assistant">¡Hola! Soy Milo. Te ayudo a conocer a Josemi y a explorar su web. Por ahora tengo respuestas locales; mi conexión a IA llegará más adelante.</p></div><div class="chat-quick"><button data-chat="proyectos">Proyectos</button><button data-chat="sobre mi">Sobre Josemi</button><button data-chat="secret vault">Secret Vault</button></div><form id="chat-form"><label class="sr-only" for="chat-input">Mensaje para Milo</label><input id="chat-input" maxlength="500" autocomplete="off" placeholder="Pregúntame algo…" required><button type="submit" aria-label="Enviar mensaje">↑</button></form><small class="chat-note">ASISTENTE LOCAL · SIN CONEXIÓN A IA</small></section>
+<dialog id="search-dialog"><form method="dialog" class="search-heading"><label for="search-input">Buscar una aplicación</label><button aria-label="Cerrar buscador">×</button></form><input id="search-input" placeholder="Sobre mí, proyectos, arcade…" autocomplete="off"><div id="search-results"></div></dialog>
+<div id="toasts" role="status" aria-live="polite"></div>
 </body>
 </html>
