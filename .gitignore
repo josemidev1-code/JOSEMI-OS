@@ -5,17 +5,3 @@
 .dev.vars.*
 .wrangler/
 node_modules/
-# Datos privados y credenciales.
-*.pem
-*.key
-*credentials*
-*token*
-# Archivos del sistema y temporales del editor.
-.DS_Store
-Thumbs.db
-*.swp
-*.tmp
-*~
-.vscode/
-# La guía para clase se entrega solo en la carpeta local.
-*.pdf

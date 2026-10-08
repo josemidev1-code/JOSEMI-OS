@@ -1,0 +1,7 @@
+name = "josemi-os-worker"
+main = "cloudflare/worker.mjs"
+compatibility_date = "2025-01-01"
+
+[vars]
+ALLOWED_ORIGIN = "*"
+GEMINI_MODEL = "gemini-2.0-flash"
