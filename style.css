@@ -5159,3 +5159,176 @@ body.reduce-motion .axolotl-tail,
 body.reduce-motion .axolotl-gills {
   animation: none;
 }
+
+/* Terminal inmersivo: el lienzo llena la pantalla; la firma ocupa el centro. */
+#os-screensaver {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  background: #020805;
+  color: #aef3c1;
+  cursor: none;
+  isolation: isolate;
+}
+#os-screensaver .saver-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+}
+#os-screensaver::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, #020805aa 5%, transparent 65%),
+    repeating-linear-gradient(
+      0deg,
+      #0002 0px,
+      #0002 1px,
+      transparent 1px,
+      transparent 4px
+    );
+}
+#os-screensaver .saver-terminal-head {
+  position: absolute;
+  inset: 28px 4vw auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font: 11px/1.6 var(--font-mono);
+  color: #61a883;
+  letter-spacing: 0.06em;
+}
+#os-screensaver .saver-command {
+  color: #9cd7b7;
+}
+#os-screensaver .saver-stage {
+  position: absolute;
+  inset: 16% 0 20%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+}
+#os-screensaver .saver-art {
+  flex: none;
+  width: auto;
+  max-width: 96vw;
+  margin: 0;
+  padding: 0;
+  font-family: "Courier New", monospace;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0;
+  white-space: pre;
+  color: #b6f7cc;
+  -webkit-text-fill-color: currentColor;
+  background: none;
+  animation: none;
+  transform: none;
+  text-shadow:
+    0 0 15px #54f19466,
+    0 2px 0 #06190e;
+}
+#os-screensaver[data-scene="orbit"] .saver-art {
+  color: #a6e9e3;
+  text-shadow: 0 0 16px #60cfd866;
+}
+#os-screensaver .saver-subtitle {
+  max-width: 90vw;
+  text-align: center;
+  font: 11px/1.8 var(--font-mono);
+  letter-spacing: 0.22em;
+  color: #a2bfae;
+}
+#os-screensaver .saver-terminal-foot {
+  position: absolute;
+  left: 4vw;
+  right: 4vw;
+  bottom: 30px;
+  display: grid;
+  gap: 14px;
+  font: 11px/1.5 var(--font-mono);
+}
+#os-screensaver .saver-notes {
+  margin: 0;
+  letter-spacing: 0.02em;
+  color: #81cda5;
+  min-height: 2em;
+}
+#os-screensaver .saver-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  color: #4e896b;
+}
+#os-screensaver .saver-exit {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: #75a48b;
+  cursor: pointer;
+}
+#os-screensaver .saver-exit:focus-visible {
+  outline: 2px solid #aef3c1;
+  outline-offset: 5px;
+}
+#os-screensaver .saver-track {
+  height: 1px;
+  background: #173e2b;
+  width: 100%;
+}
+#os-screensaver .saver-progress {
+  display: block;
+  height: 1px;
+  background: #82d9ab;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+@media (max-width: 600px) {
+  .icon .os-icon {
+    width: 56px;
+    height: 56px;
+  }
+  #mascot-button {
+    width: 76px;
+    height: 65px;
+    right: 10px;
+    bottom: 12px;
+  }
+  #mascot-button .mascot-svg {
+    width: 76px;
+    height: 65px;
+  }
+  #os-screensaver .saver-terminal-head {
+    top: 18px;
+    display: block;
+    font-size: 9px;
+  }
+  #os-screensaver .saver-scene {
+    display: block;
+    margin-top: 8px;
+  }
+  #os-screensaver .saver-stage {
+    inset: 20% 0 28%;
+    gap: 24px;
+  }
+  #os-screensaver .saver-subtitle {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+  #os-screensaver .saver-terminal-foot {
+    bottom: 22px;
+    font-size: 10px;
+  }
+  #os-screensaver .saver-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
