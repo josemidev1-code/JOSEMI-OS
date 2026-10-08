@@ -4360,42 +4360,295 @@ initDirectAccess();
     },
   });
 
-  // Iconos pixel art.
+  // ICONOS PROPIOS: rejilla de 32 píxeles, contorno oscuro y tres tonos por material.
+  // Cada rectángulo tiene coordenadas enteras: los detalles conservan bordes pixel art.
+  const pixelRects = (rects) =>
+    rects
+      .map(
+        ([x, y, w, h, color]) =>
+          `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${color}"/>`,
+      )
+      .join("");
   const PIXEL_ICONS = {
-    readme:
-      '<rect x="3" y="2" width="10" height="12" fill="#f2f0e2"/><rect x="11" y="2" width="2" height="2" fill="#d2c9b0"/><rect x="5" y="5" width="6" height="1" fill="#7f8a76"/><rect x="5" y="7" width="6" height="1" fill="#7f8a76"/><rect x="5" y="9" width="4" height="1" fill="#7f8a76"/>',
-    about:
-      '<rect x="6" y="2" width="4" height="4" fill="#f2d7b7"/><rect x="4" y="7" width="8" height="5" fill="#5d91c2"/><rect x="4" y="12" width="3" height="2" fill="#354359"/><rect x="9" y="12" width="3" height="2" fill="#354359"/>',
-    projects:
-      '<rect x="2" y="5" width="12" height="9" fill="#f3c778"/><rect x="2" y="3" width="6" height="2" fill="#d9a555"/><rect x="1" y="5" width="14" height="1" fill="#8d6b2f"/>',
-    skills:
-      '<rect x="8" y="2" width="3" height="3" fill="#edc16c"/><rect x="5" y="5" width="4" height="2" fill="#edc16c"/><rect x="7" y="7" width="4" height="2" fill="#edc16c"/><rect x="4" y="9" width="4" height="2" fill="#edc16c"/><rect x="6" y="11" width="4" height="3" fill="#edc16c"/>',
-    terminal:
-      '<rect x="2" y="3" width="12" height="10" fill="#0c1510" stroke="#adf0b7"/><rect x="4" y="5" width="1" height="1" fill="#adf0b7"/><rect x="5" y="6" width="1" height="1" fill="#adf0b7"/><rect x="4" y="7" width="1" height="1" fill="#adf0b7"/><rect x="7" y="7" width="4" height="1" fill="#adf0b7"/>',
-    contact:
-      '<rect x="2" y="4" width="12" height="8" fill="#a9c6dd"/><path d="M2 4l6 5 6-5" stroke="#293934" fill="none"/>',
-    arcade:
-      '<rect x="5" y="10" width="6" height="4" fill="#555"/><rect x="7" y="5" width="2" height="5" fill="#777"/><rect x="6" y="2" width="4" height="3" fill="#ff5a5a"/>',
-    settings:
-      '<rect x="7" y="1" width="2" height="2" fill="#a7b9c3"/><rect x="7" y="13" width="2" height="2" fill="#a7b9c3"/><rect x="1" y="7" width="2" height="2" fill="#a7b9c3"/><rect x="13" y="7" width="2" height="2" fill="#a7b9c3"/><rect x="4" y="4" width="8" height="8" fill="#a7b9c3"/><rect x="6" y="6" width="4" height="4" fill="#e8eadc"/>',
-    system:
-      '<rect x="2" y="2" width="12" height="8" fill="#243b39"/><rect x="3" y="3" width="10" height="6" fill="#9adeaa"/><path d="M4 7h2l1-2 2 4 1-2h2" stroke="#0c1510" fill="none"/><rect x="7" y="10" width="2" height="2" fill="#777"/><rect x="5" y="12" width="6" height="1" fill="#777"/>',
-    trash:
-      '<rect x="3" y="3" width="10" height="2" fill="#9fb2b5"/><rect x="7" y="1" width="2" height="2" fill="#9fb2b5"/><rect x="4" y="5" width="8" height="9" fill="#9fb2b5"/><rect x="6" y="6" width="1" height="7" fill="#708078"/><rect x="9" y="6" width="1" height="7" fill="#708078"/>',
-    easter:
-      '<rect x="2" y="6" width="12" height="8" fill="#d4b073"/><rect x="7" y="3" width="2" height="3" fill="#d4b073"/><rect x="6" y="2" width="4" height="1" fill="#d4b073"/><rect x="7" y="9" width="2" height="3" fill="#263733"/>',
-    screensaver:
-      '<rect x="7" y="1" width="2" height="2" fill="#fff"/><rect x="3" y="4" width="2" height="2" fill="#fff"/><rect x="11" y="4" width="2" height="2" fill="#fff"/><rect x="1" y="9" width="2" height="2" fill="#fff"/><rect x="13" y="9" width="2" height="2" fill="#fff"/><rect x="5" y="11" width="6" height="2" fill="#fff"/>',
-    mario:
-      '<rect x="4" y="4" width="8" height="4" fill="#ee8f91"/><rect x="6" y="8" width="4" height="5" fill="#f4dbb4"/><rect x="5" y="5" width="2" height="2" fill="#fff"/><rect x="9" y="5" width="2" height="2" fill="#fff"/>',
-    pacman:
-      '<path d="M6 2h5v2H4v2H2v4h2v2h2v2h5v-2h2v-2H9V8H7V6h6V4h-2V2z" fill="#efcb64"/><rect x="8" y="4" width="1" height="1" fill="#29312f"/>',
-    tetris:
-      '<rect x="3" y="3" width="10" height="3" fill="#c1a4d9"/><rect x="7" y="6" width="2" height="7" fill="#c1a4d9"/>',
+    readme: pixelRects([
+      [6, 3, 18, 26, "#172725"],
+      [7, 2, 15, 26, "#f1e8c9"],
+      [22, 7, 3, 21, "#b9ab8d"],
+      [8, 3, 12, 23, "#fff7dc"],
+      [20, 2, 2, 6, "#c6b897"],
+      [22, 4, 2, 4, "#ddd1ad"],
+      [9, 6, 8, 1, "#eee1bf"],
+      [10, 10, 10, 2, "#587766"],
+      [10, 14, 11, 1, "#879782"],
+      [10, 17, 11, 1, "#879782"],
+      [10, 20, 7, 1, "#879782"],
+      [17, 24, 8, 4, "#226942"],
+      [18, 24, 6, 1, "#8fe5aa"],
+      [20, 25, 1, 2, "#d5ffe2"],
+      [23, 9, 1, 16, "#978d74"],
+    ]),
+    about: pixelRects([
+      [5, 3, 22, 27, "#182b2b"],
+      [6, 2, 20, 27, "#7fabb0"],
+      [7, 3, 18, 25, "#c6d7c9"],
+      [8, 4, 16, 22, "#e3e7d5"],
+      [12, 7, 8, 2, "#3b302d"],
+      [11, 9, 10, 3, "#4a3730"],
+      [12, 10, 8, 7, "#e9b890"],
+      [13, 11, 6, 5, "#ffd3a6"],
+      [13, 13, 1, 1, "#293c35"],
+      [18, 13, 1, 1, "#293c35"],
+      [15, 16, 3, 2, "#d09573"],
+      [9, 19, 14, 6, "#355c86"],
+      [11, 18, 10, 2, "#5d89ae"],
+      [13, 19, 6, 5, "#659bbe"],
+      [15, 19, 2, 2, "#f4e5cb"],
+      [8, 6, 2, 1, "#8aac98"],
+      [21, 6, 2, 1, "#8aac98"],
+      [10, 26, 12, 1, "#8aac98"],
+    ]),
+    projects: pixelRects([
+      [3, 8, 26, 21, "#242821"],
+      [4, 7, 11, 4, "#9e632b"],
+      [5, 6, 8, 1, "#f0c674"],
+      [4, 10, 24, 17, "#c48b3f"],
+      [5, 11, 22, 14, "#e5b85d"],
+      [6, 12, 20, 2, "#ffe3a0"],
+      [6, 16, 20, 9, "#dca54c"],
+      [8, 14, 17, 1, "#9b7136"],
+      [7, 9, 8, 1, "#f7d587"],
+      [18, 17, 8, 7, "#315855"],
+      [19, 18, 6, 5, "#173431"],
+      [20, 19, 1, 1, "#a5efcb"],
+      [21, 20, 1, 1, "#a5efcb"],
+      [20, 21, 1, 1, "#a5efcb"],
+      [23, 21, 2, 1, "#78d9b1"],
+      [5, 26, 20, 1, "#b5863c"],
+      [28, 13, 1, 13, "#755831"],
+    ]),
+    skills: pixelRects([
+      [4, 8, 11, 12, "#162b28"],
+      [5, 7, 9, 11, "#729c95"],
+      [6, 8, 7, 8, "#afd0bd"],
+      [7, 9, 2, 3, "#284b42"],
+      [11, 9, 2, 3, "#284b42"],
+      [8, 13, 3, 1, "#284b42"],
+      [9, 17, 3, 10, "#65857b"],
+      [10, 18, 1, 8, "#d7eed7"],
+      [8, 26, 5, 3, "#38574b"],
+      [20, 3, 4, 3, "#233c34"],
+      [18, 6, 8, 2, "#d99f3e"],
+      [16, 8, 12, 3, "#f4cc68"],
+      [17, 11, 10, 3, "#ddaa42"],
+      [19, 14, 6, 2, "#bc8436"],
+      [20, 16, 4, 12, "#a67032"],
+      [20, 16, 2, 10, "#e6b85b"],
+      [19, 26, 6, 3, "#5e4830"],
+      [18, 8, 2, 2, "#fff0b8"],
+      [23, 11, 3, 1, "#8b632b"],
+    ]),
+    terminal: pixelRects([
+      [3, 4, 26, 24, "#081a14"],
+      [4, 3, 24, 24, "#486e57"],
+      [5, 4, 22, 22, "#93d6a0"],
+      [6, 5, 20, 20, "#10261d"],
+      [7, 6, 18, 2, "#294f37"],
+      [8, 6, 1, 1, "#91e6ad"],
+      [10, 6, 1, 1, "#5b9770"],
+      [12, 6, 1, 1, "#5b9770"],
+      [7, 9, 18, 14, "#0a1812"],
+      [10, 12, 2, 2, "#bcffd1"],
+      [12, 14, 2, 2, "#bcffd1"],
+      [10, 16, 2, 2, "#bcffd1"],
+      [17, 17, 6, 2, "#8ceca6"],
+      [17, 19, 6, 1, "#356346"],
+      [8, 22, 15, 1, "#153b28"],
+      [27, 6, 1, 19, "#406147"],
+      [6, 26, 20, 1, "#30523a"],
+    ]),
+    contact: pixelRects([
+      [3, 8, 26, 19, "#172d34"],
+      [4, 7, 24, 18, "#6896ac"],
+      [5, 8, 22, 15, "#b0d7df"],
+      [5, 9, 3, 2, "#e4f2e8"],
+      [8, 11, 3, 2, "#d2e8e5"],
+      [11, 13, 3, 2, "#d2e8e5"],
+      [14, 15, 4, 2, "#f4f3db"],
+      [18, 13, 3, 2, "#d2e8e5"],
+      [21, 11, 3, 2, "#d2e8e5"],
+      [24, 9, 3, 2, "#e4f2e8"],
+      [5, 21, 4, 2, "#8db7c5"],
+      [9, 19, 3, 2, "#8db7c5"],
+      [20, 19, 3, 2, "#8db7c5"],
+      [23, 21, 4, 2, "#8db7c5"],
+      [6, 24, 20, 1, "#456e84"],
+      [23, 4, 5, 5, "#b85054"],
+      [24, 4, 3, 3, "#fa8b88"],
+      [25, 5, 1, 1, "#ffe5bc"],
+    ]),
+    arcade: pixelRects([
+      [4, 19, 24, 10, "#17282a"],
+      [5, 18, 22, 9, "#45546a"],
+      [6, 19, 20, 2, "#748697"],
+      [6, 21, 20, 4, "#354550"],
+      [12, 8, 3, 12, "#293c3c"],
+      [13, 8, 1, 10, "#afc0af"],
+      [10, 4, 7, 5, "#853b48"],
+      [11, 3, 5, 5, "#e05c61"],
+      [12, 3, 3, 1, "#ffa99a"],
+      [10, 6, 7, 2, "#b84552"],
+      [20, 21, 4, 3, "#a54e4b"],
+      [21, 20, 3, 3, "#ff8270"],
+      [7, 23, 2, 1, "#a5bfbe"],
+      [10, 23, 2, 1, "#a5bfbe"],
+      [8, 27, 3, 2, "#0b1c20"],
+      [21, 27, 3, 2, "#0b1c20"],
+    ]),
+    settings: pixelRects([
+      [13, 2, 6, 28, "#1c3032"],
+      [2, 13, 28, 6, "#1c3032"],
+      [7, 5, 18, 22, "#1c3032"],
+      [5, 7, 22, 18, "#1c3032"],
+      [13, 3, 6, 26, "#8ea9b0"],
+      [3, 13, 26, 6, "#8ea9b0"],
+      [8, 6, 16, 20, "#a9c5c6"],
+      [6, 8, 20, 16, "#a9c5c6"],
+      [10, 6, 12, 3, "#d9e9d9"],
+      [6, 10, 3, 12, "#c3dcd3"],
+      [11, 10, 10, 12, "#36534e"],
+      [10, 11, 12, 10, "#36534e"],
+      [12, 12, 8, 8, "#122e29"],
+      [14, 13, 4, 1, "#98b9a4"],
+      [13, 14, 6, 4, "#739780"],
+      [14, 18, 4, 1, "#416d5d"],
+      [24, 11, 2, 12, "#678994"],
+      [12, 25, 10, 1, "#627f86"],
+    ]),
+    system: pixelRects([
+      [3, 4, 26, 21, "#172b30"],
+      [4, 3, 24, 20, "#7c969d"],
+      [5, 4, 22, 17, "#b7ceca"],
+      [6, 5, 20, 15, "#18392d"],
+      [7, 6, 18, 12, "#0e261b"],
+      [8, 13, 4, 1, "#90edb1"],
+      [11, 11, 2, 2, "#90edb1"],
+      [13, 8, 2, 4, "#aff9b8"],
+      [15, 12, 2, 4, "#90edb1"],
+      [17, 15, 2, 2, "#90edb1"],
+      [19, 12, 2, 4, "#90edb1"],
+      [21, 12, 3, 1, "#90edb1"],
+      [25, 21, 1, 1, "#a2ffcf"],
+      [13, 23, 6, 4, "#758c91"],
+      [14, 24, 4, 2, "#a2b3ad"],
+      [9, 27, 14, 2, "#506b6e"],
+      [10, 27, 12, 1, "#c4d2c4"],
+    ]),
+    trash: pixelRects([
+      [8, 8, 16, 22, "#172a2e"],
+      [9, 9, 14, 20, "#658a8f"],
+      [10, 10, 12, 17, "#a0c1bf"],
+      [11, 10, 2, 16, "#d3e3d6"],
+      [15, 10, 2, 16, "#6e9294"],
+      [19, 10, 2, 16, "#6e9294"],
+      [7, 6, 18, 3, "#405f65"],
+      [6, 5, 20, 2, "#b5cfca"],
+      [8, 4, 16, 1, "#e5ead7"],
+      [13, 2, 6, 2, "#526f71"],
+      [14, 1, 4, 1, "#c6d8ca"],
+      [11, 28, 10, 1, "#3d666b"],
+    ]),
+    easter: pixelRects([
+      [4, 11, 24, 18, "#23302a"],
+      [5, 10, 22, 17, "#b9853d"],
+      [6, 11, 20, 14, "#e0b766"],
+      [7, 12, 18, 2, "#ffe2a0"],
+      [7, 15, 18, 9, "#cca24f"],
+      [9, 3, 14, 8, "#324d48"],
+      [11, 2, 10, 2, "#8eafa1"],
+      [10, 4, 3, 7, "#b9d5b7"],
+      [19, 4, 3, 7, "#6e8d7c"],
+      [13, 4, 6, 2, "#142c28"],
+      [13, 6, 6, 5, "#081d17"],
+      [13, 16, 6, 4, "#3c4830"],
+      [15, 19, 2, 4, "#3c4830"],
+      [14, 17, 4, 2, "#131e17"],
+      [7, 25, 17, 1, "#8c6b32"],
+      [24, 15, 1, 9, "#a47c36"],
+    ]),
+    screensaver: pixelRects([
+      [3, 4, 26, 22, "#19302d"],
+      [4, 3, 24, 21, "#567c71"],
+      [5, 4, 22, 19, "#9ac7b0"],
+      [6, 5, 20, 16, "#061d18"],
+      [8, 7, 1, 2, "#43825b"],
+      [8, 11, 1, 3, "#7fdea2"],
+      [11, 8, 1, 3, "#adebbb"],
+      [11, 13, 1, 3, "#387d59"],
+      [15, 6, 1, 3, "#4d9f8a"],
+      [15, 11, 1, 4, "#89ebc4"],
+      [19, 8, 1, 3, "#78cad0"],
+      [19, 13, 1, 3, "#2e666e"],
+      [23, 6, 1, 3, "#a8f9d0"],
+      [23, 11, 1, 4, "#457f64"],
+      [7, 18, 17, 1, "#6ac9a0"],
+      [12, 24, 8, 3, "#668a7f"],
+      [9, 27, 14, 2, "#34594d"],
+      [10, 27, 12, 1, "#9cc4ac"],
+    ]),
+    mario: pixelRects([
+      [8, 8, 16, 17, "#213529"],
+      [11, 4, 10, 3, "#bc4748"],
+      [7, 7, 19, 4, "#ea6a5c"],
+      [5, 11, 23, 4, "#e86b61"],
+      [7, 10, 3, 3, "#fff2cf"],
+      [13, 6, 3, 3, "#ffeac3"],
+      [21, 11, 4, 3, "#ffd9ac"],
+      [11, 15, 11, 11, "#e8d4a4"],
+      [13, 16, 7, 8, "#fff0c5"],
+      [13, 17, 2, 4, "#3a3526"],
+      [18, 17, 2, 4, "#3a3526"],
+      [9, 25, 15, 3, "#769961"],
+      [11, 25, 11, 1, "#bfd5a0"],
+    ]),
+    pacman: pixelRects([
+      [10, 4, 12, 2, "#735c26"],
+      [6, 6, 18, 4, "#f4cb56"],
+      [4, 10, 18, 6, "#e8b947"],
+      [4, 16, 14, 5, "#e8b947"],
+      [6, 21, 18, 4, "#e8b947"],
+      [10, 25, 12, 2, "#b18b34"],
+      [8, 7, 10, 2, "#ffe68a"],
+      [6, 10, 3, 9, "#ffdf6f"],
+      [17, 8, 2, 2, "#27332b"],
+      [18, 13, 8, 3, "#10241a"],
+      [21, 10, 5, 3, "#10241a"],
+      [18, 16, 8, 3, "#10241a"],
+      [23, 19, 3, 2, "#10241a"],
+      [27, 14, 3, 3, "#e8e6c1"],
+    ]),
+    tetris: pixelRects([
+      [4, 3, 24, 26, "#21313a"],
+      [5, 4, 22, 24, "#3d4e5e"],
+      [6, 5, 20, 22, "#152831"],
+      [8, 7, 5, 5, "#9168b3"],
+      [13, 7, 5, 5, "#b98ee0"],
+      [18, 7, 5, 5, "#9168b3"],
+      [13, 12, 5, 5, "#9168b3"],
+      [9, 8, 3, 1, "#dac1f5"],
+      [14, 8, 3, 1, "#edd7ff"],
+      [19, 8, 3, 1, "#dac1f5"],
+      [14, 13, 3, 1, "#dac1f5"],
+      [8, 21, 5, 5, "#5fa49c"],
+      [13, 21, 5, 5, "#d5a857"],
+      [18, 21, 5, 5, "#d5a857"],
+      [18, 16, 5, 5, "#d5a857"],
+      [9, 22, 3, 1, "#9de5c6"],
+      [14, 22, 3, 1, "#f8daa0"],
+      [19, 17, 3, 1, "#f8daa0"],
+    ]),
   };
-
   const pixelIcon = (id) =>
-    `<svg class="os-icon os-icon--${id}" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">${PIXEL_ICONS[id] || PIXEL_ICONS.projects}</svg>`;
+    `<svg class="os-icon os-icon--${id}" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">${PIXEL_ICONS[id] || PIXEL_ICONS.projects}</svg>`;
 
   Object.keys(PIXEL_ICONS).forEach((id) => {
     if (Apps[id]) Apps[id].icon = pixelIcon(id);
@@ -5056,8 +5309,28 @@ async function getAssistantReply(message) {
   return getLocalReply(message);
 }
 
-const MILO_SVG =
-  '<svg class="mascot-svg" viewBox="0 0 24 24" shape-rendering="crispEdges" aria-hidden="true"><path fill="#ce7867" d="M8 3h2v3h4V3h2v3h3v3h3v7h-3v3h-2v3h-3v-3h-4v3H7v-3H5v-3H2V9h3V6h3z"/><path fill="#e99b86" d="M7 7h10v2h3v6h-3v2H7v-2H4V9h3z"/><path fill="#262e28" d="M8 10h2v3H8zm6 0h2v3h-2zM10 15h4v1h-4z"/><path fill="#f5c3a4" d="M5 13h2v2H5zm12 0h2v2h-2z"/></svg>';
+// MILO: ajolote rosa en una rejilla propia, inspirado en el estilo de Minecraft.
+// El dibujo es inline: no descarga imágenes ni cambia el punto de conexión del chat.
+const MILO_SVG = `<svg class="mascot-svg" viewBox="0 0 48 40" shape-rendering="crispEdges" aria-hidden="true">
+  <g class="axolotl-tail"><path fill="#bd607c" d="M32 27h8v-3h4v9H32z"/><path fill="#f4abc2" d="M34 28h8v-3h2v6H34z"/></g>
+  <path fill="#a34b68" d="M15 28h20v7H15zM14 33h7v4h-7zM28 33h7v4h-7z"/>
+  <path fill="#efabc1" d="M16 28h17v5H16zM15 33h5v2h-5zM29 33h5v2h-5z"/>
+  <path fill="#ffcfdb" d="M19 29h11v3H19zM16 33h2v1h-2zM30 33h2v1h-2z"/>
+  <g class="axolotl-gills">
+    <path fill="#b75576" d="M9 9H5V4H2v8h7v3H3v3H1v3h8v3H4v3h7V9zM39 9h4V4h3v8h-7v3h6v3h2v3h-8v3h5v3h-7V9z"/>
+    <path fill="#ed7ca5" d="M8 10H4V5H2v6h6v5H3v3H1v2h8v4H5v2h6V10zM40 10h4V5h2v6h-6v5h5v3h2v2h-8v4h4v2h-6V10z"/>
+    <path fill="#ffc0d2" d="M2 5h1v4H2zM2 18h4v1H2zM5 25h3v1H5zM45 5h1v4h-1zM42 18h4v1h-4zM40 25h3v1h-3z"/>
+  </g>
+  <path fill="#ba6d86" d="M12 8h24v2h3v18h-3v2H12v-2H9V10h3z"/>
+  <path fill="#f6b4cb" d="M12 10h24v2h2v14h-2v2H12v-2h-2V12h2z"/>
+  <path fill="#ffd1dd" d="M13 10h22v3H13zM11 13h4v10h-4zM15 14h18v10H15z"/>
+  <path fill="#e999b6" d="M34 13h3v13h-3zM14 26h20v2H14zM16 12h3v1h-3zM27 12h4v1h-4z"/>
+  <path fill="#412f40" d="M15 17h3v3h-3zM30 17h3v3h-3z"/>
+  <path fill="#fff3e9" d="M15 17h1v1h-1zM30 17h1v1h-1z"/>
+  <path fill="#ec8ead" d="M12 21h5v2h-5zM31 21h5v2h-5z"/>
+  <path fill="#a95e7a" d="M22 22h4v1h-4z"/>
+</svg>`;
+
 const mascot = document.createElement("button");
 mascot.id = "mascot-button";
 mascot.type = "button";
@@ -5071,7 +5344,7 @@ panel.hidden = true;
 panel.setAttribute("role", "dialog");
 panel.setAttribute("aria-label", "Milo, asistente de Josemi");
 panel.innerHTML =
-  '<div class="mascot-head"><div><strong>Milo</strong><small>Tu compañero de escritorio</small></div><button id="mascot-close" aria-label="Cerrar asistente">×</button></div><div id="mascot-log" class="mascot-log" role="log" aria-live="polite"></div><form id="mascot-form" class="mascot-form"><label class="sr-only" for="mascot-input">Mensaje para Milo</label><input id="mascot-input" maxlength="500" placeholder="Estudios, proyectos, aficiones…" autocomplete="off" required><button class="btn" type="submit">Enviar</button></form><div class="mascot-quick"><button class="btn" data-q="¿Qué estudias?">Estudios</button><button class="btn" data-q="Proyectos">Proyectos</button><button class="btn" data-q="Secret Vault">Secret Vault</button><button class="btn" data-q="Contacto">Contacto</button></div><small class="milo-mode">RESPUESTAS LOCALES · IA PENDIENTE DE CONECTAR</small>';
+  '<div class="mascot-head"><div><strong>Milo</strong><small>Tu ajolote de escritorio</small></div><button id="mascot-close" aria-label="Cerrar asistente">×</button></div><div id="mascot-log" class="mascot-log" role="log" aria-live="polite"></div><form id="mascot-form" class="mascot-form"><label class="sr-only" for="mascot-input">Mensaje para Milo</label><input id="mascot-input" maxlength="500" placeholder="Estudios, proyectos, aficiones…" autocomplete="off" required><button class="btn" type="submit">Enviar</button></form><div class="mascot-quick"><button class="btn" data-q="¿Qué estudias?">Estudios</button><button class="btn" data-q="Proyectos">Proyectos</button><button class="btn" data-q="Secret Vault">Secret Vault</button><button class="btn" data-q="Contacto">Contacto</button></div><small class="milo-mode">RESPUESTAS LOCALES · IA PENDIENTE DE CONECTAR</small>';
 document.body.append(mascot, panel);
 let chatBusy = false;
 const chatHistory = [];

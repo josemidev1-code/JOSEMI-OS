@@ -5098,3 +5098,64 @@ body.has-god-of-war .desktop {
     display: none;
   }
 }
+
+/* PIXEL ART PERSONALIZADO / 32×32: detalles nítidos también en el dock. */
+.icon .os-icon {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 3px 0 #0005);
+}
+.icon .glyph {
+  overflow: visible;
+}
+#mascot-button {
+  width: 92px;
+  height: 78px;
+  right: 18px;
+  bottom: 14px;
+}
+#mascot-button .mascot-svg {
+  width: 92px;
+  height: 78px;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 4px 0 #0005);
+}
+#mascot-button .milo-label {
+  bottom: 80px;
+  right: 22px;
+}
+.axolotl-tail {
+  transform-origin: 32px 28px;
+  animation: axolotlTail 3.6s steps(2, end) infinite;
+}
+.axolotl-gills {
+  transform-origin: 24px 18px;
+  animation: axolotlGills 4s steps(2, end) infinite;
+}
+@keyframes axolotlTail {
+  0%,
+  75%,
+  100% {
+    transform: none;
+  }
+  80%,
+  90% {
+    transform: translateY(-1px);
+  }
+}
+@keyframes axolotlGills {
+  0%,
+  70%,
+  100% {
+    transform: none;
+  }
+  75%,
+  85% {
+    transform: scaleX(1.035);
+  }
+}
+body.reduce-motion .axolotl-tail,
+body.reduce-motion .axolotl-gills {
+  animation: none;
+}
