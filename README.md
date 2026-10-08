@@ -66,3 +66,11 @@ Motor, juegos, temas y arranque del proyecto original JOSEMI-OS. Mejoras realiza
 Fondo God of War: [imagen elegida por Josemi](https://i.pinimg.com/736x/f4/e8/4e/f4e84ea8a1b943cd82b816f685c04ef7.jpg). Recurso externo, no fotografía propia; no acredita derechos de reutilización. Fuentes tipográficas de Google Fonts.
 
 La iteración de iconos, Milo y salvapantallas se trabaja en la rama `iconos-personales-y-terminal-ascii`, con commits separados en castellano y una PR que describe las comprobaciones. El historial previo se conserva.
+
+## Fondos pixel art y señal corrupta
+
+Ajustes → Fondo ofrece cuatro escenas originales: Matrix azotea, Matrix portal, Minecraft valle y Jetpack laboratorio. Se dibujan en `drawPixelWallpaper` sobre una rejilla de 480 × 270 mediante SVG de rectángulos; `PIXEL_WALLPAPERS` guarda las miniaturas. No utilizan imágenes extraídas de juegos. El encuadre está centrado, cubre la pantalla y desactiva el parallax; en móvil se recortan los laterales. La elección se guarda en localStorage. Los fondos especiales originales de Secret Vault siguen disponibles.
+
+La Terminal acepta `fondo matrixCity`, `fondo matrixCode`, `fondo minecraft` y `fondo jetpack`. El comando oculto `infectar` (también `virus`) activa un easter egg: aspecto corrupto, nombres de iconos alterados, biografía ficticia y Milo con una respuesta absurda señalada como simulación. Funciona también en ventanas abiertas después de activarlo. `antivirus`, `restaurar`, Escape o el botón Restaurar sistema recuperan los textos originales. Recargar también lo termina: el estado corrupto no se guarda.
+
+`startCorruption` guarda solo copias de los textos visibles, y `stopCorruption` los restaura y desconecta el observador. No modifica PROFILE, archivos ni contactos, no ejecuta comandos del ordenador y no realiza peticiones de red. Las frases ficticias del chat no entran en el historial que usaría la futura API. El efecto de desplazamiento respeta reducir movimiento y la preferencia del sistema.
