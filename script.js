@@ -31,7 +31,7 @@ const DEF = {
   bg: "#050806",
   wp: 0,
   sound: false,
-  motion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+  motion: false,
 };
 let state = Object.assign({}, DEF);
 try {
@@ -40,6 +40,12 @@ try {
     JSON.parse(localStorage.getItem("josemi-os") || "{}"),
   );
 } catch (e) {}
+// Corrige una sola vez el ajuste que antes se activaba automáticamente.
+// A partir de aquí, el interruptor de Ajustes conserva la elección del visitante.
+if (state.motionPreferenceVersion !== 1) {
+  state.motion = false;
+  state.motionPreferenceVersion = 1;
+}
 if (["#6C63FF", "#00C8FF", "#4ade80", "#f5b942"].includes(state.accent))
   state.accent = "#6dff9b";
 // localStorage conserva datos aunque se cierre o recargue la pestaña.
@@ -4316,8 +4322,6 @@ initDirectAccess();
     state.wallpaper = "static";
   if (!state.vault.matrix && state.atmosphere === "matrixBlue")
     state.atmosphere = "matrix";
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches)
-    state.motion = true;
   save();
 
   // DATOS PERSONALES confirmados por Josemi.
