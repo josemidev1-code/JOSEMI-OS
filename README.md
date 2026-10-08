@@ -16,11 +16,21 @@ La web funciona con **tres archivos**, sin instalar paquetes ni compilar:
 
 ## Qué funciona
 
-Se conserva el arranque Matrix, las ventanas que se pueden mover/minimizar/cerrar, la búsqueda, los ajustes, ASCII Studio, Tetris, Pac-Man y JOSEMI Run. Incluye una familia de iconos pixel art, un dock compacto y Milo. No hay una página previa al sistema. La barra superior se ha retirado.
+Se conserva el arranque Matrix, las ventanas que se pueden mover/minimizar/cerrar, la búsqueda, los ajustes, ASCII Studio, Tetris, Pac-Man y JOSEMI Run. Incluye 15 iconos SVG propios sobre una rejilla de 32 píxeles, con contornos, luces y sombras, un dock compacto y Milo, un ajolote rosa inspirado en Minecraft. El favicon comparte el dibujo del terminal. No hay una página previa al sistema. La barra superior se ha retirado.
 
 Secret Vault tiene dos preguntas personales, pistas y respuestas normalizadas: **Morfeo** desbloquea Matrix verde y cian; **God of War** desbloquea el fondo elegido. Las llaves y preferencias se guardan en `localStorage`. Es un juego público: no sirve para proteger datos privados.
 
-Milo usa respuestas locales escritas en `RAMAS`. **Todavía no está conectado a una IA ni a una API meteorológica.** No inventa el tiempo. La integración se hará manualmente en clase.
+Milo conserva el chat existente y usa respuestas locales escritas en `RAMAS`. Su dibujo está en `MILO_SVG`, integrado en JavaScript. **Todavía no está conectado a una IA ni a una API meteorológica.** No inventa el tiempo. La integración se hará manualmente en clase.
+
+## Salvapantallas: terminal ASCII
+
+Se abre con la estrella del dock o en Ajustes → Salvapantallas. En Ajustes se puede iniciar también tras uno o tres minutos de inactividad. Cualquier tecla, clic o movimiento del ratón vuelve al escritorio.
+
+Llena la pantalla con caracteres Matrix y una firma grande que se adapta al ancho y al alto. `SAVER_SCENES` encadena siete escenas durante 73 segundos: JOSEMI-OS, señal Matrix, órbita, Milo, píldoras, hacha y firma personal. El orden se repite al terminar. Cada escena tiene su comando, texto y efecto de aparición; los dibujos y la órbita se generan por código, sin vídeo, imágenes externas ni librerías.
+
+Edita `SAVER_SCENES` para cambiar los textos, las duraciones y los easter eggs. `showScreensaver` dibuja con Canvas y `requestAnimationFrame`; `hideScreensaver` cancela el bucle y retira el ajuste de tamaño. Al ocultar la pestaña se detiene. Reducir movimiento viene desactivado; si se activa manualmente, muestra una firma estática.
+
+La experiencia toma como referencia el [salvapantallas de Omarchy](https://omarchy.org/manual/toggles-idle-screensaver/), adaptada a una web con JavaScript. Los dibujos y efectos de esta página son propios. Milo se inspira en el ajolote de Minecraft; no utiliza un archivo del juego.
 
 ## Puntos para editar en clase
 
@@ -51,8 +61,8 @@ Lighthouse ≥90, fotos propias optimizadas, vídeo propio, issues, prompts arch
 
 ## Créditos y proceso
 
-Motor, juegos, temas y arranque del proyecto original JOSEMI-OS. Mejoras realizadas con IA a partir de decisiones de Josemi: conservar la web existente, entrada directa al sistema, iconos pixel art, Milo coral, quitar la barra superior, compactar el dock y personalizar Secret Vault.
+Motor, juegos, temas y arranque del proyecto original JOSEMI-OS. Mejoras realizadas con IA a partir de decisiones de Josemi: conservar la web existente, entrada directa al sistema, iconos pixel art, Milo ajolote, quitar la barra superior, compactar el dock y personalizar Secret Vault.
 
 Fondo God of War: [imagen elegida por Josemi](https://i.pinimg.com/736x/f4/e8/4e/f4e84ea8a1b943cd82b816f685c04ef7.jpg). Recurso externo, no fotografía propia; no acredita derechos de reutilización. Fuentes tipográficas de Google Fonts.
 
-Los cambios se guardan en la rama `mejoras-sobre-web-actual`, con mensajes en castellano y una PR que describe las comprobaciones. El historial previo se conserva.
+La iteración de iconos, Milo y salvapantallas se trabaja en la rama `iconos-personales-y-terminal-ascii`, con commits separados en castellano y una PR que describe las comprobaciones. El historial previo se conserva.
