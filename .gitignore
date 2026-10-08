@@ -22,6 +22,10 @@ Thumbs.db
 *.swp
 *~
 
-# Archivos locales no publicables.
+# Archivos y copias locales no publicables.
 *.pdf
 copias-locales/
+
+# Notas privadas de trabajo.
+privado/
+instrucciones-locales/
