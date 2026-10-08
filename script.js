@@ -4921,44 +4921,10 @@ initDirectAccess();
    Conservamos WM, Apps, el arranque, los temas y los juegos.
    ========================================================= */
 
-// Presentación antes del arranque original: no se reemplaza la intro Matrix.
-let landingScroll = 0;
-function startDesktopBoot() {
-  landingScroll = window.scrollY;
-  $("#os-landing").classList.add("hidden");
-  document.body.classList.remove("os-landing-mode");
-  state.welcomeWindowRead = true; // La presentación ya cumple la bienvenida.
-  save();
-  typeLoginArt();
-}
-function returnToPresentation() {
-  $$(".window").forEach((win) => WM.closeWindow(win.dataset.id));
-  $("#menu").classList.add("hidden");
-  $("#ctxmenu").classList.add("hidden");
-  hideScreensaver();
-  currentBootAnimation?.cancel();
-  bootRun++;
-  enteringOS = false;
-  $("#login").classList.add("hidden");
-  $("#desktop").classList.add("hidden");
-  $("#os-landing").classList.remove("hidden");
-  document.body.classList.add("os-landing-mode");
-  $("#os-landing-title").focus({ preventScroll: true });
-  window.scrollTo(0, landingScroll);
-}
-$("#landing-enter").addEventListener("click", startDesktopBoot);
-$("#return-presentation").addEventListener("click", returnToPresentation);
-document.body.classList.add("os-landing-mode");
-$("#login").classList.add("hidden");
-
-// Milo puede abrir una ventana desde la presentación con el motor original.
+// Milo abre aplicaciones con el motor original del escritorio.
 function launchPortfolioApp(id) {
   if (!Apps[id]) return;
   if ($("#desktop").classList.contains("hidden")) {
-    landingScroll = window.scrollY;
-    $("#os-landing").classList.add("hidden");
-    document.body.classList.remove("os-landing-mode");
-    state.welcomeWindowRead = true;
     enteringOS = false;
     enterOS();
     setTimeout(() => openWindow(id), 500);
@@ -5186,3 +5152,6 @@ addChatMessage(
 );
 
 $("#launch-settings").innerHTML = Apps.settings.icon;
+
+// INICIO: ejecutar directamente la secuencia Matrix original.
+typeLoginArt();
