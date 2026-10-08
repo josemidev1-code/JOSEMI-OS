@@ -1,7 +1,7 @@
 /* Milo AI — integració amb el gateway de JOSEMI-OS */
 const MiloAI = (() => {
   const CONFIG = {
-    endpoint: 'https://milo-ai.josemidev1.workers.dev//chat',
+    endpoint: 'https://milo-ai.josemidev1.workers.dev/chat',
     enabled: true,
     maxHistory: 12,
   };
@@ -43,21 +43,8 @@ REGLAS:
     { type: 'function', function: { name: 'set_theme', description: 'Canvia el tema visual.', parameters: { type: 'object', properties: { theme: { type: 'string', enum: ['night','paper','violet','ocean','sunset'] } }, required: ['theme'] } } },
   ];
 
-  let history = [], busy = false, audio = null;
-
+  let audio = null;
   const q = s => document.querySelector(s);
-  function say(text, who = 'assistant') {
-    const log = q(SEL.log); if (!log) return null;
-    const p = document.createElement('p');
-    p.className = who; p.textContent = text;
-    log.appendChild(p); log.scrollTop = log.scrollHeight;
-    return p;
-  }
-  function typing() {
-    const p = say('…', 'assistant typing'); let n = 0;
-    const t = setInterval(() => { if (!p.isConnected) return clearInterval(t); p.textContent = '·'.repeat(1 + (n++ % 3)); }, 320);
-    return () => { clearInterval(t); p.remove(); };
-  }
 
   async function runTool(call) {
     const args = safeParse(call.function.arguments);
@@ -99,64 +86,44 @@ REGLAS:
   }
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-  async function callApi(messages) {
+  async function callApi(messages, signal) {
     const res = await fetch(CONFIG.endpoint, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages, tools: TOOLS }),
+      body: JSON.stringify({ messages, tools: TOOLS }), signal,
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   }
 
-  async function send(userText) {
-    if (!userText.trim() || busy) return;
-    busy = true; say(userText, 'user'); const stop = typing();
-    let messages = [{ role: 'system', content: SYSTEM }, ...history, { role: 'user', content: userText }];
+  async function reply(userText, history = []) {
+    if (!CONFIG.enabled) throw new Error('Milo AI está desactivado');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    const messages = [{ role: 'system', content: SYSTEM },
+      ...history.slice(-CONFIG.maxHistory), { role: 'user', content: userText }];
     try {
-      let reply = null;
-      if (CONFIG.enabled) {
-        for (let turn = 0; turn < 4; turn++) {
-          const data = await callApi(messages);
-          const msg = data.message || {};
-          messages = data.messages || messages;
-          const calls = msg.tool_calls || [];
-          if (calls.length) {
-            messages.push(msg);
-            for (const call of calls) {
-              const result = await runTool(call);
-              messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
-            }
-            continue;
+      for (let turn = 0; turn < 4; turn++) {
+        const data = await callApi(messages, controller.signal);
+        const msg = data.message || data.choices?.[0]?.message;
+        if (!msg) throw new Error('Respuesta de IA no válida');
+        const calls = msg.tool_calls || [];
+        if (calls.length) {
+          messages.push(msg);
+          for (const call of calls) {
+            const result = await runTool(call);
+            messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
           }
-          reply = msg.content || null; break;
+          continue;
         }
+        if (typeof msg.content !== 'string' || !msg.content.trim())
+          throw new Error('Respuesta de IA vacía');
+        return { text: msg.content };
       }
-      if (!reply) reply = fallback(userText); // si la IA falla, Milo no es queda mut
-      say(reply, 'assistant');
-      history = messages.filter(m => m.role !== 'system').slice(-CONFIG.maxHistory);
-    } catch (e) {
-      say('Milo ha tingut un problema de connexió. Prova en un moment o escriu "ayuda".', 'assistant');
-      console.warn('[MiloAI]', e);
-    } finally { stop(); busy = false; }
+      throw new Error('Demasiadas acciones de IA');
+    } finally { clearTimeout(timer); }
   }
 
-  function fallback(t) {
-    const s = t.toLowerCase();
-    if (/(hola|bones|hey|salut)/.test(s)) return 'Bones! Sóc Milo. Pregunta’m per Josemi, els projectes o l’Arcade. 💧';
-    if (/(josé|josemi|sobre)/.test(s)) return 'Josemi estudia DAM a l’IES Dr. Lluís Simarro i està aprenent HTML, CSS i JS construint aquest sistema.';
-    if (/(proyecto|projecte)/.test(s)) return 'El projecte estrella és JOSEMI-OS, un portfolio en forma de sistema operatiu fet a mà.';
-    if (/(ayuda|ajuda|help)/.test(s)) return 'Puc: parlar de Josemi, buscar a Internet, posar música, obrir apps i canviar el tema.';
-    return 'Interessant! Escriu "ayuda" o pregunta’m per Josemi, els projectes o l’Arcade.';
-  }
-
-  function init(overrides = {}) {
-    Object.assign(CONFIG, overrides);
-    const form = q(SEL.form), input = q(SEL.input);
-    if (!form || !input) return console.warn('[MiloAI] No trobe el xat de Milo (revisa SEL).');
-    form.addEventListener('submit', e => { e.preventDefault(); const v = input.value; input.value = ''; send(v); });
-    say('Sóc Milo. Pregunta’m per Josemi, busca el que vulgues o digue’m “posa música”.', 'assistant');
-  }
-
-  return { init, send, playMusic };
+  function init(overrides = {}) { Object.assign(CONFIG, overrides); }
+  return { init, reply, playMusic };
 })();
 window.MiloAI = MiloAI;

@@ -6352,8 +6352,8 @@ function launchPortfolioApp(id) {
 }
 
 /* =========================================================
-   MILO / ASISTENTE LOCAL
-   La interfaz funciona sin red. No hay una IA conectada todavía.
+   MILO / ASISTENTE
+   Una sola interfaz para la IA y las respuestas locales de respaldo.
    ========================================================= */
 const normalizeQuestion = (text) =>
   String(text)
@@ -6423,7 +6423,7 @@ const RAMAS = [
   },
   {
     keys: ["quien eres", "que eres", "creado", "milo", "asistente", "bot"],
-    text: "Soy Milo, el asistente local de la web de Josemi. Elijo respuestas preparadas y te ayudo a explorar. Mi conexión a un modelo de IA llegará después.",
+    text: "Soy Milo, el asistente de la web de Josemi. Te ayudo a explorar su escritorio. También puedo conversar mediante mi conexión a la IA.",
   },
   {
     keys: ["hola", "hello"],
@@ -6458,10 +6458,12 @@ function getLocalReply(message) {
         text: "No tengo esa información. Puedo contarte sus estudios, proyectos, aficiones o contacto. Si necesitas algo más, escribe a josemidev1@gmail.com.",
       };
 }
-// Respuesta del asistente local.
+// La IA comparte la interfaz y el historial del asistente.
 // Entrada: mensaje. Salida: {text:'respuesta', app:'id opcional'}.
 async function getAssistantReply(message) {
-  return getLocalReply(message);
+  if (corruptionActive) return getLocalReply(message);
+  if (!window.MiloAI) throw new Error("Milo AI no está disponible");
+  return window.MiloAI.reply(message, chatHistory);
 }
 
 // MILO: ajolote rosa en una rejilla propia, inspirado en el estilo de Minecraft.
@@ -6499,7 +6501,7 @@ panel.hidden = true;
 panel.setAttribute("role", "dialog");
 panel.setAttribute("aria-label", "Milo, asistente de Josemi");
 panel.innerHTML =
-  '<div class="mascot-head"><div><strong>Milo</strong><small>Tu ajolote de escritorio</small></div><button id="mascot-close" aria-label="Cerrar asistente">×</button></div><div id="mascot-log" class="mascot-log" role="log" aria-live="polite"></div><form id="mascot-form" class="mascot-form"><label class="sr-only" for="mascot-input">Mensaje para Milo</label><input id="mascot-input" maxlength="500" placeholder="Estudios, proyectos, aficiones…" autocomplete="off" required><button class="btn" type="submit">Enviar</button></form><div class="mascot-quick"><button class="btn" data-q="¿Qué estudias?">Estudios</button><button class="btn" data-q="Proyectos">Proyectos</button><button class="btn" data-q="Secret Vault">Secret Vault</button><button class="btn" data-q="Contacto">Contacto</button></div><small class="milo-mode">ASISTENTE DEL PORTFOLIO</small>';
+  '<div class="mascot-head"><div><strong>Milo</strong><small>Tu ajolote de escritorio</small></div><button id="mascot-close" aria-label="Cerrar asistente">×</button></div><div id="mascot-log" class="mascot-log" role="log" aria-live="polite"></div><form id="mascot-form" class="mascot-form"><label class="sr-only" for="mascot-input">Mensaje para Milo</label><input id="mascot-input" maxlength="500" placeholder="Estudios, proyectos, aficiones…" autocomplete="off" required><button class="btn" type="submit">Enviar</button></form><div class="mascot-results"></div><div class="mascot-quick"><button class="btn" data-q="¿Qué estudias?">Estudios</button><button class="btn" data-q="Proyectos">Proyectos</button><button class="btn" data-q="Secret Vault">Secret Vault</button><button class="btn" data-q="Contacto">Contacto</button></div><small class="milo-mode">ASISTENTE CON IA</small>';
 document.body.append(mascot, panel);
 let chatBusy = false;
 const chatHistory = [];
@@ -6558,9 +6560,10 @@ async function sendChat(message) {
       };
       pending.append(button);
     }
-  } catch {
+  } catch (error) {
     pending.textContent =
-      "Ahora no puedo responder. Prueba de nuevo o escribe a josemidev1@gmail.com.";
+      "No he podido conectar con la IA. " + getLocalReply(text).text;
+    console.warn("[MiloAI]", error);
   } finally {
     clearTimeout(timer);
     chatBusy = false;
