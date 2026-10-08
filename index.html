@@ -45,7 +45,7 @@
     <!-- ESCRITORIO: inicia oculto y se muestra al terminar o saltar la intro. -->
     <main id="desktop" class="desktop hidden">
       <div class="desktop__hint">
-        ENTER ABRE · CTRL + K BUSCA · CLIC DERECHO EXPLORA
+        ENTER ABRE · CTRL + K PARA BUSCA · CLIC DERECHO PARA EXPLORAR
       </div>
       <!-- ACCESOS: JavaScript inserta aquí las aplicaciones del usuario. -->
       <div class="icons" id="icons"></div>
@@ -98,5 +98,15 @@
     <div id="toasts" class="toasts" aria-live="polite"></div>
 
     <script src="script.js?v=20261008-public"></script>
+    <div id="mascot-chat">
+  <div class="mascot-log"></div>
+  <div class="mascot-results"></div>
+  <form class="mascot-form">
+    <input type="text" placeholder="Pregunta a Milo…" />
+    <button type="submit">➤</button>
+  </form>
+</div>
+    <script src="milo-ai.js"></script>
+<script> MiloAI.init(); </script>
   </body>
 </html>

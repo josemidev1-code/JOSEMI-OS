@@ -1019,7 +1019,7 @@ const Apps = {
    <div class="content-grid">
      <article class="content-card"><span class="card-kicker">01 / AHORA</span><h3>Qué estoy haciendo</h3><p>Estudio <strong>DAM</strong> en <strong>IES Dr. Lluís Simarro</strong>. Este proyecto es mi forma de practicar frontend, interacción, diseño y JavaScript mientras construyo algo que realmente me representa.</p></article>
      <article class="content-card"><span class="card-kicker">02 / OBJETIVO</span><h3>Hacia dónde voy</h3><p>${PROFILE.aspiracion}</p></article>
-     <article class="content-card"><span class="card-kicker">03 / FUERA DEL CÓDIGO</span><h3>No todo es programar</h3><p>Me gusta entrenar en el gimnasio, hacer deporte, practicar boxeo y salir a correr. También experimento con e-commerce y dropshipping.</p></article>
+     <article class="content-card"><span class="card-kicker">03 / FUERA DEL CÓDIGO</span><h3>No todo es programar</h3><p>Me gusta entrenar en el gimnasio, hacer deporte, practicar boxeo y salir a correr. También hago e-commerce y dropshipping.</p></article>
      <article class="content-card"><span class="card-kicker">04 / MENTALIDAD</span><h3>Build · learn · repeat</h3><p>Estoy al principio del camino, así que prefiero enseñar progreso real antes que fingir experiencia que todavía no tengo.</p></article>
    </div>`,
   },
@@ -1055,13 +1055,13 @@ const Apps = {
     render: () => `
    <div class="app-title">STACK / ESTADO ACTUAL</div>
    <div class="skill-focus">
-     <span class="card-kicker">DONDE MÁS CÓMODO ESTOY AHORA</span>
+     <span class="card-kicker">TRABAJANDO AHORA</span>
      <div class="skill-big"><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
      <p>Son las tecnologías con las que más estoy trabajando actualmente porque estoy desarrollando JOSEMI-OS.</p>
    </div>
    <div class="content-grid content-grid--compact">
      <article class="content-card"><span class="card-kicker">FORMACIÓN DAM</span><h3>Base de desarrollo</h3><p>Programación, aplicaciones multiplataforma y bases de datos dentro de mi formación. Prefiero no poner porcentajes falsos: mi nivel sigue creciendo.</p></article>
-     <article class="content-card"><span class="card-kicker">ENFOQUE</span><h3>IA + automatización</h3><p>Quiero aprender a utilizar la IA para acelerar desarrollo, crear automatizaciones y construir aplicaciones con más creatividad.</p></article>
+     <article class="content-card"><span class="card-kicker">ENFOQUE</span><h3>IA + automatización</h3><p>Estoy aprendiendo a utilizar la IA para acelerar desarrollo, crear automatizaciones y construir aplicaciones con más creatividad.</p></article>
      <article class="content-card"><span class="card-kicker">HERRAMIENTAS</span><h3>Git & GitHub</h3><p>Uso Git y GitHub para versionar este portfolio y seguir aprendiendo un flujo de trabajo real.</p></article>
      <article class="content-card"><span class="card-kicker">SIGUIENTE PASO</span><h3>Más proyectos</h3><p>La prioridad es construir, equivocarme, corregir y convertir cada proyecto en evidencia real de lo que sé hacer.</p></article>
    </div>`,
@@ -1106,7 +1106,7 @@ const Apps = {
    <article class="markdown-view">
      <div class="md-path">~/JOSEMI-OS/README.md</div>
      <h1>JOSEMI-OS</h1>
-     <blockquote><strong>Primer proyecto personal como desarrollador de José Miguel Miralles Gandia.</strong></blockquote>
+     <blockquote><strong> Este es mi primer proyecto personal como desarrollador de software.</strong></blockquote>
      <p>JOSEMI-OS es mi portfolio convertido en un pequeño sistema operativo interactivo. No quería hacer una web típica de “sobre mí + proyectos + contacto”, así que decidí construir un espacio que se pueda explorar, abrir, tocar y descubrir.</p>
      <h2>¿Quién soy?</h2>
      <p>Soy <strong>José Miguel Miralles Gandia</strong>, estudiante de <strong>DAM (Desarrollo de Aplicaciones Multiplataforma) en IES Dr. Lluís Simarro</strong> y desarrollador de software en proceso.</p>
@@ -1154,15 +1154,15 @@ const Apps = {
     icon: "🗑",
     render: () => `
    <div class="app-title">/home/josemi/.papelera</div>
-   <div class="file-row" data-file="motivation.exe"><span class="g">⚙️</span> motivacion.exe</div>
-   <div class="file-row" data-file="x"><span class="g">📄</span> matrix-design.old</div>
+   <div class="file-row" data-file="motivación.exe"><span class="g">⚙️</span> motivacion.exe</div>
+   <div class="file-row" data-file="x"><span class="g">📄</span> Josemiprimeraweb.old</div>
    <div class="file-row" data-file="x"><span class="g">🗜️</span> proyecto-fallido.zip</div>
-   <div class="file-row" data-file="x"><span class="g">📄</span> todo-final-final-ahora-si.java</div>`,
+   <div class="file-row" data-file="x"><span class="g">📄</span> todo-final-final-ahora-si.html</div>`,
     bind(b) {
       b.querySelectorAll(".file-row").forEach((r) =>
         r.addEventListener("dblclick", () => {
-          if (r.dataset.file === "motivation.exe") openWindow("motivation");
-          else toast("Archivo corrupto. Es broma 🙂");
+          if (r.dataset.file === "motivación.exe") openWindow("motivation");
+          else toast("No trabajo con motivación, trabajo con disciplina.");
         }),
       );
     },
@@ -6658,3 +6658,5 @@ function stopCorruption() {
 document.addEventListener("keydown", (e) => {
   if (corruptionActive && e.key === "Escape") stopCorruption();
 });
+window.openWindow = openWindow;
+window.chooseTheme = chooseTheme;
