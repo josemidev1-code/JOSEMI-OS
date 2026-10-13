@@ -46,16 +46,39 @@ REGLAS:
   let audio = null;
   const q = s => document.querySelector(s);
 
-  async function runTool(call) {
-    const args = safeParse(call.function.arguments);
-    switch (call.function.name) {
-      case 'play_music': return await playMusic(args.query || 'chill');
-      case 'open_app': (window.openWindow || (() => {}))(args.app); return { ok: true, opened: args.app };
-      case 'set_theme': (window.chooseTheme || (() => {}))(args.theme); return { ok: true, theme: args.theme };
-      default: return { error: 'no_tool' };
+
+      const res = await fetch(
+        "https://milo-ai.josemidev1.workers.dev/search",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: args.query || "" })
+        }
+      );
+
+      if (!res.ok) {
+        return { error: `Error en la búsqueda: HTTP ${res.status}` };
+      }
+
+      return await res.json();
     }
+
+    case "play_music":
+      return await playMusic(args.query || "chill");
+
+    case "open_app":
+      window.openWindow?.(args.app);
+      return { ok: true, opened: args.app };
+
+    case "set_theme":
+      window.chooseTheme?.(args.theme);
+      return { ok: true, theme: args.theme };
+
+    default:
+      return { error: "no_tool" };
   }
-  const safeParse = s => { try { return JSON.parse(s) || {}; } catch { return {}; } };
+}
+
 
   // Música gratis: iTunes Search (preview 30s, sense clau, CORS OK)
   async function playMusic(query) {
