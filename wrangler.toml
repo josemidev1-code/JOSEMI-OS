@@ -1,0 +1,11 @@
+name = "milo-ai"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+# NO PONGAS CLAVES EN ESTE ARCHIVO.
+# Opcional para producción: crear un rate limiter en Cloudflare o habilitar protección WAF/Turnstile.
+# Si está disponible en tu cuenta, descomenta este bloque:
+# [[ratelimits]]
+# name = "MILO_RATE_LIMITER"
+# namespace_id = "1001"
+# simple = { limit = 12, period = 60 }
