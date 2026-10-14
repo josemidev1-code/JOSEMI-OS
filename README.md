@@ -12,7 +12,7 @@ Portfolio de José Miguel Miralles Gandia, estudiante de Desarrollo de Aplicacio
 - Arcade con Tetris, Pac-Man y JOSEMI Run.
 - Secret Vault con acertijos y fondos desbloqueables.
 - Diez fondos pixel art, iconos personalizados y salvapantallas ASCII.
-- Milo, un ajolote con respuestas locales sobre el portfolio.
+- Milo, un ajolote con IA (Groq), búsqueda web (Tavily), meteorología (Open-Meteo) y música (iTunes). Las respuestas locales se conservan como respaldo.
 - Preferencias guardadas en el navegador y adaptación a móvil.
 
 ## Estructura
@@ -23,7 +23,10 @@ La web utiliza HTML, CSS y JavaScript, sin proceso de compilación.
 | --- | --- |
 | `index.html` | Arranque y estructura del escritorio |
 | `style.css` | Diseño, ventanas, iconos y adaptación a pantallas |
-| `script.js` | Aplicaciones, juegos, fondos, preferencias y asistente |
+| `script.js` | Aplicaciones, juegos, fondos, preferencias y chat de Milo |
+| `milo-ai.js` | Cliente de IA y acciones del chat |
+| `worker.js` | Backend serverless para Groq, Tavily y Open-Meteo |
+| `wrangler.toml` | Configuración del despliegue a Cloudflare Workers |
 
 `CNAME` configura el dominio. `.nojekyll` permite publicar la web estática con GitHub Pages y `.gitignore` excluye configuración privada y archivos locales.
 
@@ -35,7 +38,39 @@ La web utiliza HTML, CSS y JavaScript, sin proceso de compilación.
 
 **Recursos gráficos integrados.** Los iconos y fondos pixel art se dibujan con SVG; el salvapantallas utiliza Canvas y texto ASCII. La galería mantiene el encuadre centrado y respeta las opciones de movimiento reducido.
 
-Milo utiliza respuestas predefinidas. Actualmente no realiza consultas a un modelo de IA ni a un servicio meteorológico.
+## Milo AI y APIs (proyecto DAM)
+
+La web de GitHub Pages es estática. El frontend `milo-ai.js` se comunica con el Cloudflare Worker `worker.js`. Las credenciales de las APIs no se incluyen en el HTML ni en JavaScript público.
+
+| API | Uso | Clave |
+| --- | --- | --- |
+| Groq Chat Completions | Conversación con modelo Llama 3.3 70B | `GROQ_API_KEY` (obligatoria) |
+| Tavily Search | Búsqueda de información actual con enlaces | `TAVILY_API_KEY` (opcional) |
+| Open-Meteo Geocoding + Forecast | Tiempo actual en ciudades | Sin clave |
+| Apple iTunes Search | Encontrar canciones y escuchar previews | Sin clave |
+
+### Configuración del Worker
+
+1. Crea un Worker de Cloudflare, instala y autentica Wrangler, y desde la carpeta del proyecto ejecuta `npx wrangler secret put GROQ_API_KEY`.
+2. Si quieres búsqueda web, ejecuta `npx wrangler secret put TAVILY_API_KEY`. Sin Tavily, Milo seguirá pudiendo hablar y consultar el tiempo.
+3. Despliega con `npx wrangler deploy`. El archivo `wrangler.toml` usa el nombre `milo-ai`. Comprueba que su URL coincide con el `endpoint` declarado en `milo-ai.js`.
+4. Publica el frontend fusionando la rama en `main` para que GitHub Pages actualice la web.
+5. Prueba `https://milo-ai.josemidev1.workers.dev/health` (debe indicar `groq: true`). El valor `tavily: true` señala que la clave de búsqueda existe.
+
+Los endpoints del Worker son `POST /chat`, `POST /search`, `POST /weather` y `GET /health`. Las llamadas a Groq y Tavily requieren configuración previa. `/weather` usa primero geocodificación y después previsión actual con la API de Open-Meteo; la búsqueda sin clave no es posible. La música se obtiene directamente de iTunes desde el navegador, sin credenciales. Los resultados de APIs externas pueden no estar disponibles si el proveedor falla.
+
+### Demostración en clase
+
+- «Qui és Josemi i què estudia?» demuestra el contexto del portfolio y la IA.
+- «Explica'm què és una API REST» demuestra conversación libre.
+- «Quin temps fa a València?» demuestra geocodificación y datos meteorológicos de una API.
+- «Busca notícies recents sobre Java» demuestra Tavily si has configurado su clave.
+- «Obri projectes», «Posa el tema oceà», «Busca música de Queen» demuestran herramientas y la integración en la interfaz.
+
+**Arquitectura**: navegador → Worker → Groq → `tool_calls` → Worker (Tavily/Open-Meteo) o navegador (iTunes/acciones visuales) → respuesta. Las respuestas se envían como JSON.
+
+**Seguridad y despliegue**: nunca subas archivos `.dev.vars`, claves ni tokens a GitHub. Los filtros CORS no sustituyen la autenticación ni impiden abusos fuera del navegador. Antes de dar difusión a la web configura límites de peticiones/costes en Cloudflare y en los proveedores. El endpoint es público y no tiene aún un límite de cuota por visitante. Las respuestas a preguntas sobre Josemi solo utilizan datos públicos declarados en el prompt del Worker.
+
 
 ## Publicación
 
