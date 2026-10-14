@@ -5478,3 +5478,121 @@ body.reduce-motion.is-corrupted .icons {
     font-size: 10px;
   }
 }
+
+
+/* Milo: bombolles amb Markdown segur, sense afectar altres finestres. */
+.mascot-log > .chat-message {
+  max-width: 94%;
+  width: fit-content;
+  margin: 7px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font: 12px/1.55 var(--font-ui, sans-serif);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.mascot-log > .chat-message.assistant {
+  align-self: flex-start;
+  white-space: normal;
+}
+.mascot-log > .chat-message.user {
+  align-self: flex-end;
+  white-space: pre-wrap;
+}
+.mascot-log > .chat-message.assistant p {
+  max-width: none;
+  margin: 0 0 9px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  white-space: normal;
+}
+.mascot-log > .chat-message.assistant > :last-child {
+  margin-bottom: 0;
+}
+.mascot-log > .chat-message.assistant strong {
+  font-weight: 750;
+  color: var(--shell-text, #edf7f0);
+}
+.mascot-log > .chat-message.assistant h4 {
+  font: 700 12px/1.4 var(--font-ui, sans-serif);
+  color: var(--shell-text, #edf7f0);
+  margin: 12px 0 6px;
+}
+.mascot-log > .chat-message.assistant :is(ul, ol) {
+  padding-left: 18px;
+  margin: 6px 0 10px;
+  list-style-position: outside;
+}
+.mascot-log > .chat-message.assistant ul { list-style-type: disc; }
+.mascot-log > .chat-message.assistant ol { list-style-type: decimal; }
+.mascot-log > .chat-message.assistant li { margin: 4px 0; }
+.mascot-log > .chat-message.assistant li > :is(ul, ol) {
+  margin: 4px 0;
+}
+.mascot-log > .chat-message.assistant a {
+  color: var(--accent, #93d6a0);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.mascot-log > .chat-message.assistant a:hover {
+  opacity: .82;
+}
+.mascot-log > .chat-message.assistant code {
+  font: 11px/1.5 var(--font-mono, monospace);
+  background: rgba(0, 0, 0, .28);
+  padding: 1px 4px;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+.mascot-log > .chat-message.assistant pre {
+  max-width: 100%;
+  margin: 7px 0;
+  padding: 10px;
+  overflow-x: auto;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, .38);
+}
+.mascot-log > .chat-message.assistant pre code {
+  background: none;
+  padding: 0;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+.mascot-log > .chat-message.assistant blockquote {
+  margin: 8px 0;
+  padding: 3px 0 3px 10px;
+  border-left: 2px solid var(--accent, #93d6a0);
+  color: var(--shell-muted, #a3b9aa);
+}
+.mascot-log > .chat-message.assistant hr {
+  border: 0;
+  border-top: 1px solid var(--shell-border, #395644);
+  margin: 10px 0;
+}
+.mascot-log > .chat-message.assistant .milo-table-scroll {
+  max-width: 100%;
+  margin: 8px 0 10px;
+  overflow-x: auto;
+}
+.mascot-log > .chat-message.assistant table {
+  border-collapse: collapse;
+  width: 100%;
+  font: inherit;
+  white-space: normal;
+}
+.mascot-log > .chat-message.assistant :is(th, td) {
+  text-align: left;
+  vertical-align: top;
+  border: 1px solid var(--shell-border, #395644);
+  padding: 6px;
+  overflow-wrap: anywhere;
+}
+.mascot-log > .chat-message.assistant th {
+  background: rgba(255, 255, 255, .06);
+  font-weight: 700;
+}
