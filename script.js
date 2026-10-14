@@ -6507,8 +6507,8 @@ let chatBusy = false;
 const chatHistory = [];
 function addChatMessage(text, role) {
   const log = $("#mascot-log");
-  const line = document.createElement("p");
-  line.className = role;
+  const line = document.createElement(role === "assistant" ? "div" : "p");
+  line.className = "chat-message " + role;
   line.textContent = text;
   log.append(line);
   while (log.children.length > 30) log.firstElementChild.remove();
@@ -6541,7 +6541,9 @@ async function sendChat(message) {
     ]);
     if (!response || typeof response.text !== "string")
       throw new Error("Respuesta no válida");
-    pending.textContent = response.text.slice(0, 3000);
+    if (response.simulated) pending.textContent = response.text.slice(0, 3000);
+    else if (window.MiloRender) window.MiloRender.render(pending, response.text.slice(0, 3000));
+    else pending.textContent = response.text.slice(0, 3000);
     if (response.simulated) pending.classList.add("corrupt-reply");
     if (!response.simulated)
       chatHistory.push(
