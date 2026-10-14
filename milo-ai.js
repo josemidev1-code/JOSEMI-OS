@@ -1,152 +1,184 @@
-/* Milo AI — integració amb el gateway de JOSEMI-OS */
+/* Milo AI: client sense credencials; el Worker executa les APIs protegides. */
 const MiloAI = (() => {
-  const CONFIG = {
-    endpoint: 'https://milo-ai.josemidev1.workers.dev/chat',
-    enabled: true,
-    maxHistory: 12,
-  };
-
-  // Si els teus IDs/clases són diferents, canvia només açò:
-  const SEL = {
-    log: '.mascot-log',
-    form: '.mascot-form',
-    input: '.mascot-form input',
-    results: '.mascot-results',
-    quick: '.mascot-quick',
-  };
-
-  /* ---- QUI ÉS JOSEMI: açò fa que responga sobre TU ---- */
-  const SYSTEM = `Eres MILO, un axolote de compañía que vive en JOSEMI-OS, el portfolio interactivo de José Miguel Miralles Gandia ("Josemi").
-
-DATOS REALES (nunca inventes nada que no esté aquí):
-- Nombre: José Miguel Miralles Gandia, "Josemi". Español.
-- Rol: Desarrollador de software EN PROCESO. Estudia DAM (Multiplataforma) en el IES Dr. Lluís Simarro.
-- Stack actual: HTML, CSS y JavaScript puro (sin frameworks), porque JOSEMI-OS está hecho a mano.
-- Usa IA como herramienta de aprendizaje y creación.
-- Aspiración: automatizaciones y aplicaciones para grandes empresas combinando programación + IA + creatividad.
-- Gustos: informática, IA, automatización, gimnasio, boxeo, running, e-commerce/dropshipping.
-- JOSEMI-OS incluye: terminal con comandos, Arcade (Tetris, Pac-Man y JOSEMI Run), Secret Vault, salvapantallas ASCII, ajustes de tema/fondo/cursor y este asistente.
-- Contacto público: GitHub @josemidev1-code, email josemidev1@gmail.com.
-
-REGLAS:
-1. Responde en el idioma del usuario (valenciano, castellano o inglés). Sé breve: 2-4 frases.
-2. Si preguntan algo de Josemi que NO está en los datos, di que no lo sabes. NUNCA inventes notas, sueldos, edades o experiencias.
-3. Si preguntan algo externo (noticias, "qué es X"), usa la herramienta web_search antes de responder.
-4. Puedes ACCIONAR el sistema: play_music, open_app, set_theme.
-5. Tono: cercano, gamberro ligero, motivador. Eres un axolote, no un chatbot corporativo.`;
-
-  // IMPORTANT: OpenAI/Groq vol les tools amb "function" dins. No ho toques o falla.
-  const TOOLS = [
-    { type: 'function', function: { name: 'web_search', description: 'Busca en Internet informació actual o que no estiga en les dades de Josemi.', parameters: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] } } },
-    { type: 'function', function: { name: 'play_music', description: 'Reprodueix música (preview de 30s + enllaç a YouTube).', parameters: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] } } },
-    { type: 'function', function: { name: 'open_app', description: 'Obri una app de JOSEMI-OS.', parameters: { type: 'object', properties: { app: { type: 'string', enum: ['about','projects','skills','terminal','contact','arcade','settings'] } }, required: ['app'] } } },
-    { type: 'function', function: { name: 'set_theme', description: 'Canvia el tema visual.', parameters: { type: 'object', properties: { theme: { type: 'string', enum: ['night','paper','violet','ocean','sunset'] } }, required: ['theme'] } } },
+  const endpoint = "https://milo-ai.josemidev1.workers.dev";
+  const tools = [
+    {
+      type: "function",
+      function: {
+        name: "web_search",
+        description: "Busca informació actual a Internet.",
+        parameters: { type: "object", properties: { query: { type: "string" } }, required: ["query"] }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "get_weather",
+        description: "Consulta el temps actual en una ciutat.",
+        parameters: { type: "object", properties: { city: { type: "string" } }, required: ["city"] }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "play_music",
+        description: "Busca una cançó en iTunes i escolta una mostra.",
+        parameters: { type: "object", properties: { query: { type: "string" } }, required: ["query"] }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "open_app",
+        description: "Obri una app de JOSEMI-OS.",
+        parameters: {
+          type: "object",
+          properties: { app: { type: "string", enum: ["about", "projects", "skills", "terminal", "contact", "arcade", "settings"] } },
+          required: ["app"]
+        }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "set_theme",
+        description: "Canvia el tema visual de JOSEMI-OS.",
+        parameters: {
+          type: "object",
+          properties: { theme: { type: "string", enum: ["night", "paper", "violet", "ocean", "sunset"] } },
+          required: ["theme"]
+        }
+      }
+    }
   ];
 
-  let audio = null;
-  const q = s => document.querySelector(s);
+  let player = null;
+  let resultsBox = null;
+  const allowedApps = new Set(["about", "projects", "skills", "terminal", "contact", "arcade", "settings"]);
+  const allowedThemes = new Set(["night", "paper", "violet", "ocean", "sunset"]);
 
+  async function post(path, payload, signal) {
+    const response = await fetch(endpoint + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "API HTTP " + response.status);
+    return data;
+  }
 
-      const res = await fetch(
-        "https://milo-ai.josemidev1.workers.dev/search",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: args.query || "" })
-        }
-      );
-
-      if (!res.ok) {
-        return { error: `Error en la búsqueda: HTTP ${res.status}` };
+  async function music(query, signal) {
+    const url = "https://itunes.apple.com/search?term=" + encodeURIComponent(query.slice(0, 100)) + "&media=music&entity=song&limit=3";
+    const response = await fetch(url, { signal });
+    if (!response.ok) throw new Error("iTunes HTTP " + response.status);
+    const data = await response.json();
+    const tracks = (data.results || []).filter(t => t.previewUrl).slice(0, 3);
+    if (!tracks.length) return { error: "No s'han trobat cançons" };
+    if (!player) player = new Audio();
+    player.src = tracks[0].previewUrl;
+    player.play().catch(() => {});
+    if (!resultsBox) resultsBox = document.querySelector(".mascot-results");
+    if (resultsBox) {
+      resultsBox.replaceChildren();
+      for (const track of tracks) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = track.trackName + " — " + track.artistName + " ▶";
+        button.addEventListener("click", () => {
+          player.src = track.previewUrl;
+          player.play().catch(() => {});
+        });
+        resultsBox.appendChild(button);
       }
-
-      return await res.json();
     }
-
-    case "play_music":
-      return await playMusic(args.query || "chill");
-
-    case "open_app":
-      window.openWindow?.(args.app);
-      return { ok: true, opened: args.app };
-
-    case "set_theme":
-      window.chooseTheme?.(args.theme);
-      return { ok: true, theme: args.theme };
-
-    default:
-      return { error: "no_tool" };
+    return {
+      source: "iTunes Search API",
+      tracks: tracks.map(t => ({
+        name: t.trackName, artist: t.artistName,
+        preview_seconds: 30,
+        artist_link: t.artistViewUrl || ""
+      })),
+      note: "S'han mostrat fins a 3 cançons, amb mostres de 30 segons."
+    };
   }
-}
 
-
-  // Música gratis: iTunes Search (preview 30s, sense clau, CORS OK)
-  async function playMusic(query) {
+  async function runTool(call, signal) {
+    let args;
+    try { args = JSON.parse(call.function?.arguments || "{}"); }
+    catch { return { error: "Arguments JSON invàlids" }; }
     try {
-      const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=3`);
-      const tracks = (await r.json()).results.filter(t => t.previewUrl).slice(0, 3);
-      if (!tracks.length) return { ok: false, reason: 'sin resultados' };
-      const list = tracks.map(t => ({
-        title: t.trackName, artist: t.artistName, preview: t.previewUrl,
-        youtube: `https://www.youtube.com/results?search_query=${encodeURIComponent(`${t.trackName} ${t.artistName}`)}`,
-      }));
-      renderResults(list); play(list[0]);
-      return { ok: true, now_playing: `${list[0].title} — ${list[0].artist}`, note: 'Suena un preview de 30s. El enlace completo está en los resultados.' };
-    } catch { return { ok: false, reason: 'iTunes no responde' }; }
-  }
-  function play(track) {
-    if (!audio) { audio = new Audio(); audio.preload = 'none'; }
-    audio.src = track.preview; audio.play().catch(() => {});
-    const st = q('#music-status'); if (st) st.textContent = `${track.title} — ${track.artist}`;
-  }
-  function renderResults(list) {
-    const box = q(SEL.results); if (!box) return; box.innerHTML = '';
-    list.forEach(t => {
-      const b = document.createElement('button');
-      b.innerHTML = `<b>${esc(t.title)}</b><br><small>${esc(t.artist)}</small>`;
-      b.onclick = () => play(t); box.appendChild(b);
-    });
-  }
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
-  async function callApi(messages, signal) {
-    const res = await fetch(CONFIG.endpoint, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages, tools: TOOLS }), signal,
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
+      switch (call.function?.name) {
+        case "web_search":
+          return await post("/search", { query: String(args.query || "").slice(0, 250) }, signal);
+        case "get_weather":
+          return await post("/weather", { city: String(args.city || "").slice(0, 100) }, signal);
+        case "play_music":
+          return await music(String(args.query || "chill"), signal);
+        case "open_app":
+          if (!allowedApps.has(args.app)) return { error: "App desconeguda" };
+          if (typeof window.openWindow !== "function") return { error: "No es pot obrir l'app" };
+          window.openWindow(args.app);
+          return { ok: true, app: args.app };
+        case "set_theme":
+          if (!allowedThemes.has(args.theme)) return { error: "Tema desconegut" };
+          if (typeof window.chooseTheme !== "function") return { error: "No es pot canviar el tema" };
+          window.chooseTheme(args.theme);
+          return { ok: true, theme: args.theme };
+        default:
+          return { error: "Ferramenta no permesa" };
+      }
+    } catch (error) {
+      return { error: error.message || "Error en ferramenta externa" };
+    }
   }
 
-  async function reply(userText, history = []) {
-    if (!CONFIG.enabled) throw new Error('Milo AI está desactivado');
+  async function reply(text, history = [], externalSignal) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
-    const messages = [{ role: 'system', content: SYSTEM },
-      ...history.slice(-CONFIG.maxHistory), { role: 'user', content: userText }];
+    const abort = () => controller.abort();
+    if (externalSignal?.aborted) controller.abort();
+    externalSignal?.addEventListener("abort", abort, { once: true });
+    const timeout = setTimeout(abort, 28000);
+    const messages = [
+      ...history.filter(m => ["user", "assistant"].includes(m.role))
+        .slice(-12).map(m => ({ role: m.role, content: String(m.content || "").slice(0, 3000) })),
+      { role: "user", content: String(text).slice(0, 500) }
+    ];
     try {
-      for (let turn = 0; turn < 4; turn++) {
-        const data = await callApi(messages, controller.signal);
-        const msg = data.message || data.choices?.[0]?.message;
-        if (!msg) throw new Error('Respuesta de IA no válida');
-        const calls = msg.tool_calls || [];
+      for (let attempt = 0; attempt < 4; attempt++) {
+        const data = await post("/chat", { messages }, controller.signal);
+        const message = data.message;
+        if (!message || typeof message !== "object") throw new Error("Resposta invàlida de Groq");
+        const calls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
         if (calls.length) {
-          messages.push(msg);
+          messages.push({
+            role: "assistant",
+            content: typeof message.content === "string" ? message.content : null,
+            tool_calls: calls
+          });
           for (const call of calls) {
-            const result = await runTool(call);
-            messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
+            const result = await runTool(call, controller.signal);
+            messages.push({
+              role: "tool",
+              tool_call_id: call.id,
+              content: JSON.stringify(result).slice(0, 3500)
+            });
           }
           continue;
         }
-        if (typeof msg.content !== 'string' || !msg.content.trim())
-          throw new Error('Respuesta de IA vacía');
-        return { text: msg.content };
+        if (typeof message.content === "string" && message.content.trim()) {
+          return { text: message.content.trim() };
+        }
+        throw new Error("Resposta buida de la IA");
       }
-      throw new Error('Demasiadas acciones de IA');
-    } finally { clearTimeout(timer); }
+      throw new Error("Massa accions consecutives");
+    } finally {
+      clearTimeout(timeout);
+      externalSignal?.removeEventListener("abort", abort);
+    }
   }
 
-  function init(overrides = {}) { Object.assign(CONFIG, overrides); }
-  return { init, reply, playMusic };
+  return { reply, playMusic: music, tools };
 })();
 window.MiloAI = MiloAI;
