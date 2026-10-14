@@ -130,12 +130,13 @@ async function chat(payload, env, origin) {
         tool_choice: "auto",
         parallel_tool_calls: false,
         temperature: 0.4,
-        max_completion_tokens: 700
+        max_completion_tokens: 1400,
+        reasoning_effort: "low"
       })
     });
     if (!r.ok) {
       console.error("Groq HTTP", r.status);
-      return json({ error: "El proveïdor d'IA no ha respost correctament" }, 502, origin);
+      return json({ error: "El proveïdor d'IA no ha respost correctament", provider_status: r.status }, 502, origin);
     }
     const data = await r.json();
     const message = data.choices?.[0]?.message;
@@ -241,7 +242,7 @@ export default {
 
     const path = new URL(request.url).pathname;
     if (path === "/health" && request.method === "GET") {
-      return json({ ok: true, groq: !!env.GROQ_API_KEY, tavily: !!env.TAVILY_API_KEY, weather: true }, 200, origin);
+      return json({ ok: true, groq: !!env.GROQ_API_KEY, tavily: !!env.TAVILY_API_KEY, weather: true, model: MODEL }, 200, origin);
     }
     if (!["/chat", "/search", "/weather"].includes(path)) return json({ error: "Ruta no trobada" }, 404, origin);
     if (request.method !== "POST") return json({ error: "Cal fer POST" }, 405, origin);
