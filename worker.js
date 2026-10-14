@@ -1,6 +1,6 @@
 // Milo API: Groq (IA), Tavily (cerca) i Open-Meteo (meteorologia).
 // Les claus privades viuen exclusivament en els Secrets de Cloudflare Workers.
-const MODEL = "llama-3.3-70b-versatile";
+const MODEL = "openai/gpt-oss-120b";
 const ORIGINS = new Set([
   "https://josemidev1.site",
   "https://www.josemidev1.site"
