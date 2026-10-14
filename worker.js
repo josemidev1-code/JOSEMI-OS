@@ -139,8 +139,29 @@ async function chat(payload, env, origin) {
       return json({ error: "El proveïdor d'IA no ha respost correctament", provider_status: r.status }, 502, origin);
     }
     const data = await r.json();
-    const message = data.choices?.[0]?.message;
-    if (!message) return json({ error: "Resposta buida del model" }, 502, origin);
+    const upstream = data.choices?.[0]?.message;
+    if (!upstream) return json({ error: "Resposta buida del model" }, 502, origin);
+    // No exposem camps interns del proveïdor (p. ex. reasoning).
+    // El frontend sols necessita contingut i crides a ferramentes.
+    const message = {
+      role: "assistant",
+      content: typeof upstream.content === "string" ? upstream.content : null
+    };
+    if (Array.isArray(upstream.tool_calls)) {
+      const valid = upstream.tool_calls.slice(0, 2).filter(call =>
+        typeof call?.id === "string" &&
+        TOOLS.some(t => t.function.name === call?.function?.name) &&
+        typeof call?.function?.arguments === "string"
+      ).map(call => ({
+        id: call.id,
+        type: "function",
+        function: {
+          name: call.function.name,
+          arguments: call.function.arguments
+        }
+      }));
+      if (valid.length) message.tool_calls = valid;
+    }
     return json({ message }, 200, origin);
   } catch (error) {
     console.error("Groq network failure", error?.name);
