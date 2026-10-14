@@ -6536,7 +6536,7 @@ async function sendChat(message) {
     const response = await Promise.race([
       getAssistantReply(text),
       new Promise((_, reject) => {
-        timer = setTimeout(() => reject(new Error("Tiempo agotado")), 20000);
+        timer = setTimeout(() => reject(new Error("Tiempo agotado")), 32000);
       }),
     ]);
     if (!response || typeof response.text !== "string")
@@ -6548,7 +6548,7 @@ async function sendChat(message) {
         { role: "user", content: text },
         { role: "assistant", content: response.text.slice(0, 3000) },
       );
-    if (chatHistory.length > 4) chatHistory.splice(0, chatHistory.length - 4);
+    if (chatHistory.length > 12) chatHistory.splice(0, chatHistory.length - 12);
     if (response.app && Apps[response.app]) {
       const button = document.createElement("button");
       button.className = "btn milo-launch";
@@ -6562,7 +6562,7 @@ async function sendChat(message) {
     }
   } catch (error) {
     pending.textContent =
-      "No he podido conectar con la IA. " + getLocalReply(text).text;
+      "No he podido conectar con la IA (" + (error?.message || "error de red") + "). " + getLocalReply(text).text;
     console.warn("[MiloAI]", error);
   } finally {
     clearTimeout(timer);
@@ -6584,7 +6584,7 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !panel.hidden) toggleMilo(false);
 });
 addChatMessage(
-  "¡Hola! Soy Milo. Puedo ayudarte a conocer a Josemi y explorar su escritorio. Pregúntame por sus estudios, proyectos, aficiones o contacto.",
+  "¡Hola! Soy Milo, el asistente de Josemi con IA. Puedo hablar de sus proyectos, consultar información actual en Internet y decirte el tiempo de una ciudad. ¡Pregúntame lo que quieras!",
   "assistant",
 );
 
