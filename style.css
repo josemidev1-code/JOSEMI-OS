@@ -224,6 +224,10 @@ a:focus-visible,
 /* Rótulo: centrado en la pantalla. La capa «hot» no ocupa alto y se dibuja encima con los destellos blancos. */
 .login[data-phase="signature"] .boot-terminal-output {
   position: absolute;
+  width: max-content;
+  max-width: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
   top: 46%;
   left: 50%;
   -webkit-transform: translate(-50%, -50%);
@@ -231,7 +235,7 @@ a:focus-visible,
 }
 .boot-logo {
   font-size: 2.6vw;
-  font-size: min(27px, 2.75vw);
+  font-size: var(--boot-logo-size, min(27px, 2.75vw));
   line-height: 1.12;
   color: #35f07a;
   text-shadow:
@@ -239,7 +243,9 @@ a:focus-visible,
     0 0 20px rgba(30, 200, 90, 0.3);
 }
 .boot-logo--hot {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   z-index: 1;
   height: 0;
   overflow: visible;
@@ -4408,9 +4414,6 @@ body.has-god-of-war .desktop-welcome {
   }
   .boot-neo {
     font-size: 18px;
-  }
-  .boot-logo {
-    font-size: min(18px, 4.2vw);
   }
 }
 @media (prefers-reduced-motion: reduce) {

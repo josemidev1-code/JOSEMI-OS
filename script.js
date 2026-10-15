@@ -4226,6 +4226,22 @@ const BOOT_ART = [
   "/ /_/ / /_/ /___/ / /___/ /  / // /_____/ /_/ /___/ / ",
   "\\____/\\____//____/_____/_/  /_/___/     \\____//____/  ",
 ];
+// Ajusta el rètol complet a l'ample real, també en girar el mòbil.
+function fitBootLogo() {
+  const login = $("#login");
+  const out = $("#bootTerminalOutput");
+  const logo = out?.querySelector(".boot-logo:not(.boot-logo--hot)");
+  if (!login || !logo || login.dataset.phase !== "signature") return;
+  const padding = getComputedStyle(login);
+  const available = Math.max(1, login.clientWidth -
+    parseFloat(padding.paddingLeft) - parseFloat(padding.paddingRight));
+  const context = document.createElement("canvas").getContext("2d");
+  if (context) context.font = `700 100px ${getComputedStyle(logo).fontFamily}`;
+  const width = Math.max(...BOOT_ART.map((row) =>
+    context ? context.measureText(row).width : row.length * 62));
+  out.style.setProperty("--boot-logo-size", `${Math.min(27, available * 100 / width)}px`);
+}
+
 const BOOT_NOISE = "/\\\\|_-=+<>*#01";
 const bootNoise = () =>
   BOOT_NOISE[Math.floor(Math.random() * BOOT_NOISE.length)];
@@ -4332,6 +4348,7 @@ typeLoginArt = async function () {
     login.dataset.phase = "signature";
     const hot = appendBoot("", "boot-logo boot-logo--hot"),
       logo = appendBoot("", "boot-logo");
+    fitBootLogo();
     const final = BOOT_ART.join("\n"),
       plan = bootPlan(),
       steps = still ? 0 : 84;
@@ -5428,9 +5445,10 @@ new MutationObserver(syncAtmosphere).observe($("#os-screensaver"), {
 });
 document.addEventListener("visibilitychange", syncAtmosphere);
 window.addEventListener("resize", syncAtmosphere);
-window.addEventListener("resize", () =>
-  $$(".boot-logo--hero,.ascii-stage,.saver-art").forEach(fitAsciiText),
-);
+window.addEventListener("resize", () => {
+  fitBootLogo();
+  $$(".boot-logo--hero,.ascii-stage,.saver-art").forEach(fitAsciiText);
+});
 if (state.experienceVersion !== 5) {
   state.atmosphere = "matrixBlue";
   state.bootEffect = "cinematic";
