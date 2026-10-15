@@ -4844,7 +4844,7 @@ body.has-god-of-war .desktop {
   transform: translateX(-50%);
   width: max-content;
   min-width: 260px;
-  max-width: calc(100vw - 160px);
+  max-width: calc(100vw - 240px);
   height: 58px;
   padding: 7px;
   gap: 7px;
@@ -4970,8 +4970,8 @@ body.has-god-of-war .desktop {
 }
 /* Milo: criatura coral pixel art y panel con el estilo de tu escritorio. */
 #mascot-button {
-  left: auto;
-  right: 20px;
+  left: 18px;
+  right: auto;
   bottom: 16px;
   width: 66px;
   height: 66px;
@@ -5000,8 +5000,8 @@ body.has-god-of-war .desktop {
   border-radius: 4px;
 }
 #mascot-chat {
-  left: auto;
-  right: 20px;
+  left: 18px;
+  right: auto;
   bottom: 105px;
   width: 370px;
   height: min(520px, calc(100dvh - 135px));
@@ -5034,9 +5034,10 @@ body.has-god-of-war .desktop {
     bottom: auto;
   }
   .taskbar {
-    max-width: calc(100vw - 100px);
+    max-width: calc(100vw - 130px);
     min-width: 0;
-    left: 12px;
+    left: auto;
+    right: 12px;
     transform: none;
     height: 52px;
     bottom: 14px;
@@ -5084,8 +5085,8 @@ body.has-god-of-war .desktop {
     height: min(520px, calc(100dvh - 120px));
   }
   #mascot-button {
-    left: auto;
-    right: 12px;
+    left: 10px;
+    right: auto;
     bottom: 12px;
     width: 58px;
     height: 58px;
@@ -5112,7 +5113,8 @@ body.has-god-of-war .desktop {
 #mascot-button {
   width: 92px;
   height: 78px;
-  right: 18px;
+  left: 18px;
+  right: auto;
   bottom: 14px;
 }
 #mascot-button .mascot-svg {
@@ -5299,7 +5301,8 @@ body.reduce-motion .axolotl-gills {
   #mascot-button {
     width: 76px;
     height: 65px;
-    right: 10px;
+    left: 10px;
+    right: auto;
     bottom: 12px;
   }
   #mascot-button .mascot-svg {
