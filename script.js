@@ -5901,42 +5901,52 @@ initDirectAccess();
   Apps.easter = {
     title: "Secret Vault",
     icon: pixelIcon("easter"),
-    size: [760, 780],
+    size: [760, 700],
     render: () => `
       <section class="vault vault--personal">
         <div class="vault-top">
           <span class="card-kicker">/ROOT / SECRET_VAULT</span>
-          <span class="vault-status">${(state.vault.matrix ? 1 : 0) + (state.vault.gof ? 1 : 0)}/2 LLAVES</span>
+          <span class="vault-status">${state.vault.matrix && state.vault.gof ? "DESBLOQUEADA" : "SECRETOS GUARDADOS"}</span>
         </div>
         <h2>Secret Vault de Josemi</h2>
-        <p class="vault-copy">Dos llaves, dos fondos. No es seguridad real: es curiosidad, memoria y easter eggs personales.</p>
+        <div class="vault-opening" aria-hidden="true">
+          <pre class="vault-ascii-door">+-------------------+
+|  .-----------.    |
+|  |     +     |    |
+|  |   --O--   |    |
+|  |     +     |    |
+|  '-----------'    |
++-------------------+</pre>
+          <span>ABRIENDO SECRET VAULT<span class="vault-dots">...</span></span>
+        </div>
+        <p class="vault-copy">Dos secretos bajo llave. Elige un candado y descubre su pregunta.</p>
 
-        <div class="vault-keys">
-          <span data-key="matrix" class="${state.vault.matrix ? "unlocked" : ""}">${state.vault.matrix ? "✓ " : "○ "}LLAVE MATRIX</span>
-          <span data-key="gof" class="${state.vault.gof ? "unlocked" : ""}">${state.vault.gof ? "✓ " : "○ "}LLAVE GOD OF WAR</span>
+        <div class="vault-locks" aria-label="Candados de la Secret Vault">
+          ${["matrix", "gof"].map((key, index) => `<button type="button" class="vault-lock ${state.vault[key] ? "unlocked" : ""}" data-lock="${key}" aria-label="${index === 0 ? "Candado izquierdo" : "Candado derecho"}${state.vault[key] ? ", desbloqueado" : ""}" aria-expanded="false" aria-controls="vault-question-${key}">
+            <pre class="vault-lock-art" aria-hidden="true">${state.vault[key] ? "   .----.\n   |    |\n .-+----'-.\n |   o   |\n |   |   |\n '-------'" : "  .---.\n /     \\\n |     |\n.+-----+.\n|   o   |\n|   |   |\n'-------'"}</pre>
+            <span class="vault-lock-caption">${state.vault[key] ? "DESBLOQUEADO" : "EXPLORAR"}</span>
+          </button>`).join("")}
         </div>
 
         <div class="vault-challenges">
-        <section class="vault-question">
-          <span class="card-kicker">01 / MATRIX</span>
+        <section class="vault-question" id="vault-question-matrix" hidden>
           <h3>¿Quién ayuda a Neo a escapar de Matrix?</h3>
           <form data-key="matrix">
-            <input maxlength="100" required aria-label="Respuesta Matrix" autocomplete="off" spellcheck="false" placeholder="Escribe tu respuesta…">
+            <input maxlength="100" required aria-label="Tu respuesta" autocomplete="off" spellcheck="false" placeholder="Escribe tu respuesta…">
             <button class="btn btn--accent" type="submit">VALIDAR ↵</button>
           </form>
           <button type="button" class="vault-hint-button" data-hint="matrix">NECESITO UNA PISTA</button><p class="vault-feedback" data-feedback="matrix" role="status"></p>
-          <button class="btn vault-reward" data-reward="matrix" ${state.vault.matrix ? "" : "disabled"}>ACTIVAR FONDO MATRIX ↗</button>
+          <button class="btn vault-reward" data-reward="matrix" ${state.vault.matrix ? "" : "hidden disabled"}>DESCUBRIR FONDO ↗</button>
         </section>
 
-        <section class="vault-question">
-          <span class="card-kicker">02 / GOD OF WAR</span>
+        <section class="vault-question" id="vault-question-gof" hidden>
           <h3>¿Cuál es el videojuego favorito de Josemi?</h3>
           <form data-key="gof">
-            <input maxlength="100" required aria-label="Respuesta God of War" autocomplete="off" spellcheck="false" placeholder="Escribe tu respuesta…">
+            <input maxlength="100" required aria-label="Tu respuesta" autocomplete="off" spellcheck="false" placeholder="Escribe tu respuesta…">
             <button class="btn btn--accent" type="submit">VALIDAR ↵</button>
           </form>
           <button type="button" class="vault-hint-button" data-hint="gof">NECESITO UNA PISTA</button><p class="vault-feedback" data-feedback="gof" role="status"></p>
-          <button class="btn vault-reward" data-reward="gof" ${state.vault.gof ? "" : "disabled"}>ACTIVAR FONDO GOD OF WAR ↗</button>
+          <button class="btn vault-reward" data-reward="gof" ${state.vault.gof ? "" : "hidden disabled"}>DESCUBRIR FONDO ↗</button>
         </section>
 
         </div>
@@ -5955,18 +5965,31 @@ initDirectAccess();
           .trim();
 
       function refresh() {
-        const total = (state.vault.matrix ? 1 : 0) + (state.vault.gof ? 1 : 0);
-        body.querySelector(".vault-status").textContent = `${total}/2 LLAVES`;
-        body.querySelectorAll(".vault-keys span").forEach((span) => {
-          const key = span.dataset.key;
-          const unlocked = !!state.vault[key];
-          span.classList.toggle("unlocked", unlocked);
-          span.textContent = `${unlocked ? "✓ " : "○ "}${key === "matrix" ? "LLAVE MATRIX" : "LLAVE GOD OF WAR"}`;
+        body.querySelector(".vault-status").textContent = state.vault.matrix && state.vault.gof ? "DESBLOQUEADA" : "SECRETOS GUARDADOS";
+        body.querySelectorAll("[data-lock]").forEach((button) => {
+          const unlocked = !!state.vault[button.dataset.lock];
+          button.classList.toggle("unlocked", unlocked);
+          button.querySelector(".vault-lock-caption").textContent = unlocked ? "DESBLOQUEADO" : "EXPLORAR";
+          button.setAttribute("aria-label", `${button.dataset.lock === "matrix" ? "Candado izquierdo" : "Candado derecho"}${unlocked ? ", desbloqueado" : ""}`);
+          if (unlocked) button.querySelector("pre").textContent = "   .----.\n   |    |\n .-+----'-.\n |   o   |\n |   |   |\n '-------'";
         });
         body.querySelectorAll("[data-reward]").forEach((btn) => {
           btn.disabled = !state.vault[btn.dataset.reward];
+          btn.hidden = btn.disabled;
         });
       }
+
+      body.querySelectorAll("[data-lock]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const show = button.getAttribute("aria-expanded") !== "true";
+          body.querySelectorAll("[data-lock]").forEach((lock) => {
+            const active = show && lock === button;
+            lock.setAttribute("aria-expanded", String(active));
+            body.querySelector(`#vault-question-${lock.dataset.lock}`).hidden = !active;
+          });
+          if (show) body.querySelector(`#vault-question-${button.dataset.lock} input`).focus();
+        });
+      });
 
       const formMatrix = body.querySelector('form[data-key="matrix"]');
       if (formMatrix) {

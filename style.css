@@ -5599,3 +5599,105 @@ body.reduce-motion.is-corrupted .icons {
   background: rgba(255, 255, 255, .06);
   font-weight: 700;
 }
+
+/* Secret Vault: entrada ASCII y secretos detrás de dos candados. */
+.vault--personal {
+  position: relative;
+  min-height: 340px;
+}
+.vault-opening {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  border-radius: 12px;
+  background: var(--shell-panel, #08110d);
+  color: var(--accent);
+  font: 10px var(--font-mono);
+  letter-spacing: .12em;
+  perspective: 600px;
+  animation: vault-entry 1.8s steps(8, end) forwards;
+}
+.vault-ascii-door {
+  margin: 0;
+  font: 14px/1.25 var(--font-mono);
+  white-space: pre;
+  transform-origin: left center;
+  animation: vault-door 1.6s steps(7, end) forwards;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.vault-locks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+.vault-lock {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 18px;
+  padding: 28px 12px;
+  border: 1px solid var(--shell-border);
+  border-radius: 12px;
+  background: var(--shell-raised);
+  color: var(--shell-muted);
+  cursor: pointer;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.vault-lock:hover,
+.vault-lock:focus-visible,
+.vault-lock[aria-expanded="true"],
+.vault-lock.unlocked {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--shell-panel));
+}
+.vault-lock:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.vault-lock-art {
+  margin: 0;
+  font: 18px/1.2 var(--font-mono);
+  white-space: pre;
+}
+.vault-lock-caption {
+  font: 10px var(--font-mono);
+  letter-spacing: .08em;
+}
+.vault--personal .vault-challenges {
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 18px;
+}
+.vault--personal .vault-question[hidden],
+.vault--personal .vault-reward[hidden] {
+  display: none;
+}
+.vault--personal .vault-question h3 {
+  min-height: 0;
+}
+@keyframes vault-door {
+  0%, 30% { transform: rotateY(0deg); }
+  100% { transform: rotateY(-105deg); opacity: .2; }
+}
+@keyframes vault-entry {
+  0%, 80% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+@media (max-width: 480px) {
+  .vault-locks { gap: 10px; }
+  .vault-lock { padding: 24px 8px; }
+  .vault-lock-art { font-size: 15px; }
+  .vault-lock-caption { font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vault-opening { display: none; animation: none; }
+  .vault-ascii-door { animation: none; }
+}
+body.reduce-motion .vault-opening { display: none; animation: none; }
