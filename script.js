@@ -6501,7 +6501,8 @@ panel.hidden = true;
 panel.setAttribute("role", "dialog");
 panel.setAttribute("aria-label", "Milo, asistente de Josemi");
 panel.innerHTML =
-  '<div class="mascot-head"><div><strong>Milo</strong><small>Tu ajolote de escritorio</small></div><button id="mascot-close" aria-label="Cerrar asistente">×</button></div><div id="mascot-log" class="mascot-log" role="log" aria-live="polite"></div><form id="mascot-form" class="mascot-form"><label class="sr-only" for="mascot-input">Mensaje para Milo</label><input id="mascot-input" maxlength="500" placeholder="Estudios, proyectos, aficiones…" autocomplete="off" required><button class="btn" type="submit">Enviar</button></form><div class="mascot-results"></div><div class="mascot-quick"><button class="btn" data-q="¿Qué estudias?">Estudios</button><button class="btn" data-q="Proyectos">Proyectos</button><button class="btn" data-q="Secret Vault">Secret Vault</button><button class="btn" data-q="Contacto">Contacto</button></div><small class="milo-mode">ASISTENTE CON IA</small>';
+panel.innerHTML =
+  '<div class="mascot-head"><div><strong>Milo</strong><small>Tu ajolote de escritorio</small></div><button id="mascot-close" aria-label="Cerrar asistente">×</button></div><div id="mascot-log" class="mascot-log" role="log" aria-live="polite"></div><form id="mascot-form" class="mascot-form"><label class="sr-only" for="mascot-input">Mensaje para Milo</label><input id="mascot-input" maxlength="500" placeholder="Estudios, proyectos, aficiones…" autocomplete="off" required><button class="btn" type="submit">Enviar</button></form><div class="mascot-results"></div><small class="milo-mode">ASISTENTE CON IA</small>';
 document.body.append(mascot, panel);
 let chatBusy = false;
 const chatHistory = [];
@@ -6579,9 +6580,6 @@ $("#mascot-form").onsubmit = (event) => {
   event.preventDefault();
   sendChat($("#mascot-input").value);
 };
-$$("[data-q]", panel).forEach(
-  (button) => (button.onclick = () => sendChat(button.dataset.q)),
-);
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !panel.hidden) toggleMilo(false);
 });
