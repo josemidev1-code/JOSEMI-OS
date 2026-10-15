@@ -1040,9 +1040,18 @@ const Apps = {
     bind(b) {
       b.querySelectorAll(".folder").forEach((f) => {
         const abrir = () => openProject(f.dataset.folder);
-        f.addEventListener("dblclick", abrir);
+        f.setAttribute("role", "button");
+        f.addEventListener("click", (event) => {
+          if (event.pointerType === "touch" || matchMedia("(pointer: coarse)").matches) abrir();
+        });
+        f.addEventListener("dblclick", (event) => {
+          if (event.pointerType !== "touch" && !matchMedia("(pointer: coarse)").matches) abrir();
+        });
         f.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") abrir();
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            abrir();
+          }
         });
       });
     },
@@ -1159,12 +1168,26 @@ const Apps = {
    <div class="file-row" data-file="x"><span class="g">🗜️</span> proyecto-fallido.zip</div>
    <div class="file-row" data-file="x"><span class="g">📄</span> todo-final-final-ahora-si.html</div>`,
     bind(b) {
-      b.querySelectorAll(".file-row").forEach((r) =>
-        r.addEventListener("dblclick", () => {
-          if (r.dataset.file === "motivación.exe") openWindow("motivation");
+      b.querySelectorAll(".file-row").forEach((row) => {
+        const openFile = () => {
+          if (row.dataset.file === "motivación.exe") openWindow("motivation");
           else toast("No trabajo con motivación, trabajo con disciplina.");
-        }),
-      );
+        };
+        row.tabIndex = 0;
+        row.setAttribute("role", "button");
+        row.addEventListener("click", (event) => {
+          if (event.pointerType === "touch" || matchMedia("(pointer: coarse)").matches) openFile();
+        });
+        row.addEventListener("dblclick", (event) => {
+          if (event.pointerType !== "touch" && !matchMedia("(pointer: coarse)").matches) openFile();
+        });
+        row.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openFile();
+          }
+        });
+      });
     },
   },
 
@@ -2099,6 +2122,19 @@ function bar(n, v) {
    closeWindow. Así, variables internas como z y open no contaminan el ámbito global.
    ========================================================= */
 // VENTANAS: este módulo guarda las abiertas en un Map. Controla foco (z-index), arrastre, tamaño y cierre.
+// Manté les finestres dins de la pantalla quan canvia la mida o l'orientació.
+function fitWindowBounds(rect, viewportWidth, viewportHeight) {
+  const availableWidth = Math.max(1, viewportWidth - 32);
+  const availableHeight = Math.max(1, viewportHeight - 110);
+  const width = Math.max(Math.min(300, availableWidth), Math.min(rect.width, availableWidth));
+  const height = Math.max(Math.min(220, availableHeight), Math.min(rect.height, availableHeight));
+  return {
+    width, height,
+    left: Math.max(16, Math.min(rect.left, viewportWidth - width - 16)),
+    top: Math.max(12, Math.min(rect.top, viewportHeight - height - 98)),
+  };
+}
+
 const WM = (() => {
   let z = 10,
     open = new Map(),
@@ -2121,6 +2157,7 @@ const WM = (() => {
     if (c) {
       c.classList.add("active");
       c.classList.remove("dim");
+      c.scrollIntoView({ block: "nearest", inline: "nearest" });
     }
   }
   function openWindow(id) {
@@ -2142,18 +2179,11 @@ const WM = (() => {
     win.className = "window";
     win.dataset.id = id;
     win.tabIndex = -1;
-    win.style.width = Math.min(app.size?.[0] || 640, innerWidth - 32) + "px";
-    win.style.height = Math.min(app.size?.[1] || 500, innerHeight - 180) + "px";
-    win.style.left =
-      Math.max(
-        16,
-        Math.min(p.x, innerWidth - parseFloat(win.style.width) - 16),
-      ) + "px";
-    win.style.top =
-      Math.max(
-        82,
-        Math.min(p.y, innerHeight - parseFloat(win.style.height) - 80),
-      ) + "px";
+    const bounds = fitWindowBounds({
+      width: app.size?.[0] || 640, height: app.size?.[1] || 500,
+      left: p.x, top: p.y,
+    }, innerWidth, innerHeight);
+    for (const [key, value] of Object.entries(bounds)) win.style[key] = value + "px";
     win.style.zIndex = ++z;
     win.innerHTML = `<div class="win__bar"><div class="win__title"><span class="t-ico">${app.icon}</span> ${app.title}</div>
       <div class="win__btns"><button class="win-btn min" aria-label="Minimizar"></button><button class="win-btn max" aria-label="Maximizar"></button><button class="win-btn close" aria-label="Cerrar"></button></div></div>
@@ -2221,11 +2251,12 @@ const WM = (() => {
       } else focus(o.el);
     };
     $("#taskbar__apps").appendChild(b);
+    b.scrollIntoView({ block: "nearest", inline: "nearest" });
   }
   // pointerdown guarda la posición inicial; pointermove calcula el desplazamiento del ratón.
   function drag(win, h) {
     h.addEventListener("pointerdown", (e) => {
-      if (e.target.closest(".win-btn")) return;
+      if (innerWidth <= 820 || e.target.closest(".win-btn")) return;
       if (win.classList.contains("maximized")) return;
       focus(win);
       const sx = e.clientX,
@@ -2234,7 +2265,7 @@ const WM = (() => {
         oy = win.offsetTop;
       const mv = (ev) => {
         let nx = Math.max(0, Math.min(ox + ev.clientX - sx, innerWidth - 120)),
-          ny = Math.max(82, Math.min(oy + ev.clientY - sy, innerHeight - 150));
+          ny = Math.max(12, Math.min(oy + ev.clientY - sy, innerHeight - 150));
         win.style.left = nx + "px";
         win.style.top = ny + "px";
       };
@@ -2276,6 +2307,16 @@ const WM = (() => {
       document.addEventListener("pointerup", up);
     });
   }
+  window.addEventListener("resize", () => {
+    if (innerWidth <= 820) return;
+    for (const { el } of open.values()) {
+      const bounds = fitWindowBounds({
+        width: parseFloat(el.style.width), height: parseFloat(el.style.height),
+        left: parseFloat(el.style.left), top: parseFloat(el.style.top),
+      }, innerWidth, innerHeight);
+      for (const [key, value] of Object.entries(bounds)) el.style[key] = value + "px";
+    }
+  });
   return { openWindow, closeWindow };
 })();
 const openWindow = WM.openWindow;
@@ -4525,8 +4566,8 @@ buildIcons = function () {
     button.style.setProperty("--icon-index", i);
     button.setAttribute("aria-label", `Abrir ${app.title}`);
     button.innerHTML = `<span class="glyph">${app.icon}</span><span class="lbl">${app.title}</span>`;
-    button.onclick = () => {
-      if (matchMedia("(pointer: coarse)").matches) openWindow(id);
+    button.onclick = (event) => {
+      if (event.pointerType === "touch" || matchMedia("(pointer: coarse)").matches) openWindow(id);
       else {
         $$(".icon").forEach((el) => el.classList.remove("sel"));
         button.classList.add("sel");
@@ -5877,9 +5918,18 @@ initDirectAccess();
     bind(b) {
       b.querySelectorAll(".folder").forEach((f) => {
         const abrir = () => openProject(f.dataset.folder);
-        f.addEventListener("dblclick", abrir);
+        f.setAttribute("role", "button");
+        f.addEventListener("click", (event) => {
+          if (event.pointerType === "touch" || matchMedia("(pointer: coarse)").matches) abrir();
+        });
+        f.addEventListener("dblclick", (event) => {
+          if (event.pointerType !== "touch" && !matchMedia("(pointer: coarse)").matches) abrir();
+        });
         f.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") abrir();
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            abrir();
+          }
         });
       });
     },
@@ -6704,3 +6754,17 @@ document.addEventListener("keydown", (e) => {
 });
 window.openWindow = openWindow;
 window.chooseTheme = chooseTheme;
+// Espai visible real: barres del navegador, teclat virtual i canvis d'orientació.
+function syncResponsiveViewport() {
+  const view = window.visualViewport;
+  const height = view?.height || innerHeight;
+  const top = view?.offsetTop || 0;
+  const root = document.documentElement.style;
+  root.setProperty("--screen-height", `${height}px`);
+  root.setProperty("--screen-top", `${top}px`);
+  root.setProperty("--keyboard-inset", `${Math.max(0, innerHeight - height - top)}px`);
+}
+window.addEventListener("resize", syncResponsiveViewport);
+window.visualViewport?.addEventListener("resize", syncResponsiveViewport);
+window.visualViewport?.addEventListener("scroll", syncResponsiveViewport);
+syncResponsiveViewport();
