@@ -109,7 +109,7 @@ function loopMatrix() {
   if (!matrixCtx) return;
   matrixCtx.fillStyle = "rgba(0,0,0,.14)";
   matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
-  matrixCtx.font = "16px monospace";
+  matrixCtx.font = "20px VT323";
   matrixDrops.forEach((y, i) => {
     const ch = matrixChars[Math.floor(Math.random() * matrixChars.length)];
     matrixCtx.fillStyle = "rgba(190,255,190,.95)"; // cap blanc brillant
@@ -1532,7 +1532,7 @@ const Apps = {
           ctx.fillStyle = "rgba(0,0,0,.65)";
           ctx.fillRect(0, 0, cv.width, cv.height);
           ctx.fillStyle = "#fff";
-          ctx.font = "bold 20px monospace";
+          ctx.font = "24px VT323";
           ctx.textAlign = "center";
           ctx.fillText("PAUSA", cv.width / 2, cv.height / 2);
         }
@@ -1820,40 +1820,43 @@ const Apps = {
         ctx.fillRect(x * CELL + 4, y * CELL + 4, CELL - 8, CELL - 8);
       }
       function drawPac() {
-        const cx = player.x * CELL + 10,
-          cy = player.y * CELL + 10;
-        mouth = (mouth + 0.18) % (Math.PI / 2);
-        const open = 0.18 + Math.abs(Math.sin(mouth)) * 0.36;
-        let ang = 0;
-        if (player.dir.x < 0) ang = Math.PI;
-        if (player.dir.y < 0) ang = -Math.PI / 2;
-        if (player.dir.y > 0) ang = Math.PI / 2;
+        // A 16×16 sprite: all visible edges are whole pixels.
+        const ox = player.x * CELL + 2, oy = player.y * CELL + 2;
+        const opening = [0.15, 0.55, 1][Math.floor(mouth++ / 2) % 3];
         ctx.fillStyle = "#ffd51f";
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, 8, ang + open, ang + Math.PI * 2 - open);
-        ctx.closePath();
-        ctx.fill();
+        for (let sy = 0; sy < 16; sy++) for (let sx = 0; sx < 16; sx++) {
+          const dx = sx - 7.5, dy = sy - 7.5;
+          if (dx * dx + dy * dy > 59) continue;
+          const forward = player.dir.x < 0 ? -dx : player.dir.y < 0 ? -dy : player.dir.y > 0 ? dy : dx;
+          const across = player.dir.y ? dx : dy;
+          if (forward > 0 && Math.abs(across) < forward * opening) continue;
+          ctx.fillRect(ox + sx, oy + sy, 1, 1);
+        }
       }
       function drawGhost(g, fright) {
-        const x = g.x * CELL + 10,
-          y = g.y * CELL + 10;
+        const x = g.x * CELL + 3, y = g.y * CELL + 3;
+        const sprite = [
+          "00001111110000", "00111111111100", "01111111111110",
+          "01111111111110", "11111111111111", "11111111111111",
+          "11111111111111", "11111111111111", "11111111111111",
+          "11111111111111", "11111111111111", "11111111111111",
+          tickNo % 4 < 2 ? "11100111100111" : "11011100111011",
+          tickNo % 4 < 2 ? "11000011000011" : "10011100111001",
+        ];
         ctx.fillStyle = fright ? "#194cff" : g.color;
-        ctx.beginPath();
-        ctx.arc(x, y - 1, 8, Math.PI, 0);
-        ctx.lineTo(x + 8, y + 7);
-        ctx.lineTo(x + 4, y + 4);
-        ctx.lineTo(x, y + 7);
-        ctx.lineTo(x - 4, y + 4);
-        ctx.lineTo(x - 8, y + 7);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(x - 5, y - 2, 4, 5);
-        ctx.fillRect(x + 2, y - 2, 4, 5);
-        ctx.fillStyle = fright ? "#fff" : "#182050";
-        ctx.fillRect(x - 4, y, 2, 3);
-        ctx.fillRect(x + 3, y, 2, 3);
+        sprite.forEach((row,sy)=>[...row].forEach((pixel,sx)=>{if(pixel==='1')ctx.fillRect(x+sx,y+sy,1,1);}));
+        if (fright) {
+          ctx.fillStyle = "#ffe8d1";
+          ctx.fillRect(x + 3, y + 5, 2, 2); ctx.fillRect(x + 9, y + 5, 2, 2);
+          for (let sx = 2; sx < 12; sx += 2) ctx.fillRect(x + sx, y + 9 + (sx % 4 ? 1 : 0), 2, 1);
+        } else {
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(x + 2, y + 4, 4, 5); ctx.fillRect(x + 8, y + 4, 4, 5);
+          ctx.fillStyle = "#182050";
+          const ex = g.dir.x < 0 ? 0 : g.dir.x > 0 ? 2 : 1;
+          const ey = g.dir.y < 0 ? 0 : g.dir.y > 0 ? 3 : 2;
+          ctx.fillRect(x + 2 + ex, y + 4 + ey, 2, 2); ctx.fillRect(x + 8 + ex, y + 4 + ey, 2, 2);
+        }
       }
       function draw() {
         ctx.fillStyle = "#000";
@@ -1863,15 +1866,12 @@ const Apps = {
         ctx.fillStyle = "#f6d7a7";
         dots.forEach((k) => {
           const [x, y] = k.split(",").map(Number);
-          ctx.beginPath();
-          ctx.arc(x * CELL + 10, y * CELL + 10, 2, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.fillRect(x * CELL + 9, y * CELL + 9, 3, 3);
         });
         powers.forEach((k) => {
           const [x, y] = k.split(",").map(Number);
-          ctx.beginPath();
-          ctx.arc(x * CELL + 10, y * CELL + 10, 5, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.fillRect(x * CELL + 7, y * CELL + 6, 6, 8);
+          ctx.fillRect(x * CELL + 6, y * CELL + 7, 8, 6);
         });
         drawPac();
         const fright = tickNo < frightenedUntil;
@@ -1888,7 +1888,7 @@ const Apps = {
           ctx.fillStyle = "rgba(0,0,0,.65)";
           ctx.fillRect(0, 0, cv.width, cv.height);
           ctx.fillStyle = "#fff";
-          ctx.font = "bold 20px monospace";
+          ctx.font = "24px VT323";
           ctx.textAlign = "center";
           ctx.fillText("PAUSA", cv.width / 2, cv.height / 2);
         }
@@ -2532,7 +2532,7 @@ function matrixMode() {
     x.fillStyle = "rgba(0,0,0,.14)";
     x.fillRect(0, 0, c.width, c.height);
     x.fillStyle = "#4ade80";
-    x.font = "16px monospace";
+    x.font = "20px VT323";
     drops.forEach((y, i) => {
       x.fillText(ch[Math.floor(Math.random() * ch.length)], i * 16, y * 16);
       if (y * 16 > c.height && Math.random() > 0.975) drops[i] = 0;
@@ -2983,9 +2983,9 @@ function gameOverlay(ctx, cv, title, sub) {
   ctx.fillRect(0, 0, cv.width, cv.height);
   ctx.textAlign = "center";
   ctx.fillStyle = "#6dff9b";
-  ctx.font = "bold 17px monospace";
+  ctx.font = "22px VT323";
   ctx.fillText(title, cv.width / 2, cv.height / 2 - 10);
-  ctx.font = "10px monospace";
+  ctx.font = "16px VT323";
   ctx.fillStyle = "#dbe8df";
   ctx.fillText(sub, cv.width / 2, cv.height / 2 + 16);
 }
@@ -3585,7 +3585,7 @@ Apps.mario = {
           );
           rect(tile.x + 3, tile.y + 3, 25, 2, "#ffffff50");
           ctx.fillStyle = "#fff2ba";
-          ctx.font = "bold 18px monospace";
+          ctx.font = "24px VT323";
           if (tile.type === "question" && !tile.used)
             ctx.fillText("?", tile.x + 10, tile.y + 19);
           else rect(tile.x + 1, tile.y + 12, 29, 2, "#00000025");
@@ -3647,7 +3647,7 @@ Apps.mario = {
       for (const s of world.particles) {
         ctx.globalAlpha = s.life / 0.6;
         ctx.fillStyle = "#fff4a5";
-        ctx.font = "bold 12px monospace";
+        ctx.font = "18px VT323";
         ctx.fillText("+100", s.x, s.y);
       }
       ctx.globalAlpha = 1;
@@ -4815,7 +4815,7 @@ function showScreensaver() {
   function matrix(time, elapsed) {
     ctx.fillStyle = "rgba(2,8,5,.17)";
     ctx.fillRect(0, 0, width, height);
-    ctx.font = "15px monospace";
+    ctx.font = "20px VT323";
     drops.forEach((drop, i) => {
       drop.y += drop.speed * elapsed;
       if (drop.y > height + 240) drop.y = -20;
@@ -4884,7 +4884,7 @@ function showScreensaver() {
         }
       }
     const cell = Math.min(width / (cols + 2), height / (lines + 4));
-    ctx.font = `${cell}px monospace`;
+    ctx.font = `${cell}px VT323`;
     ctx.fillStyle = "#307a60";
     const x = (width - cols * cell * 0.61) / 2,
       y = (height - lines * cell) / 2;
@@ -4898,7 +4898,7 @@ function showScreensaver() {
   function stars(time) {
     ctx.fillStyle = "#030806";
     ctx.fillRect(0, 0, width, height);
-    ctx.font = "15px monospace";
+    ctx.font = "20px VT323";
     for (let i = 0; i < 140; i++) {
       const phase = (time * 0.025 + seededNoise(i + 100)) % 1;
       const angle = seededNoise(i + 800) * Math.PI * 2;
@@ -5384,8 +5384,8 @@ function drawAtmosphere() {
   }
   atmosphereContext.clearRect(0, 0, width, height);
   atmosphereContext.font = state.atmosphere.startsWith("matrix")
-    ? "14px monospace"
-    : "12px monospace";
+    ? "18px VT323"
+    : "16px VT323";
   atmosphereContext.textBaseline = "top";
   const cells = atmosphereFrame(
     state.atmosphere,
