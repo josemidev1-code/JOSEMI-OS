@@ -188,6 +188,7 @@
       else if(expression.length<150){if(fresh&&/[\d.(]/.test(value))expression='';fresh=false;expression+=value;message.textContent='';}
       display.value=expression||'0';
     }
+    win.calculateExpression=value=>{expression=String(PixelTools.calculate(value));fresh=true;display.value=expression;message.textContent='RESULTADO';return Number(expression);};
     body.addEventListener('click',e=>{const b=e.target.closest('[data-calc]');if(b)act(b.dataset.calc);});
     win.addEventListener('keydown',e=>{let key=e.key;if(key==='Enter'||key==='=')key='equals';else if(key==='Backspace')key='back';else if(key==='Escape'||key==='Delete')key='clear';else if(!/^[\d.+\-*/()%]$/.test(key))return;e.preventDefault();act(key);});
   }};

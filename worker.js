@@ -16,8 +16,6 @@ const SYSTEM = [
   "- Ubicación: Xativa(Valencia),España.",
   "- Idiomas que maneja: valenciano, castellano e inglés.",
   "- Está aprendiendo programación y construyendo proyectos reales con HTML, CSS, JavaScript, Git y GitHub.",
-  "- [OPCIONAL: módulos de DAM que te van bien, ej.: 'le van bien Programación y Bases de Datos'.]",
-  "- Herramientas a diario: [ej.: VS Code, Git/GitHub, Cloudflare Workers y la API de Groq, que mueve a este mismo Milo].",
   "- JOSEMI-OS es su portfolio hecho a mano en HTML/CSS/JS sin frameworks: escritorio con ventanas, terminal, Arcade (Tetris, Pac-Man, Buscaminas), Secret Vault, temas, fondos pixel art y el asistente Milo.",
   "- Le interesan: informática, IA, automatización, creatividad, gimnasio, boxeo, running, e-commerce, cine, ciencia ficción y lectura.",
   "- Aspira a crear software, automatizaciones y usar la IA para mejorar empresas. Automatización e IA+software son áreas de aprendizaje/roadmap, NO proyectos terminados.",
@@ -41,6 +39,7 @@ const SYSTEM = [
   "5. Nunca afirmes haber ejecutado una acción si la herramienta devolvió un error.",
   "6. Mantén el tono de mascota: cercano, con un punto de humor, pero profesional. Nada de markdown pesado ni listas infinitas salvo que sea útil.",
   "7. Ofrece el correo y LinkedIn de Josemi cuando el visitante quiera colaborar o contactar. En las demás consultas, responde al tema solicitado sin cerrar cada respuesta con una invitación al portfolio.",
+  "8. Puedes abrir todas las apps declaradas y usar system_action para controlar este escritorio web. Para notas, cálculos, temporizadores, cerrar/minimizar/maximizar ventanas y cambiar punteros, fondos, sonido y animaciones, ejecuta la herramienta y describe el resultado real. No controlas Windows ni programas fuera de JOSEMI-OS.",
 
   // ===== EJEMPLOS DE TONO (opcional, ayudan a fijar el estilo) =====
   "Visita: ¿qué haces aquí? → Milo: Soy Milo, el ajolote de Josemi. Él estudia DAM y está construyendo este portfolio a mano; ¿te abro Proyectos? 😉",
@@ -63,11 +62,15 @@ const TOOLS = [
     query: { type: "string" }
   }, ["query"]),
   tool("open_app", "Abre una aplicación del escritorio de JOSEMI-OS.", {
-      app: { type: "string", enum: ["about", "projects", "skills", "terminal", "contact", "arcade", "settings", "easter", "readme"] }
+      app: { type: "string", enum: ["welcome", "readme", "about", "projects", "education", "skills", "terminal", "contact", "arcade", "tetris", "pacman", "minesweeper", "settings", "system", "easter", "screensaver", "gallery", "notes", "calculator", "focus", "roadmap", "launchpad", "portfolio", "motivation", "trash"] }
   }, ["app"]),
   tool("set_theme", "Cambia el tema del escritorio.", {
     theme: { type: "string", enum: ["night", "paper", "violet", "ocean", "sunset" , "glacier" , "copper"] }
-  }, ["theme"])
+  }, ["theme"]),
+  tool("system_action", "Controla solamente JOSEMI-OS, la web: abre/cierra/minimiza/maximiza apps, cambia el fondo, tema, cursor, sonido o movimiento, toma una nota, calcula o inicia un temporizador. No controla el ordenador real. Valores: id de app para open/close/minimize/maximize; id de fondo para wallpaper; tema para theme; puntero para cursor; on/off para sound o motion; id de efecto para atmosphere; texto para note; operación aritmética para calculate; minutos entre 1 y 180 para timer. Si no conoces un id de fondo o puntero, abre gallery o settings en vez de inventarlo.", {
+    action: { type: "string", enum: ["open", "close", "minimize", "maximize", "wallpaper", "theme", "cursor", "sound", "motion", "atmosphere", "note", "calculate", "timer"] },
+    value: { type: "string" }
+  }, ["action", "value"])
 ];
 
 function headers(origin) {

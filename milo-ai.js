@@ -33,7 +33,7 @@ const MiloAI = (() => {
         description: "Obri una app de JOSEMI-OS.",
         parameters: {
           type: "object",
-          properties: { app: { type: "string", enum: ["about", "projects", "skills", "terminal", "contact", "arcade", "settings"] } },
+          properties: { app: { type: "string", enum: ["welcome", "readme", "about", "projects", "education", "skills", "terminal", "contact", "arcade", "tetris", "pacman", "minesweeper", "settings", "system", "easter", "screensaver", "gallery", "notes", "calculator", "focus", "roadmap", "launchpad", "portfolio", "motivation", "trash"] } },
           required: ["app"]
         }
       }
@@ -45,7 +45,7 @@ const MiloAI = (() => {
         description: "Canvia el tema visual de JOSEMI-OS.",
         parameters: {
           type: "object",
-          properties: { theme: { type: "string", enum: ["night", "paper", "violet", "ocean", "sunset"] } },
+          properties: { theme: { type: "string", enum: ["night", "paper", "violet", "ocean", "sunset", "glacier", "copper"] } },
           required: ["theme"]
         }
       }
@@ -54,8 +54,8 @@ const MiloAI = (() => {
 
   let player = null;
   let resultsBox = null;
-  const allowedApps = new Set(["about", "projects", "skills", "terminal", "contact", "arcade", "settings"]);
-  const allowedThemes = new Set(["night", "paper", "violet", "ocean", "sunset"]);
+  const allowedApps = new Set(["welcome", "readme", "about", "projects", "education", "skills", "terminal", "contact", "arcade", "tetris", "pacman", "minesweeper", "settings", "system", "easter", "screensaver", "gallery", "notes", "calculator", "focus", "roadmap", "launchpad", "portfolio", "motivation", "trash"]);
+  const allowedThemes = new Set(["night", "paper", "violet", "ocean", "sunset", "glacier", "copper"]);
 
   async function post(path, payload, signal) {
     const response = await fetch(endpoint + path, {
@@ -126,6 +126,9 @@ const MiloAI = (() => {
           if (typeof window.chooseTheme !== "function") return { error: "No es pot canviar el tema" };
           window.chooseTheme(args.theme);
           return { ok: true, theme: args.theme };
+        case "system_action":
+          if (!window.PixelOS) return { error: "Los controles del escritorio no están disponibles" };
+          return window.PixelOS.perform(String(args.action || ""), String(args.value || ""));
         default:
           return { error: "Ferramenta no permesa" };
       }
@@ -135,6 +138,8 @@ const MiloAI = (() => {
   }
 
   async function reply(text, history = [], externalSignal) {
+    const local = window.PixelOS?.command(text);
+    if (local) return local;
     const controller = new AbortController();
     const abort = () => controller.abort();
     if (externalSignal?.aborted) controller.abort();

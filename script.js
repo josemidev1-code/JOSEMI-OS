@@ -828,7 +828,7 @@ const PIXEL_WALLPAPERS = Object.fromEntries(
 function selectPixelWallpaper(id) {
   if (!PIXEL_WALLPAPERS[id]) return false;
   state.wallpaper = id;
-  state.atmosphere = "none";
+  if (!state.universeUserAtmosphere) state.atmosphere = "none";
   state.wp = 0;
   applyTheme();
   save();
@@ -1709,16 +1709,7 @@ function buildContext() {
           toast("Escritorio actualizado.");
         }
         if (a === "wallpaper") {
-          state.wp = (state.wp + 1) % WALLS.length;
-          state.atmosphere = state.wp === 4 ? "matrix" : "none";
-          applyTheme();
-          save();
-          toast(
-            "Fondo: " +
-              ["Aurora", "Bosque", "Azul profundo", "Violeta", "Matrix"][
-                state.wp
-              ],
-          );
+          openWindow("gallery");
         }
         if (a === "terminal") openWindow("terminal");
         if (a === "system") openWindow("system");
@@ -2043,6 +2034,14 @@ const CURSORS = {
   terminal: "Terminal",
   crosshair: "Mira",
   arrow: "Flecha clara",
+  sword: "Espada",
+  axe: "Hacha nórdica",
+  coin: "Moneda",
+  ghost: "Fantasma",
+  leaf: "Hoja",
+  circuit: "Circuito",
+  star: "Estrella",
+  axolotl: "Ajolote",
 };
 if (!THEMES[state.theme]) state.theme = "night";
 if (!CURSORS[state.cursor]) state.cursor = "system";
@@ -3078,7 +3077,6 @@ function setupDesktop() {
     "pointermove",
     () => {
       lastInput = Date.now();
-      if (!saver.hidden) hideScreensaver();
     },
     { passive: true },
   );
@@ -3567,7 +3565,7 @@ initDirectAccess();
   "use strict";
 
   const GOW_URL =
-    "https://i.pinimg.com/736x/f4/e8/4e/f4e84ea8a1b943cd82b816f685c04ef7.jpg";
+    "assets/wallpapers/god-of-war-ragnarok.jpg";
 
   // Estado para desbloqueos y fondo personalizado.
   if (!state.vault) state.vault = { matrix: false, gof: false };
@@ -4350,12 +4348,8 @@ initDirectAccess();
                 ? Number(el.value)
                 : el.value;
 
-          if (key === "atmosphere") {
-            if (["matrixBlue", "matrixDepth", "matrix"].includes(el.value))
-              state.wallpaper = "matrix";
-            else if (el.value === "none" && state.wallpaper === "matrix")
-              state.wallpaper = "static";
-          }
+          // La animación y la imagen son independientes: cambiar un efecto no borra el fondo.
+          if (key === "atmosphere") state.universeUserAtmosphere = true;
 
           if (key === "sound" && state.sound && typeof beep === "function")
             beep();
@@ -4607,8 +4601,8 @@ const MILO_SVG = `<svg class="mascot-svg" viewBox="0 0 48 40" shape-rendering="c
   <path fill="#f6b4cb" d="M12 10h24v2h2v14h-2v2H12v-2h-2V12h2z"/>
   <path fill="#ffd1dd" d="M13 10h22v3H13zM11 13h4v10h-4zM15 14h18v10H15z"/>
   <path fill="#e999b6" d="M34 13h3v13h-3zM14 26h20v2H14zM16 12h3v1h-3zM27 12h4v1h-4z"/>
-  <path fill="#412f40" d="M15 17h3v3h-3zM30 17h3v3h-3z"/>
-  <path fill="#fff3e9" d="M15 17h1v1h-1zM30 17h1v1h-1z"/>
+  <g class="milo-base-eyes"><path fill="#412f40" d="M15 17h3v3h-3zM30 17h3v3h-3z"/>
+  <path fill="#fff3e9" d="M15 17h1v1h-1zM30 17h1v1h-1z"/></g>
   <path fill="#ec8ead" d="M12 21h5v2h-5zM31 21h5v2h-5z"/>
   <path fill="#a95e7a" d="M22 22h4v1h-4z"/>
 </svg>`;
