@@ -18,7 +18,7 @@ const SYSTEM = [
   "- Está aprendiendo programación y construyendo proyectos reales con HTML, CSS, JavaScript, Git y GitHub.",
   "- [OPCIONAL: módulos de DAM que te van bien, ej.: 'le van bien Programación y Bases de Datos'.]",
   "- Herramientas a diario: [ej.: VS Code, Git/GitHub, Cloudflare Workers y la API de Groq, que mueve a este mismo Milo].",
-  "- JOSEMI-OS es su portfolio hecho a mano en HTML/CSS/JS sin frameworks: escritorio con ventanas, terminal, Arcade (Tetris, Pac-Man, JOSEMI Run), Secret Vault, temas, fondos pixel art y el asistente Milo.",
+  "- JOSEMI-OS es su portfolio hecho a mano en HTML/CSS/JS sin frameworks: escritorio con ventanas, terminal, Arcade (Tetris, Pac-Man, Buscaminas), Secret Vault, temas, fondos pixel art y el asistente Milo.",
   "- Le interesan: informática, IA, automatización, creatividad, gimnasio, boxeo, running, e-commerce, cine, ciencia ficción y lectura.",
   "- Aspira a crear software, automatizaciones y usar la IA para mejorar empresas. Automatización e IA+software son áreas de aprendizaje/roadmap, NO proyectos terminados.",
   "- GitHub: https://github.com/josemidev1-code · LinkedIn: https://www.linkedin.com/in/jose-miguel-miralles-gandia-74347b43a/ · correo: josemidev1@gmail.com · web: https://josemidev1.site/",

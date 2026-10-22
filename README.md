@@ -9,7 +9,7 @@ Portfolio de José Miguel Miralles Gandia, estudiante de Desarrollo de Aplicacio
 - Arranque Matrix y escritorio con ventanas que se pueden mover, minimizar y cerrar.
 - Sobre mí, proyectos, habilidades y contacto.
 - Terminal, buscador de aplicaciones y monitor del sistema.
-- Arcade con Tetris, Pac-Man y JOSEMI Run.
+- Arcade con Tetris (Maratón, Sprint 40 y Ultra, rotación SRS, pieza guardada y T-spins), Pac-Man (laberinto propio, cuatro fantasmas con personalidad, frutas y niveles) y Buscaminas (cuatro dificultades, primer clic seguro, acordes, pistas y estadísticas).
 - Secret Vault con acertijos y fondos desbloqueables.
 - Diez fondos pixel art, iconos personalizados y salvapantallas ASCII.
 - Milo, un ajolote con IA (Groq), búsqueda web (Tavily), meteorología (Open-Meteo) y música (iTunes). Las respuestas locales se conservan como respaldo.
@@ -23,7 +23,8 @@ La web utiliza HTML, CSS y JavaScript, sin proceso de compilación.
 | --- | --- |
 | `index.html` | Arranque y estructura del escritorio |
 | `style.css` | Diseño, ventanas, iconos y adaptación a pantallas |
-| `script.js` | Aplicaciones, juegos, fondos, preferencias y chat de Milo |
+| `script.js` | Aplicaciones, fondos, preferencias y chat de Milo |
+| `games.js` / `games.css` | Arcade: Tetris, Pac-Man y Buscaminas |
 | `milo-ai.js` | Cliente de IA y acciones del chat |
 | `worker.js` | Backend serverless para Groq, Tavily y Open-Meteo |
 | `wrangler.toml` | Configuración del despliegue a Cloudflare Workers |
