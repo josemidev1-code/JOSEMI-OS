@@ -7,8 +7,8 @@
 .jg-chip:hover { border-color: var(--accent); color: var(--pixel-ink, #dbe9e0); }
 .jg-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #10231a; }
 .jg-canvas { display: block; width: 100%; height: auto; flex-shrink: 0; touch-action: none; cursor: pointer; background: #050807; border: 2px solid var(--pixel-edge, #455c4f) !important; border-radius: 0 !important; box-shadow: 4px 4px 0 var(--pixel-shadow, #020806) !important; image-rendering: pixelated; }
-.jg-tetris-canvas { max-width: min(100%, 500px); }
-.jg-pac-canvas { max-width: min(100%, 470px); background: #000; }
+.jg-tetris-canvas { width: auto; max-width: min(100%, 500px); max-height: max(200px, calc(var(--screen-height, 100dvh) - 330px)); }
+.jg-pac-canvas { width: auto; max-width: min(100%, 470px); max-height: max(200px, calc(var(--screen-height, 100dvh) - 330px)); background: #000; }
 .jg-hint, .jg-legend { margin: 0; font: 16px var(--font-mono, monospace); color: var(--pixel-muted, #95a89e); text-align: center; }
 .jg-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; }
 .jg-legend span { color: var(--ghost); }
@@ -24,6 +24,16 @@
 @media (pointer: coarse), (max-width: 600px) {
   .jg-pad { display: flex; }
   .jg-dpad { display: grid; }
+}
+@media (max-width: 600px) {
+  .jg { padding: 8px; gap: 8px; }
+  .jg-chip { padding: 5px 7px; font-size: 15px; }
+  .jg-modes, .jg-actions { gap: 5px; }
+  .jg .jg-actions .btn { padding: 6px 9px; font-size: 12px; }
+  .jg-tetris-canvas, .jg-pac-canvas { max-height: max(180px, calc(var(--screen-height, 100dvh) - 560px)); }
+  .jg-hint, .jg-legend { font-size: 15px; }
+  .jg-pad { gap: 6px; }
+  .jg-pad .btn { min-height: 44px; }
 }
 
 /* BUSCAMINAS */

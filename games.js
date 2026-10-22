@@ -972,6 +972,7 @@
       }
     }
     const keydown = (e) => {
+      if (e.target.closest("button, input, select, textarea, a, [contenteditable='true']")) return;
       const action = KEYS[e.key.toLowerCase()];
       if (!action) return;
       e.preventDefault();
@@ -1778,6 +1779,7 @@
       }
     }
     const keydown = (e) => {
+      if (e.target.closest("button, input, select, textarea, a, [contenteditable='true']")) return;
       const k = e.key.toLowerCase();
       if (KEYS[k]) {
         e.preventDefault();

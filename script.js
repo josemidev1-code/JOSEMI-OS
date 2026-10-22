@@ -1100,14 +1100,15 @@ function bar(n, v) {
 // VENTANAS: este módulo guarda las abiertas en un Map. Controla foco (z-index), arrastre, tamaño y cierre.
 // Mantiene las ventanas dentro de la pantalla al cambiar el tamaño o la orientación.
 function fitWindowBounds(rect, viewportWidth, viewportHeight) {
+  const topInset = document.body.classList.contains("pixel-system") ? 48 : 12;
   const availableWidth = Math.max(1, viewportWidth - 32);
-  const availableHeight = Math.max(1, viewportHeight - 110);
+  const availableHeight = Math.max(1, viewportHeight - topInset - 98);
   const width = Math.max(Math.min(300, availableWidth), Math.min(rect.width, availableWidth));
   const height = Math.max(Math.min(220, availableHeight), Math.min(rect.height, availableHeight));
   return {
     width, height,
     left: Math.max(16, Math.min(rect.left, viewportWidth - width - 16)),
-    top: Math.max(12, Math.min(rect.top, viewportHeight - height - 98)),
+    top: Math.max(topInset, Math.min(rect.top, viewportHeight - height - 98)),
   };
 }
 
@@ -1241,7 +1242,7 @@ const WM = (() => {
         oy = win.offsetTop;
       const mv = (ev) => {
         let nx = Math.max(0, Math.min(ox + ev.clientX - sx, innerWidth - 120)),
-          ny = Math.max(12, Math.min(oy + ev.clientY - sy, innerHeight - 150));
+          ny = Math.max(document.body.classList.contains("pixel-system") ? 48 : 12, Math.min(oy + ev.clientY - sy, innerHeight - 150));
         win.style.left = nx + "px";
         win.style.top = ny + "px";
       };
@@ -1272,7 +1273,7 @@ const WM = (() => {
         win.style.height =
           Math.max(
             180,
-            Math.min(oh + ev.clientY - sy, innerHeight - win.offsetTop - 46),
+            Math.min(oh + ev.clientY - sy, innerHeight - win.offsetTop - 98),
           ) + "px";
       };
       const up = () => {
@@ -4538,7 +4539,7 @@ const RAMAS = [
   },
   {
     keys: ["arcade", "juego", "tetris", "pacman", "buscaminas", "minas"],
-    text: "El Arcade tiene Tetris (maratón, sprint y ultra), Pac-Man con cuatro fantasmas y Buscaminas con tres dificultades. Los récords se guardan en este navegador.",
+    text: "El Arcade tiene Tetris (maratón, sprint y ultra), Pac-Man con cuatro fantasmas y Buscaminas con cuatro dificultades, incluida una a medida. Los récords se guardan en este navegador.",
     app: "arcade",
   },
   {
