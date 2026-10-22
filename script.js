@@ -52,7 +52,7 @@ const save = () => {
 };
 
 /* --- Wallpapers (tonos planos estilo Win95) --- */
-// [FIX] Añadido 'matrix' como 5º wallpaper (índice 4).
+// El índice 4 es el fondo Matrix: lo anima el motor ASCII.
 const WALLS = [
   "radial-gradient(circle at 18% 18%, rgba(40,130,82,.18), transparent 28%), radial-gradient(circle at 78% 70%, rgba(40,110,160,.10), transparent 30%), var(--bg)",
   "radial-gradient(circle at 80% 18%, rgba(53,190,146,.14), transparent 25%), var(--bg)",
@@ -60,82 +60,10 @@ const WALLS = [
   "radial-gradient(circle at 15% 85%, rgba(142,82,190,.13), transparent 30%), var(--bg)",
   "matrix",
 ];
-// [FIX] Si el wp guardado no es válido (p.ej. un número raro), lo ponemos a 0 para evitar errores.
+// Un índice guardado no válido vuelve al primer fondo.
 if (!Number.isInteger(state.wp) || state.wp < 0 || state.wp >= WALLS.length)
   state.wp = 0;
 
-/* =========================================================
-   [NOU] MATRIX WALLPAPER PERSISTENT
-   Es dibuixa DINS del #bg (així respecta el teu z-index i el parallax).
-   ========================================================= */
-let matrixCanvas = null,
-  matrixCtx = null,
-  matrixAnim = null,
-  matrixDrops = [];
-const matrixChars = "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎ01JOSEMI<>/*#";
-
-// Arrenca la pluja: crea un <canvas> fill del #bg.
-function startMatrix() {
-  if (matrixCanvas) return; // si ja corre, no el dupliquem
-  const bg = $("#bg");
-  if (!bg) return;
-  matrixCanvas = document.createElement("canvas");
-  matrixCanvas.id = "matrix-wall";
-  matrixCanvas.setAttribute("aria-hidden", "true");
-  Object.assign(matrixCanvas.style, {
-    position: "absolute",
-    inset: "0",
-    width: "100%",
-    height: "100%",
-    pointerEvents: "none",
-  });
-  bg.appendChild(matrixCanvas);
-  matrixCtx = matrixCanvas.getContext("2d");
-  resizeMatrix();
-  addEventListener("resize", resizeMatrix);
-  matrixAnim = requestAnimationFrame(loopMatrix);
-}
-// Recalcula mides i columnes quan canvia la pantalla.
-function resizeMatrix() {
-  if (!matrixCanvas) return;
-  matrixCanvas.width = innerWidth;
-  matrixCanvas.height = innerHeight;
-  matrixCtx.fillStyle = "#000";
-  matrixCtx.fillRect(0, 0, innerWidth, innerHeight);
-  matrixDrops = Array(Math.floor(innerWidth / 18)).fill(1);
-}
-// Bucle d'animació. [FIX] rastre curt (.14) + cap blanc + caiguda ràpida (+=2).
-function loopMatrix() {
-  if (!matrixCtx) return;
-  matrixCtx.fillStyle = "rgba(0,0,0,.14)";
-  matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
-  matrixCtx.font = "20px VT323";
-  matrixDrops.forEach((y, i) => {
-    const ch = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-    matrixCtx.fillStyle = "rgba(190,255,190,.95)"; // cap blanc brillant
-    matrixCtx.fillText(ch, i * 18, y * 18);
-    matrixCtx.fillStyle = "#00ff41"; // cos verd (un per damunt)
-    matrixCtx.fillText(
-      matrixChars[Math.floor(Math.random() * matrixChars.length)],
-      i * 18,
-      (y - 1) * 18,
-    );
-    if (y * 18 > matrixCanvas.height && Math.random() > 0.975)
-      matrixDrops[i] = 0;
-    matrixDrops[i] += 1; // Velocidad más calmada para que el fondo no distraiga
-  });
-  matrixAnim = requestAnimationFrame(loopMatrix);
-}
-// Apaga i neteja la pluja.
-function stopMatrix() {
-  if (matrixAnim) cancelAnimationFrame(matrixAnim);
-  removeEventListener("resize", resizeMatrix);
-  if (matrixCanvas) matrixCanvas.remove();
-  matrixCanvas = null;
-  matrixCtx = null;
-  matrixAnim = null;
-  matrixDrops = [];
-}
 
 /* FONDOS PIXEL ART: dibujos propios en una rejilla de 480 × 270.
    Solo rectángulos y pasos enteros: ni fotos, ni filtros, ni archivos extra. */
@@ -917,15 +845,8 @@ function applyTheme() {
   );
   document.documentElement.style.setProperty("--bg", state.bg);
   const bg = $("#bg");
-  if (state.wp === 4) {
-    // wallpaper = matrix
-    if (bg) bg.style.background = "#000"; // fons negre sota la pluja
-    // La lluvia la gestiona el motor ASCII, que también pausa al abrir juegos.
-    stopMatrix();
-  } else {
-    stopMatrix();
-    if (bg) bg.style.background = WALLS[state.wp];
-  }
+  // Con el fondo Matrix (wp 4) la lluvia la dibuja el motor ASCII sobre negro.
+  if (bg) bg.style.background = state.wp === 4 ? "#000" : WALLS[state.wp];
   document.body.classList.toggle("reduce-motion", state.motion);
 }
 applyTheme();
@@ -1005,57 +926,7 @@ const pixelIcon = (tipo) =>
 
 // APLICACIONES: cada entrada tiene título, icono, render() para el HTML y bind() para los eventos.
 const Apps = {
-  // SOBRE MÍ: muestra los datos de PROFILE en una ficha personal.
-  about: {
-    title: "Sobre mí",
-    icon: "👤",
-    render: () => `
-   <section class="profile-hero">
-     <div class="profile-hero__terminal"><span>josemi@portfolio</span><b>DESARROLLADOR EN PROCESO</b></div>
-     <h2>José Miguel Miralles Gandia</h2>
-     <p>${PROFILE.bio}</p>
-     <div class="chips">${PROFILE.gustos.map((x) => `<span class="chip">${x}</span>`).join("")}</div>
-   </section>
-   <div class="content-grid">
-     <article class="content-card"><span class="card-kicker">01 / AHORA</span><h3>Qué estoy haciendo</h3><p>Estudio <strong>DAM</strong> en <strong>IES Dr. Lluís Simarro</strong>. Este proyecto es mi forma de practicar frontend, interacción, diseño y JavaScript mientras construyo algo que realmente me representa.</p></article>
-     <article class="content-card"><span class="card-kicker">02 / OBJETIVO</span><h3>Hacia dónde voy</h3><p>${PROFILE.aspiracion}</p></article>
-     <article class="content-card"><span class="card-kicker">03 / FUERA DEL CÓDIGO</span><h3>No todo es programar</h3><p>Me gusta entrenar en el gimnasio, hacer deporte, practicar boxeo y salir a correr. También hago e-commerce y dropshipping.</p></article>
-     <article class="content-card"><span class="card-kicker">04 / MENTALIDAD</span><h3>Build · learn · repeat</h3><p>Estoy al principio del camino, así que prefiero enseñar progreso real antes que fingir experiencia que todavía no tengo.</p></article>
-   </div>`,
-  },
 
-  // PROYECTOS: tarjetas que abren detalles definidos en PROJECTS.
-  projects: {
-    title: "Proyectos",
-    icon: "📁",
-    render: () => `
-   <div class="app-title">/PROYECTOS</div>
-   <p class="bio">Aquí separo lo que ya estoy construyendo de las áreas en las que quiero seguir experimentando. No relleno el portfolio con proyectos inventados.</p>
-   <div class="folder-grid">
-     <div class="folder" tabindex="0" data-folder="web"><span class="g">⌘</span><span class="n">JOSEMI-OS</span><small>Proyecto real</small></div>
-     <div class="folder" tabindex="0" data-folder="school"><span class="g">{ }</span><span class="n">DAM</span><small>Formación</small></div>
-     <div class="folder" tabindex="0" data-folder="auto"><span class="g">⚙</span><span class="n">Automatización</span><small>Roadmap</small></div>
-     <div class="folder" tabindex="0" data-folder="ai"><span class="g">✦</span><span class="n">IA + software</span><small>Roadmap</small></div>
-   </div>`,
-    bind(b) {
-      b.querySelectorAll(".folder").forEach((f) => {
-        const abrir = () => openProject(f.dataset.folder);
-        f.setAttribute("role", "button");
-        f.addEventListener("click", (event) => {
-          if (event.pointerType === "touch" || matchMedia("(pointer: coarse)").matches) abrir();
-        });
-        f.addEventListener("dblclick", (event) => {
-          if (event.pointerType !== "touch" && !matchMedia("(pointer: coarse)").matches) abrir();
-        });
-        f.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            abrir();
-          }
-        });
-      });
-    },
-  },
 
   // HABILIDADES: barras visuales con porcentajes; no son mediciones automáticas.
   skills: {
@@ -1130,32 +1001,6 @@ const Apps = {
    </article>`,
   },
 
-  // CONTACTO: enlaces públicos y botón para copiar el correo con la API del portapapeles.
-  contact: {
-    title: "Contacto",
-    icon: "📬",
-    render: () => `
-   <div class="contact contact--modern">
-     <span class="card-kicker">CONTACTO / NETWORK</span><h2>¿Construimos algo?</h2>
-     <p>Estoy aprendiendo y buscando oportunidades para seguir creando proyectos y mejorar como desarrollador.</p>
-     <div class="links">
-       <a class="clink" href="https://github.com/josemidev1-code" target="_blank" rel="noopener"><span class="g">GH</span><span><b>GitHub</b><small>@josemidev1-code</small></span><i>↗</i></a>
-       <a class="clink" href="https://www.linkedin.com/search/results/people/?keywords=Jose%20Miguel%20Miralles%20Gandia" target="_blank" rel="noopener"><span class="g">IN</span><span><b>LinkedIn</b><small>José Miguel Miralles Gandia</small></span><i>↗</i></a>
-       <a class="clink" href="mailto:josemidev1@gmail.com"><span class="g">@</span><span><b>Email</b><small>josemidev1@gmail.com</small></span><i>↗</i></a>
-     </div>
-     <button class="btn btn--accent" id="copy-email">COPIAR EMAIL</button>
-   </div>`,
-    bind(b) {
-      $("#copy-email", b).addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText("josemidev1@gmail.com");
-          toast("Email copiado al portapapeles.");
-        } catch {
-          toast("No se ha podido acceder al portapapeles.");
-        }
-      });
-    },
-  },
 
   // PAPELERA: archivos ficticios para la metáfora del escritorio; no borra archivos del ordenador.
   trash: {
@@ -1191,71 +1036,6 @@ const Apps = {
     },
   },
 
-  // AJUSTES BASE: shell.js reemplaza esta vista por el panel ampliado de preferencias.
-  settings: {
-    title: "Configuración",
-    icon: "⚙️",
-    render: () => `
-   <div class="app-title">CONFIGURACIÓN</div>
-   <div class="setting"><div>Reducir animaciones<small>Desactiva transiciones y efectos</small></div><button class="switch ${state.motion ? "on" : ""}" id="sw-motion"></button></div>
-   <div class="setting"><div>Sonidos<small>Beeps al abrir y cerrar</small></div><button class="switch ${state.sound ? "on" : ""}" id="sw-sound"></button></div>
-   <div class="setting"><div>Color de acento<small>Afecta a distintos elementos del sistema</small></div><div class="swatches" id="sw-accent">
-     <span class="swatch ${state.accent === "#6dff9b" ? "on" : ""}" data-c="#6dff9b" style="background:#6dff9b"></span>
-     <span class="swatch ${state.accent === "#5de4ff" ? "on" : ""}" data-c="#5de4ff" style="background:#5de4ff"></span>
-     <span class="swatch ${state.accent === "#b08cff" ? "on" : ""}" data-c="#b08cff" style="background:#b08cff"></span>
-     <span class="swatch ${state.accent === "#ffd166" ? "on" : ""}" data-c="#ffd166" style="background:#ffd166"></span></div></div>
-   <div class="setting"><div>Oscuridad<small>Nivel del fondo</small></div><select id="sel-dark">
-     <option value="#050505" ${state.bg === "#050505" ? "selected" : ""}>Oscuro</option>
-     <option value="#030303" ${state.bg === "#030303" ? "selected" : ""}>Más oscuro</option>
-     <option value="#000000" ${state.bg === "#000000" ? "selected" : ""}>Negro total</option></select></div>
-   <div class="setting"><div>Fondo de pantalla<small>Cambia el escritorio</small></div><div class="wp-row" id="sw-wp">
-     ${WALLS.map((w, i) =>
-       w === "matrix"
-         ? `<span class="wp wp--matrix ${i === state.wp ? "on" : ""}" data-w="${i}">M</span>`
-         : `<span class="wp ${i === state.wp ? "on" : ""}" data-w="${i}" style="background:${w}"></span>`,
-     ).join("")}</div></div>`,
-    bind(b) {
-      $("#sw-motion", b).onclick = (e) => {
-        state.motion = !state.motion;
-        e.target.classList.toggle("on");
-        applyTheme();
-        save();
-      };
-      $("#sw-sound", b).onclick = (e) => {
-        state.sound = !state.sound;
-        e.target.classList.toggle("on");
-        save();
-        if (state.sound) beep();
-      };
-      $$("#sw-accent .swatch", b).forEach(
-        (s) =>
-          (s.onclick = () => {
-            state.accent = s.dataset.c;
-            $$("#sw-accent .swatch", b).forEach((x) =>
-              x.classList.remove("on"),
-            );
-            s.classList.add("on");
-            applyTheme();
-            save();
-          }),
-      );
-      $("#sel-dark", b).onchange = (e) => {
-        state.bg = e.target.value;
-        applyTheme();
-        save();
-      };
-      $$("#sw-wp .wp", b).forEach(
-        (w) =>
-          (w.onclick = () => {
-            state.wp = +w.dataset.w;
-            $$("#sw-wp .wp", b).forEach((x) => x.classList.remove("on"));
-            w.classList.add("on");
-            applyTheme();
-            save();
-          }),
-      );
-    },
-  },
 
   // MONITOR: información disponible del navegador y tiempo de sesión, no acceso a CPU o RAM real.
   system: {
@@ -1307,18 +1087,6 @@ const Apps = {
   // JUEGOS: Tetris y Pac-Man se definen completos en games.js; aquí solo reservan título e icono.
   tetris: { title: "Tetris", icon: pixelIcon("tetris") },
   pacman: { title: "Pac-Man", icon: pixelIcon("pacman") },
-  // SECRETO BASE: upgrade.js lo convierte en Secret Vault.
-  easter: {
-    title: "SECRETO.sys",
-    icon: "🥚",
-    render: () => `
-   <div class="secret-screen">
-     <div class="secret-skull">☠</div>
-     <h2>HAS ENCONTRADO UNA PARTE OCULTA DE JOSEMI_OS</h2>
-     <p>Un portfolio cuenta lo que ya sabes hacer. Este sistema también quiere contar lo que todavía estás intentando conseguir.</p>
-     <p class="secret-code">PISTA: prueba <b>matrix</b>, <b>cafe</b>, <b>42</b> y el código Konami en la terminal o con el teclado.</p>
-   </div>`,
-  },
 };
 // Genera el HTML repetido de una barra de habilidad; data-w guarda el porcentaje.
 function bar(n, v) {
@@ -1330,7 +1098,7 @@ function bar(n, v) {
    closeWindow. Así, variables internas como z y open no contaminan el ámbito global.
    ========================================================= */
 // VENTANAS: este módulo guarda las abiertas en un Map. Controla foco (z-index), arrastre, tamaño y cierre.
-// Manté les finestres dins de la pantalla quan canvia la mida o l'orientació.
+// Mantiene las ventanas dentro de la pantalla al cambiar el tamaño o la orientación.
 function fitWindowBounds(rect, viewportWidth, viewportHeight) {
   const availableWidth = Math.max(1, viewportWidth - 32);
   const availableHeight = Math.max(1, viewportHeight - 110);
@@ -1427,7 +1195,7 @@ const WM = (() => {
     beep();
     return win;
   }
-  // [FIX] closeWindow ara crida win.__cleanup() perquè els jocs no deixen intervals corrent.
+  // CERRAR: win.__cleanup() libera bucles, temporizadores y eventos de cada aplicación.
   function closeWindow(id) {
     const o = open.get(id);
     if (!o) return;
@@ -1721,40 +1489,6 @@ function runCommand(raw, print, openWin) {
       print(`<span class="err">comando no encontrado: ${escapeHTML(c)}</span>`);
   }
 }
-// (Opcional) Efecte temporal de Matrix 5s, usat pel mode "matrix" del boot.
-function matrixMode() {
-  const c = document.createElement("canvas");
-  Object.assign(c.style, {
-    position: "fixed",
-    inset: "0",
-    zIndex: "9998",
-    background: "#000",
-    opacity: ".9",
-  });
-  document.body.appendChild(c);
-  const x = c.getContext("2d");
-  c.width = innerWidth;
-  c.height = innerHeight;
-  const cols = Math.floor(c.width / 16),
-    drops = Array(cols).fill(0),
-    ch = "アイウエオ01JOSEMI<>/*";
-  const iv = setInterval(() => {
-    x.fillStyle = "rgba(0,0,0,.14)";
-    x.fillRect(0, 0, c.width, c.height);
-    x.fillStyle = "#4ade80";
-    x.font = "20px VT323";
-    drops.forEach((y, i) => {
-      x.fillText(ch[Math.floor(Math.random() * ch.length)], i * 16, y * 16);
-      if (y * 16 > c.height && Math.random() > 0.975) drops[i] = 0;
-      drops[i] += 2;
-    });
-  }, 45);
-  setTimeout(() => {
-    clearInterval(iv);
-    c.remove();
-  }, 5000);
-}
-
 /* ========================================================= PROYECTOS */
 const PROJECTS = {
   web: {
@@ -1823,7 +1557,7 @@ function boot() {
 }
 
 /* ========================================================= ESCRITORIO */
-// [FIX] Añadidos 'tetris' y 'pacman' perquè tinguen acces directe.
+// ACCESOS DEL ESCRITORIO: los juegos se abren desde el Arcade, el buscador o la terminal.
 const ICONS = [
   "readme",
   "about",
@@ -1898,21 +1632,31 @@ function buildClock() {
   tick();
   setInterval(tick, 1000);
 }
-// [FIX] Amb Matrix desactivem el parallax (evita vores negres en moure's el #bg).
 // PROFUNDIDAD: desplaza el fondo unos píxeles con el ratón. Matrix y reducir movimiento lo desactivan.
+// RENDIMIENTO: como máximo un cálculo por fotograma y solo se escribe el estilo si cambia.
 function buildParallax() {
   const bg = $("#bg");
+  let pending = false,
+    last = "",
+    x = 0,
+    y = 0;
   addEventListener("mousemove", (e) => {
-    if (
-      state.motion ||
-      PIXEL_WALLPAPERS[state.wallpaper] ||
-      state.wp === 4 ||
-      state.atmosphere?.startsWith("matrix")
-    ) {
-      bg.style.transform = "none";
-      return;
-    }
-    bg.style.transform = `translate(${(e.clientX / innerWidth - 0.5) * 30}px,${(e.clientY / innerHeight - 0.5) * 30}px)`;
+    x = e.clientX;
+    y = e.clientY;
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(() => {
+      pending = false;
+      const still =
+        state.motion ||
+        PIXEL_WALLPAPERS[state.wallpaper] ||
+        state.wp === 4 ||
+        state.atmosphere?.startsWith("matrix");
+      const value = still
+        ? "none"
+        : `translate(${Math.round((x / innerWidth - 0.5) * 30)}px,${Math.round((y / innerHeight - 0.5) * 30)}px)`;
+      if (value !== last) bg.style.transform = last = value;
+    });
   });
 }
 // INICIO: alterna la visibilidad del menú y lo cierra cuando se pulsa fuera.
@@ -1963,7 +1707,6 @@ function buildContext() {
           buildIcons();
           toast("Escritorio actualizado.");
         }
-        // [FIX] array de noms ara inclou 'Matrix' (5 wallpapers).
         if (a === "wallpaper") {
           state.wp = (state.wp + 1) % WALLS.length;
           state.atmosphere = state.wp === 4 ? "matrix" : "none";
@@ -1985,7 +1728,6 @@ function buildContext() {
 // APAGADO SIMULADO: cierra las ventanas y muestra una pantalla final; no apaga el ordenador.
 function shutdown() {
   Object.keys(Apps).forEach((id) => WM.closeWindow(id));
-  stopMatrix();
   const s = $("#shutdown");
   s.classList.remove("hidden");
   $("#shutdown__msg").textContent = "Apagando JOSEMI-OS...";
@@ -2135,12 +1877,6 @@ function enterOS() {
   }, 420);
 }
 
-function showLogin() {
-  $("#desktop").classList.add("hidden");
-  stopMatrix();
-  typeLoginArt();
-}
-
 // SALTAR INTRO: botón o Enter llaman a enterOS; siempre se puede entrar sin esperar la animación.
 function initDirectAccess() {
   $("#skipBoot").addEventListener("click", enterOS);
@@ -2222,105 +1958,11 @@ const NAME_ART = [
   "╚█████╔╝╚██████╔╝███████║███████╗██║ ╚═╝ ██║██║      ╚██████╔╝███████║",
   " ╚════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝     ╚═╝╚═╝       ╚═════╝ ╚══════╝",
 ];
-// BÓVEDA: tres respuestas desbloquean fases guardadas localmente. Es un juego de pistas, no seguridad real.
-Apps.easter = {
-  title: "Secret Vault",
-  icon: "⌬",
-  render:
-    () => `<section class="vault"><div class="vault-top"><span class="card-kicker">/ROOT / SECRET_VAULT</span><span class="vault-status">ACCESO LIMITADO</span></div><pre class="vault-art" aria-hidden="true">       .--------.
-      / .------. \\
-      | |      | |
-    __| |______| |__
-   [________________]
-   |       /\\       |
-   |      /__\\      |
-   |       ||       |
-   |________________|</pre><h2>Todo sistema guarda secretos.</h2><p class="vault-copy">Tres llaves. Un pequeño homenaje a quienes nunca dejan de explorar.</p><div class="vault-progress"></div><div class="vault-challenge"></div><form class="vault-form"><label for="vault-answer">CLAVE DE ACCESO</label><div><input id="vault-answer" autocomplete="off" spellcheck="false" placeholder="Escribe tu respuesta…"><button class="btn btn--accent">VALIDAR ↵</button></div></form><p class="vault-feedback" role="status"></p><button class="btn vault-hint">NECESITO UNA PISTA</button></section>`,
-  bind(body) {
-    const challenges = [
-      [
-        "01 / LA RESPUESTA",
-        "En la guía más famosa de la galaxia, ¿qué número responde a la vida, el universo y todo lo demás?",
-        "La terminal conoce un número de dos cifras.",
-        "42",
-      ],
-      [
-        "02 / EL CÓDIGO",
-        "↑ ↑ ↓ ↓ ← → ← → B A. ¿Qué apellido da nombre a este código?",
-        "Empieza por K. Es un estudio japonés de videojuegos.",
-        "konami",
-      ],
-      [
-        "03 / EL CREADOR",
-        "Seis letras iluminan el arranque de este sistema. ¿Cuál es el nombre?",
-        "Mira el escritorio: JOSEMI-OS.",
-        "josemi",
-      ],
-    ];
-    let stage = 0;
-    try {
-      stage = Math.min(
-        3,
-        Math.max(0, Number(localStorage.getItem("josemi-vault")) || 0),
-      );
-    } catch {}
-    const render = () => {
-      $(".vault-progress", body).innerHTML = [0, 1, 2]
-        .map(
-          (i) =>
-            `<span class="${i < stage ? "unlocked" : ""}">${i < stage ? "✓" : "○"} LLAVE 0${i + 1}</span>`,
-        )
-        .join("");
-      const done = stage === 3;
-      $(".vault-form", body).hidden = done;
-      $(".vault-hint", body).hidden = done;
-      $(".vault-status", body).textContent = done
-        ? "ACCESO CONCEDIDO"
-        : `${stage}/3 LLAVES`;
-      $(".vault-challenge", body).innerHTML = done
-        ? `<span class="card-kicker">EL SECRETO ES SEGUIR CONSTRUYENDO</span><h3>Build. Learn. Repeat.</h3><p>No hay atajos para aprender. Sí hay curiosidad, errores y una partida más.</p><button class="btn btn--accent vault-reward">ACTIVAR TEMA ÁMBAR</button><button class="btn vault-play">VOLVER AL ARCADE</button>`
-        : `<span class="card-kicker">${challenges[stage][0]}</span><p>${challenges[stage][1]}</p>`;
-      $(".vault-reward", body)?.addEventListener("click", () => {
-        state.accent = "#ffd166";
-        applyTheme();
-        save();
-        toast("Secret Vault: tema ámbar desbloqueado.");
-      });
-      $(".vault-play", body)?.addEventListener("click", () =>
-        openWindow("arcade"),
-      );
-    };
-    $(".vault-form", body).addEventListener("submit", (e) => {
-      e.preventDefault();
-      if (stage >= 3) return;
-      const input = $("#vault-answer", body);
-      if (input.value.trim().toLowerCase() === challenges[stage][3]) {
-        stage++;
-        try {
-          localStorage.setItem("josemi-vault", stage);
-        } catch {}
-        input.value = "";
-        $(".vault-feedback", body).textContent =
-          stage === 3
-            ? "Bóveda abierta. Bienvenido al otro lado."
-            : "Llave correcta. Siguiente cerradura.";
-        render();
-      } else
-        $(".vault-feedback", body).textContent =
-          "Esa llave no encaja. Prueba con la pista.";
-    });
-    $(".vault-hint", body).onclick = () => {
-      $(".vault-feedback", body).textContent = challenges[stage]?.[2] || "";
-    };
-    render();
-  },
-};
 ICONS.push("easter");
 currentUser.apps.push("easter");
 
 // Original raycaster, no external assets or downloads required.
 Apps.arcade.size = [940, 650];
-Apps.easter.size = [740, 740];
 
 /* === END upgrade.js === */
 
@@ -2793,7 +2435,7 @@ const BOOT_ART = [
   "/ /_/ / /_/ /___/ / /___/ /  / // /_____/ /_/ /___/ / ",
   "\\____/\\____//____/_____/_/  /_/___/     \\____//____/  ",
 ];
-// Ajusta el rètol complet a l'ample real, també en girar el mòbil.
+// Ajusta el rótulo completo al ancho real, también al girar el móvil.
 function fitBootLogo() {
   const login = $("#login");
   const out = $("#bootTerminalOutput");
@@ -2937,102 +2579,6 @@ typeLoginArt = async function () {
   }
 };
 
-// AJUSTES: render crea los controles; bind lee sus cambios, actualiza state, aplica el tema y guarda.
-Apps.settings = {
-  title: "Ajustes",
-  icon: osIcon("settings"),
-  size: [850, 710],
-  render:
-    () => `<div class="preferences"><aside class="preferences-nav"><span class="card-kicker">PERSONALIZA TU ESPACIO</span><h2>Ajustes</h2><a href="#pref-theme">01 / Apariencia</a><a href="#pref-cursor">02 / Cursor</a><a href="#pref-motion">03 / Movimiento</a><a href="#pref-screen">04 / Salvapantallas</a><div class="preferences-note">Se guarda en este navegador.<br>Tu escritorio, a tu manera.</div></aside><div class="preferences-main">
-  <section id="pref-theme"><span class="card-kicker">01 / APARIENCIA</span><h3>Un ambiente para cada idea.</h3><div class="theme-picker">${Object.entries(
-    THEMES,
-  )
-    .map(
-      ([id, t]) =>
-        `<button data-theme="${id}" class="theme-option ${state.theme === id ? "selected" : ""}" aria-pressed="${state.theme === id}"><span class="theme-mini" style="--sample-bg:${t.bg};--sample-color:${t.accent}"><i></i><b>J</b><em></em></span>${t.name}</button>`,
-    )
-    .join(
-      "",
-    )}</div><label class="pref-row">Color de acento<input class="accent-input" type="color" value="${state.accent}" aria-label="Color de acento"></label><div class="weather-preferences"><span class="card-kicker">LIENZOS ASCII VIVOS</span><label class="pref-row">Fondo animado<select data-setting="atmosphere">${Object.entries(
-    ATMOSPHERES,
-  )
-    .map(([id, label]) => `<option value="${id}">${label}</option>`)
-    .join(
-      "",
-    )}</select></label><label class="pref-row">Densidad<input type="range" min="15" max="90" step="5" data-setting="weatherDensity" aria-label="Densidad del fondo"></label><label class="pref-row">Velocidad<select data-setting="weatherSpeed"><option value="0.5">Contemplativa</option><option value="1">Natural</option><option value="1.5">Enérgica</option></select></label><p>Los rayos se dibujan con // y se ramifican entre la lluvia. El fondo descansa mientras juegas o cambias de pestaña.</p></div><label class="pref-row">Base del fondo<select data-setting="wp"><option value="0">Aurora</option><option value="1">Bosque</option><option value="2">Azul profundo</option><option value="3">Violeta</option><option value="4">Matrix</option></select></label></section>
-  <section id="pref-cursor"><span class="card-kicker">02 / CURSOR</span><h3>Elige cómo señalar el mundo.</h3><div class="cursor-picker">${Object.entries(
-    CURSORS,
-  )
-    .map(
-      ([id, label]) =>
-        `<button data-cursor="${id}" class="cursor-option ${state.cursor === id ? "selected" : ""}" aria-pressed="${state.cursor === id}"><span>${id === "system" ? "↖" : cursorSVG(id, 30)}</span>${label}</button>`,
-    )
-    .join(
-      "",
-    )}</div><label class="pref-row">Tamaño<select data-setting="cursorSize"><option value="20">Pequeño</option><option value="24">Mediano</option><option value="32">Grande</option></select></label><div class="cursor-test">Prueba el cursor aquí. No hay círculo ni rastro.</div></section>
-  <section id="pref-motion"><span class="card-kicker">03 / MOVIMIENTO</span><h3>Que el sistema respire.</h3><label class="pref-row">Animación ASCII<select data-setting="bootEffect">${Object.entries(
-    EFFECTS,
-  )
-    .map(([id, label]) => `<option value="${id}">${label}</option>`)
-    .join(
-      "",
-    )}</select></label><label class="pref-row">Intensidad<select data-setting="intensity"><option value="full">Expresiva</option><option value="calm">Suave</option></select></label><label class="pref-row">Reducir movimiento<input type="checkbox" data-setting="motion" ${state.motion ? "checked" : ""}></label><label class="pref-row">Textura de papel<input type="checkbox" data-setting="grain" ${state.grain ? "checked" : ""}></label><label class="pref-row">Sonidos del sistema<input type="checkbox" data-setting="sound" ${state.sound ? "checked" : ""}></label><button class="btn preview-ascii">VER ANIMACIÓN ASCII ↗</button></section>
-  <section id="pref-screen"><span class="card-kicker">04 / SALVAPANTALLAS</span><h3>Arte cuando te tomas un descanso.</h3><label class="pref-row">Iniciar tras inactividad<select data-setting="idle"><option value="0">Solo manualmente</option><option value="60">1 minuto</option><option value="180">3 minutos</option></select></label><button class="btn start-saver">ABRIR SALVAPANTALLAS ↗</button></section></div></div>`,
-  bind(body) {
-    for (const el of $$("[data-setting]", body)) {
-      const key = el.dataset.setting;
-      if (el.type !== "checkbox") el.value = String(state[key]);
-      el.addEventListener(el.type === "range" ? "input" : "change", () => {
-        state[key] =
-          el.type === "checkbox"
-            ? el.checked
-            : [
-                  "idle",
-                  "wp",
-                  "cursorSize",
-                  "weatherDensity",
-                  "weatherSpeed",
-                ].includes(key)
-              ? Number(el.value)
-              : el.value;
-        applyTheme();
-        save();
-      });
-    }
-    $$("[data-theme]", body).forEach(
-      (button) =>
-        (button.onclick = () => {
-          chooseTheme(button.dataset.theme);
-          $$("[data-theme]", body).forEach((b) => {
-            const on = b === button;
-            b.classList.toggle("selected", on);
-            b.setAttribute("aria-pressed", on);
-          });
-          $(".accent-input", body).value = state.accent;
-        }),
-    );
-    $$("[data-cursor]", body).forEach(
-      (button) =>
-        (button.onclick = () => {
-          state.cursor = button.dataset.cursor;
-          applyShell();
-          save();
-          $$("[data-cursor]", body).forEach((b) => {
-            const on = b === button;
-            b.classList.toggle("selected", on);
-            b.setAttribute("aria-pressed", on);
-          });
-        }),
-    );
-    $(".accent-input", body).oninput = (e) => {
-      state.accent = e.target.value;
-      applyTheme();
-      save();
-    };
-    $(".preview-ascii", body).onclick = () => openWindow("screensaver");
-    $(".start-saver", body).onclick = () => showScreensaver();
-  },
-};
 // ASCII STUDIO: reproduce el efecto elegido; al cerrar cancela el bucle para liberar recursos.
 Apps.screensaver = {
   title: "ASCII Studio",
@@ -3501,40 +3047,6 @@ function showScreensaver() {
 
 // ESCRITORIO: crea bienvenida, barra de herramientas y salvapantallas; registra actividad para el temporizador.
 function setupDesktop() {
-  // La bienvenida usa el mismo gestor de ventanas; no se dibuja ningún panel de fondo.
-  Apps.welcome = {
-    title: "Bienvenido a JOSEMI-OS",
-    icon: osIcon("readme"),
-    size: [660, 500],
-    render: () =>
-      `<section class="welcome-window"><span class="card-kicker">TU ESCRITORIO PERSONAL</span><h2>Ideas en marcha.<br>Sistema en vivo.</h2><p>Soy José Miguel Miralles Gandia, estudiante de DAM. Estoy aprendiendo a construir webs, software y automatizaciones con HTML, CSS, JavaScript e IA.</p><p>Explora las aplicaciones del escritorio, mis proyectos y el Arcade. Milo te ayuda a conocer a Josemi y a explorar el sistema.</p><div class="welcome-actions"><button class="btn btn--accent" data-welcome-open="projects">VER PROYECTOS</button><button class="btn" data-welcome-open="about">SOBRE MÍ</button><button class="btn" id="welcome-read">YA LO HE LEÍDO · CERRAR</button></div></section>`,
-    bind(body, win) {
-      const done = () => {
-        state.welcomeWindowRead = true;
-        state.welcomeVisible = false;
-        save();
-      };
-      win.__cleanup = done;
-      $("#welcome-read", body).onclick = () => WM.closeWindow("welcome");
-      $$("[data-welcome-open]", body).forEach(
-        (button) =>
-          (button.onclick = () => {
-            WM.closeWindow("welcome");
-            openWindow(button.dataset.welcomeOpen);
-          }),
-      );
-    },
-  };
-  const welcomeObserver = new MutationObserver(() => {
-    if (!$("#desktop").classList.contains("hidden")) {
-      welcomeObserver.disconnect();
-      if (!state.welcomeWindowRead) openWindow("welcome");
-    }
-  });
-  welcomeObserver.observe($("#desktop"), {
-    attributes: true,
-    attributeFilter: ["class"],
-  });
   const toolbar = document.createElement("div");
   toolbar.className = "shell-tools";
   toolbar.innerHTML =
@@ -3740,16 +3252,32 @@ const windowObserver = new MutationObserver((records) => {
 });
 // A single bounded character canvas; no per-particle DOM or accumulating timers.
 // FONDOS: devuelve una matriz de caracteres y brillo. Es cálculo puro: todavía no dibuja nada.
+// RENDIMIENTO: el búfer se reutiliza entre fotogramas y solo recuerda las celdas ocupadas,
+// así no se crean miles de objetos por fotograma ni se recorren las celdas vacías al dibujar.
+const atmosphereBuffer = { size: 0, w: 0, h: 0, ch: [], light: null, ink: [], used: [] };
 function atmosphereFrame(kind, w, h, t, density = 55) {
-  const cells = Array.from({ length: h }, () =>
-      Array.from({ length: w }, () => ({ ch: " ", light: 0 })),
-    ),
-    put = (x, y, ch, light = 0.4) => {
-      x = Math.floor(x);
-      y = Math.floor(y);
-      if (x >= 0 && x < w && y >= 0 && y < h)
-        cells[y][x] = { ch, light: Math.max(0, Math.min(1, light)) };
-    };
+  const buf = atmosphereBuffer;
+  if (buf.size !== w * h) {
+    buf.size = w * h;
+    buf.ch = new Array(buf.size).fill(" ");
+    buf.light = new Float32Array(buf.size);
+    buf.ink = new Array(buf.size).fill("");
+    buf.used = [];
+  }
+  for (const i of buf.used) buf.ch[i] = " ";
+  buf.used.length = 0;
+  buf.w = w;
+  buf.h = h;
+  const put = (x, y, ch, light = 0.4) => {
+    x = Math.floor(x);
+    y = Math.floor(y);
+    if (x < 0 || x >= w || y < 0 || y >= h) return;
+    const i = y * w + x;
+    if (buf.ch[i] === " ") buf.used.push(i);
+    buf.ch[i] = ch;
+    buf.light[i] = Math.max(0, Math.min(1, light));
+    buf.ink[i] = "";
+  };
   if (kind === "storm" || kind === "rain") {
     for (let i = 0; i < Math.floor((w * h * density) / 1400); i++) {
       const speed = 6 + seededNoise(i + 32) * 9,
@@ -3856,8 +3384,7 @@ function atmosphereFrame(kind, w, h, t, density = 55) {
           ],
           kind === "matrixDepth" ? light * (0.3 + layer * 0.7) : light,
         );
-        if (cells[y]?.[x])
-          cells[y][x].ink =
+        buf.ink[y * w + x] =
             tail === 0
               ? "head"
               : kind === "matrixBlue" && (x % 7 < 2 || layer > 0.8)
@@ -3867,7 +3394,7 @@ function atmosphereFrame(kind, w, h, t, density = 55) {
     }
   }
 
-  return cells;
+  return buf;
 }
 let atmosphereCanvas = null,
   atmosphereContext = null,
@@ -3913,28 +3440,24 @@ function drawAtmosphere() {
     ? "18px VT323"
     : "16px VT323";
   atmosphereContext.textBaseline = "top";
-  const cells = atmosphereFrame(
+  const frame = atmosphereFrame(
     state.atmosphere,
     Math.min(cols, 180),
     Math.min(rows, 65),
     state.motion ? 3.5 : atmosphereTime,
     state.weatherDensity,
   );
-  for (let y = 0; y < cells.length; y++)
-    for (let x = 0; x < cells[y].length; x++) {
-      const c = cells[y][x];
-      if (c.ch === " ") continue;
-      atmosphereContext.globalAlpha =
-        c.light * (state.intensity === "calm" ? 0.65 : 1);
-      atmosphereContext.fillStyle = c.ink
-        ? c.ink === "head"
-          ? "#defff3"
-          : c.ink === "cyan"
-            ? "#52d8ec"
-            : "#36dd87"
-        : atmosphereColors[Math.floor((x / cols) * 3) % 3];
-      atmosphereContext.fillText(c.ch, x * cell, y * line);
-    }
+  const calm = state.intensity === "calm" ? 0.65 : 1,
+    inks = { head: "#defff3", cyan: "#52d8ec", green: "#36dd87" };
+  let lastFill = "";
+  for (const i of frame.used) {
+    const x = i % frame.w,
+      y = (i - x) / frame.w,
+      fill = inks[frame.ink[i]] || atmosphereColors[Math.floor((x / cols) * 3) % 3];
+    atmosphereContext.globalAlpha = frame.light[i] * calm;
+    if (fill !== lastFill) atmosphereContext.fillStyle = lastFill = fill;
+    atmosphereContext.fillText(frame.ch[i], x * cell, y * line);
+  }
   atmosphereContext.globalAlpha = 1;
 }
 // TIEMPO DEL FONDO: limita los fotogramas y evita saltos al volver de otra pestaña.
@@ -3964,7 +3487,6 @@ function syncAtmosphere() {
     atmosphereContext = atmosphereCanvas.getContext("2d");
   }
   atmosphereCanvas.hidden = state.atmosphere === "none";
-  stopMatrix();
   atmosphereColors = [
     state.accent,
     THEMES[state.theme].accent,

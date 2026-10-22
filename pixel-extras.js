@@ -13,7 +13,7 @@
     };
     return `<svg class="os-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" shape-rendering="crispEdges">${pixels[kind].map(([x,y,w,h,c])=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`).join('')}</svg>`;
   }
-  const newWalls=[['orbital','Estación orbital','Órbita, estrellas y un planeta lejano'],['floating','Islas del cielo','Jardines suspendidos sobre las nubes'],['desert','Templo del desierto','Arena, ruinas y un sol de cobre'],['library','Biblioteca nocturna','Libros, luz cálida y una noche de lluvia'],['cabin','Refugio de invierno','Un bosque nevado y una cabaña encendida'],['sunsetCity','Ciudad al atardecer','Azoteas, antenas y el último sol']];
+  const newWalls=[['orbital','Estación orbital','Órbita, estrellas y un planeta lejano'],['floating','Islas del cielo','Jardines suspendidos sobre las nubes'],['desert','Templo del desierto','Arena, ruinas y un sol de cobre'],['library','Biblioteca nocturna','Libros, luz cálida y una noche de lluvia'],['cabin','Refugio de invierno','Un bosque nevado y una cabaña encendida'],['sunsetCity','Ciudad al atardecer','Azoteas, antenas y el último sol'],['sakura','Jardín de cerezos','Pagoda, montaña nevada y pétalos al viento'],['lighthouse','Faro en la tormenta','Acantilado, lluvia y un haz de luz'],['reef','Arrecife','Corales, peces y un cofre en la arena'],['volcano','Isla volcánica','Lava, ceniza y un mar encendido'],['arcadeRoom','Salón recreativo','Máquinas, neón y suelo de ajedrez'],['auroraLake','Aurora boreal','Un lago helado bajo luces del norte']];
   function landscape(kind){
     const art=[];
     const r=(x,y,w,h,c)=>art.push(`<rect x="${Math.round(x)}" y="${Math.round(y)}" width="${Math.round(w)}" height="${Math.round(h)}" fill="${c}"/>`);
@@ -67,6 +67,76 @@
       r(273,105,10,30,'#715f5a');r(272,102,12,4,'#e0e5d7');r(278,91,9,6,'#82969c');r(283,78,13,7,'#607e8c');
       for(let i=0;i<100;i++)r(random()*480,random()*270,1,1,'#e1e6dc');
       r(198,224,72,3,'#d5ddd2');r(177,239,103,3,'#d5ddd2');
+    }else if(kind==='sakura'){
+      ['#3b2f55','#553a66','#7a4b72','#a35f7a','#cc7d84','#eaa392','#f6c3a0'].forEach((c,i)=>r(0,i*26,480,26,c));
+      r(395,52,22,22,'#ffe6c4');r(391,56,30,14,'#ffe6c4');
+      for(let i=0;i<92;i++){const w=6+i*2.3;r(300-w/2,62+i,w,1,i<20?'#f6e7ef':i<24?'#c9b2c8':'#6f5a7d');}
+      for(let i=0;i<17;i++)r(i*30-6,148+Math.sin(i*1.3)*7,42,40,'#4d3c5f');
+      r(0,176,480,94,'#35283f');r(0,176,480,3,'#5b4567');
+      r(150,206,220,30,'#6a5886');r(166,211,190,2,'#9a86b6');r(200,222,120,1,'#9a86b6');
+      for(let i=0;i<30;i++){const w=50-i*1.4;if(w>0)r(260-w/2,208+i*0.9,w,1,'#7d6a98');}
+      [[150,48,64],[128,36,52],[108,26,40]].forEach(([y,w,roof],k)=>{const h=k?20:26;r(80-w/2,y,w,h,'#8a3a45');for(let j=0;j<w/8-1;j++)r(80-w/2+5+j*8,y+6,3,7,'#f2c27a');r(80-roof/2,y-4,roof,5,'#2a1f30');r(80-roof/2-3,y-6,6,3,'#2a1f30');r(80+roof/2-3,y-6,6,3,'#2a1f30');});
+      r(78,90,4,14,'#2a1f30');r(76,96,8,2,'#2a1f30');r(60,174,40,4,'#2a1f30');
+      const tree=(x,y,s)=>{r(x-2,y,5,34*s,'#3a2630');r(x-12*s,y+8,10*s,3,'#3a2630');r(x+3,y+4,9*s,3,'#3a2630');for(let i=0;i<46;i++){const a=random()*6.28,d=random()*24*s;r(x+Math.cos(a)*d-5,y-8+Math.sin(a)*d*0.62-4,9,6,i%4?'#f4a7c0':i%8?'#ffd3df':'#e47fa3');}};
+      tree(420,150,1.35);tree(34,168,1);tree(196,182,0.75);tree(352,190,0.65);
+      for(let i=0;i<80;i++)r(random()*480,random()*270,2,1,i%3?'#ffc6d6':'#fff0f4');
+    }else if(kind==='lighthouse'){
+      ['#141c2a','#1a2434','#202d40','#26364b'].forEach((c,i)=>r(0,i*42,480,42,c));
+      for(let i=0;i<14;i++){const x=random()*520-40,y=random()*110,w=70+random()*120;r(x,y,w,7,'#2d3a4f');r(x+10,y-4,w-30,4,'#34435a');}
+      for(let i=0;i<48;i++){const h=3+i*0.85;r(390-i*6,37-h/2,6,h,'#f6e3a052');}
+      r(0,168,480,102,'#13304a');
+      for(let y=172;y<270;y+=8)for(let x=(y*7)%26;x<480;x+=26)r(x,y,12,2,y<200?'#2a5677':'#1f4766');
+      r(300,150,180,120,'#24232c');r(318,134,162,18,'#2e2d38');r(336,120,144,16,'#383744');r(296,160,14,10,'#2e2d38');
+      for(let i=0;i<9;i++)r(286+i*4,166+Math.sin(i)*3,8,3,'#dbe8ef');
+      for(let y=0;y<70;y++){const w=24-y*0.13;r(400-w/2,120-y,w,1,Math.floor(y/12)%2?'#e9e2d0':'#c2443d');}
+      r(388,42,24,6,'#24232c');r(392,32,16,10,'#ffe9a0');r(390,30,20,3,'#24232c');r(395,24,10,6,'#24232c');r(399,20,2,4,'#24232c');
+      r(394,100,6,10,'#ffd27a');r(404,74,5,8,'#ffd27a');
+      for(let i=0;i<170;i++)r(random()*480,random()*270,1,6,'#4f6788');
+    }else if(kind==='reef'){
+      ['#3a8fb7','#2f80aa','#26709a','#1e6088','#175176','#114264','#0c3453'].forEach((c,i)=>r(0,i*34,480,34,c));
+      for(let i=0;i<6;i++)for(let y=0;y<210;y+=6)r(50+i*78+y*0.28,y,9,6,'#5fb2d6');
+      r(0,226,480,44,'#c9b27c');for(let i=0;i<12;i++)r(i*44,222+Math.sin(i)*3,50,6,'#d9c38d');for(let i=0;i<40;i++)r(random()*480,232+random()*36,3,1,'#a99063');
+      r(10,196,96,32,'#4b5a66');r(24,184,60,14,'#5a6a76');r(380,200,90,28,'#4b5a66');r(396,190,56,12,'#5a6a76');
+      const coral=(x,c,t)=>{for(let i=0;i<5;i++){const h=18+random()*30;r(x+i*7,226-h,4,h,c);r(x+i*7-3,226-h+8,3,3,c);r(x+i*7+4,226-h+14,3,3,c);r(x+i*7,226-h-2,4,2,t);}};
+      coral(120,'#ff7a8a','#ffb3bd');coral(300,'#ffb347','#ffd99a');coral(430,'#c77dff','#e3bcff');coral(52,'#ff8f6b','#ffc2ad');
+      for(const [x,h] of [[180,70],[196,52],[250,64],[350,80],[366,58]])for(let y=0;y<h;y+=4)r(x+Math.sin(y*0.16+x)*4,226-y,4,4,y%8?'#3f9a6a':'#57b882');
+      r(270,212,28,14,'#7a4a24');r(270,206,28,7,'#94602f');r(282,213,4,4,'#f2c94c');r(272,207,24,1,'#b67a3a');
+      const fish=(x,y,c,f)=>{r(x,y,14,6,c);r(x+2,y-2,10,10,c);r(f?x+14:x-5,y,5,6,c);r(f?x+2:x+10,y+1,2,2,'#0b1a26');r(x+5,y-2,4,10,'#ffffff55');};
+      fish(90,90,'#ffd84d',0);fish(130,104,'#ffd84d',0);fish(330,70,'#ff7a3d',1);fish(222,150,'#4fd8e8',0);fish(410,128,'#ff7a3d',1);fish(60,160,'#4fd8e8',1);
+      for(let i=0;i<34;i++){const x=random()*480,y=random()*220;r(x,y,3,3,'#bfe9ff');r(x+1,y+1,1,1,'#3a8fb7');}
+    }else if(kind==='volcano'){
+      ['#140c1c','#211024','#33152a','#4a1b2e','#651f2f','#82292f'].forEach((c,i)=>r(0,i*32,480,32,c));
+      for(let i=0;i<60;i++)r(random()*480,random()*90,1,1,'#c99aa8');
+      for(let i=0;i<8;i++){const x=150+random()*180,y=10+random()*50,w=60+random()*70;r(x,y,w,10,'#3a2632');r(x+10,y-6,w-24,6,'#45303c');}
+      for(let i=0;i<124;i++){const w=34+i*2.2;r(240-w/2,68+i,w,1,i%9?'#2b1d25':'#33232c');}
+      r(222,64,36,6,'#ff7a2f');r(228,60,24,4,'#ffc04d');r(234,57,12,3,'#fff1a8');
+      [[-1,0.42],[1,0.34],[1,0.85]].forEach(([d,k])=>{for(let y=70;y<190;y+=3){const x=240+d*(y-70)*k+Math.sin(y*0.18)*3;r(x,y,4,3,'#ff5a1f');r(x+1,y,2,3,'#ffc04d');}});
+      for(let i=0;i<40;i++){const a=random()*3.14,d=random()*60;r(240+Math.cos(a)*d*1.4,58-Math.sin(a)*d,2,2,i%2?'#ffb347':'#ff6a2a');}
+      r(0,190,480,80,'#170f19');r(110,188,260,6,'#1f1419');
+      for(let i=0;i<46;i++)r(170+random()*140,198+random()*70,10+random()*24,1,i%3?'#7a2f24':'#b84a2a');
+      r(0,182,120,10,'#0f0a10');r(20,174,60,8,'#0f0a10');r(380,180,100,12,'#0f0a10');r(410,170,50,10,'#0f0a10');
+    }else if(kind==='arcadeRoom'){
+      r(0,0,480,270,'#140f24');for(let x=0;x<480;x+=24)r(x,0,2,226,'#1a1430');
+      const font={A:'010101111101101',R:'110101110101101',C:'011100100100011',D:'110101101101110',E:'111100110100111'};
+      r(136,18,208,52,'#2a0f2f');r(140,22,200,44,'#120a1c');
+      [...'ARCADE'].forEach((ch,n)=>[...font[ch]].forEach((p,k)=>{if(p==='1')r(160+n*28+(k%3)*6,28+Math.floor(k/3)*6,6,6,'#ff4fd8');}));
+      r(140,22,200,2,'#ff4fd8');r(140,64,200,2,'#ff4fd8');r(140,22,2,44,'#ff4fd8');r(338,22,2,44,'#ff4fd8');
+      ['#4fd8e8','#ffd84d','#ff4fd8','#6fd479','#ff7a3d'].forEach((c,i)=>{const x=22+i*92;
+        r(x,98,64,132,'#2a2340');r(x+4,92,56,12,c);r(x+8,94,48,8,'#0e0b18');r(x+12,96,40,4,c);
+        r(x+8,110,48,38,'#06060c');for(let k=0;k<14;k++)r(x+12+random()*38,114+random()*30,3,3,k%3?c:'#ffffff');
+        r(x+4,152,56,18,'#3a3158');r(x+16,146,3,10,'#c9c9d6');r(x+14,143,7,5,'#ff4a4a');r(x+34,158,5,5,'#4fd8e8');r(x+42,158,5,5,'#ffd84d');r(x+50,158,5,5,'#ff4fd8');
+        r(x+10,176,44,46,'#221c36');r(x+28,192,8,3,'#ffd84d');r(x+28,202,8,8,'#110d1c');r(x-2,226,68,4,c+'55');});
+      for(let y=230;y<270;y+=10)for(let x=0;x<480;x+=20)r(x+((y/10)%2)*10,y,10,10,'#2a2244');r(0,230,480,1,'#3a3158');
+    }else if(kind==='auroraLake'){
+      r(0,0,480,270,'#06101f');stars(150);
+      [['#6ff2b0','#3cc58a','#1f6f5a'],['#8ef0c8','#4fd8b0','#226d6a'],['#c99bff','#8a62d6','#3a2c6e']].forEach(([a,b,c],band)=>{
+        for(let x=0;x<480;x+=3){const y=26+band*24+Math.sin(x*0.018+band*1.7)*22,h=34+Math.sin(x*0.047+band*2.3)*14;for(let k=0;k<h;k+=3)r(x,y+k,3,3,k<4?a:k<h*0.5?b:c);}});
+      for(let x=0;x<480;x+=4){const h=58+Math.sin(x*0.013)*24+Math.sin(x*0.041)*11;r(x,192-h,4,h,'#18213a');r(x,192-h,4,3,'#c6d4e4');}
+      for(let x=0;x<480;x+=4){const h=30+Math.sin(x*0.02+2)*14;r(x,192-h,4,h,'#111a2c');}
+      r(0,192,480,78,'#081325');
+      for(let i=0;i<40;i++)r(random()*480,198+random()*66,16+random()*46,1,i%3?'#2c7a62':'#4f4a8a');
+      for(let i=0;i<14;i++){const k=0.75+random()*0.3;pine(10+i*34+random()*10,192-18*k,k,true);}
+      r(318,176,22,12,'#2a2230');r(316,172,26,4,'#3a3040');r(324,180,5,5,'#ffd27a');r(316,188,26,2,'#2a2230');
     }else{
       r(0,0,480,270,'#544a72');r(0,71,480,75,'#a56f86');r(0,146,480,124,'#d69d8c');
       r(327,75,51,35,'#ebc396');r(334,68,37,49,'#ebc396');
@@ -78,6 +148,8 @@
     return 'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" shape-rendering="crispEdges">${art.join('')}</svg>`);
   }
   newWalls.forEach(([id,name,detail])=>PIXEL_WALLPAPERS[id]={name,detail,url:landscape(id)});
+  // Los fondos se registran después del primer applyTheme: se vuelve a aplicar para recuperar el elegido al recargar.
+  if(PIXEL_WALLPAPERS[state.wallpaper])applyTheme();
 
   Apps.gallery={title:'Fondos',icon:spriteIcon('gallery'),size:[900,680],render:()=>'<section class="wall-gallery"><div class="extra-heading"><span class="card-kicker">PERSONALIZA TU UNIVERSO</span><h2>Un escritorio. Muchos mundos.</h2><p>Fondos originales en pixel art. Elige uno o guarda tus favoritos.</p></div><div class="wall-controls"><input type="search" aria-label="Buscar fondo" placeholder="Buscar un mundo…"><div><button class="btn" data-wall-filter="all" aria-pressed="true">TODOS</button><button class="btn" data-wall-filter="new" aria-pressed="false">NUEVOS</button><button class="btn" data-wall-filter="favorite" aria-pressed="false">FAVORITOS</button></div></div><p class="wall-count" role="status"></p><div class="wall-gallery-grid"></div></section>',bind(body){
     let filter='all',favorites=read('josemi-wall-favorites',[]);if(!Array.isArray(favorites))favorites=[];

@@ -23,9 +23,9 @@
   --danger: #ff6b7a;
   --shadow: 0 26px 80px rgba(0, 0, 0, 0.52);
   --radius: 16px;
-  --font-ui: "Inter", system-ui, sans-serif;
-  --font-display: "Space Grotesk", "Inter", sans-serif;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  --font-ui: Pixelify, monospace;
+  --font-display: Pixelify, monospace;
+  --font-mono: VT323, monospace;
 }
 * {
   box-sizing: border-box;
@@ -106,14 +106,6 @@ a:focus-visible,
     rgba(0, 0, 0, 0.35) 100%
   );
   pointer-events: none;
-}
-#matrix-wall {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0.42;
 }
 
 /* ---------- Arranque terminal ---------- */
@@ -1555,9 +1547,6 @@ select {
 body.reduce-motion * {
   animation: none !important;
   transition: none !important;
-}
-body.reduce-motion #matrix-wall {
-  display: none;
 }
 
 /* ---------- Responsive ---------- */
