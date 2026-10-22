@@ -58,7 +58,7 @@ body.pixel-system .win__body h2{font-size:28px;}
 body.pixel-system .win__body h3{font-size:20px;}
 body.pixel-system .win__body :is(p,.bio){font-family:var(--font-ui);font-size:16px;line-height:1.6;}
 body.pixel-system :is(.app-title,.cat-label,.card-kicker){font:14px var(--font-mono);letter-spacing:1px;}
-body.pixel-system :is(.content-card,.folder,.skill-focus,.clink,.chip,.theme-option,.wallpaper-option,.cursor-option,.sys-card,.game-panel,.vault-question){border:2px solid var(--pixel-edge);background:var(--pixel-raised);box-shadow:3px 3px 0 var(--pixel-shadow);}
+body.pixel-system :is(.content-card,.folder,.skill-focus,.clink,.chip,.theme-option,.wallpaper-option,.cursor-option,.sys-card,.vault-question){border:2px solid var(--pixel-edge);background:var(--pixel-raised);box-shadow:3px 3px 0 var(--pixel-shadow);}
 body.pixel-system :is(.content-card,.folder,.clink,.theme-option,.wallpaper-option):hover{border-color:var(--accent);}
 body.pixel-system .content-card p{font-size:15px;}
 body.pixel-system .chip{font:14px var(--font-mono);padding:5px 9px;}
@@ -162,11 +162,6 @@ body.pixel-system .game-card strong{font:600 20px var(--font-ui);}
 body.pixel-system .game-card__bottom{font:15px var(--font-mono);border-width:2px;}
 body.pixel-system .game-card__bottom span{font:13px var(--font-mono);}
 body.pixel-system .game-help{font:17px/1.3 var(--font-mono);}
-body.pixel-system .game-panel>span{font:14px var(--font-mono);}
-body.pixel-system .game-panel>b{font:26px var(--font-mono);}
-body.pixel-system .game-controls button{border:2px solid var(--pixel-edge);font:20px var(--font-mono);background:var(--pixel-raised);color:var(--pixel-ink);box-shadow:2px 2px 0 var(--pixel-shadow);}
-body.pixel-system .pac-hud{font:15px var(--font-mono);}
-body.pixel-system :is(.pac-canvas,.tetris-canvas){border:2px solid var(--pixel-edge);image-rendering:pixelated;}
 
 body.pixel-system #mascot-button .mascot-svg{filter:drop-shadow(3px 3px 0 #02080699);}
 body.pixel-system #mascot-button .milo-label{font:15px var(--font-mono);padding:2px 7px;border:2px solid var(--pixel-edge);background:var(--pixel-panel);color:var(--pixel-ink);box-shadow:2px 2px 0 var(--pixel-shadow);}

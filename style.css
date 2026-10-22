@@ -23,9 +23,9 @@
   --danger: #ff6b7a;
   --shadow: 0 26px 80px rgba(0, 0, 0, 0.52);
   --radius: 16px;
-  --font-ui: "Inter", system-ui, sans-serif;
-  --font-display: "Space Grotesk", "Inter", sans-serif;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  --font-ui: Pixelify, monospace;
+  --font-display: Pixelify, monospace;
+  --font-mono: VT323, monospace;
 }
 * {
   box-sizing: border-box;
@@ -106,14 +106,6 @@ a:focus-visible,
     rgba(0, 0, 0, 0.35) 100%
   );
   pointer-events: none;
-}
-#matrix-wall {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0.42;
 }
 
 /* ---------- Arranque terminal ---------- */
@@ -1156,35 +1148,6 @@ select {
   transform: scale(0.75);
   transform-origin: center;
 }
-.app-pixel-icon--tetris {
-  background:
-    linear-gradient(#5de4ff 0 0) 0 0/8px 8px no-repeat,
-    linear-gradient(#5de4ff 0 0) 8px 0/8px 8px no-repeat,
-    linear-gradient(#5de4ff 0 0) 16px 0/8px 8px no-repeat,
-    linear-gradient(#5de4ff 0 0) 24px 0/8px 8px no-repeat,
-    linear-gradient(#ffd166 0 0) 0 12px/8px 8px no-repeat,
-    linear-gradient(#ffd166 0 0) 8px 12px/8px 8px no-repeat,
-    linear-gradient(#b08cff 0 0) 16px 12px/8px 8px no-repeat,
-    linear-gradient(#b08cff 0 0) 16px 20px/8px 8px no-repeat;
-}
-.app-pixel-icon--pacman::before {
-  content: "";
-  position: absolute;
-  inset: 3px;
-  border-radius: 50%;
-  background: #ffd51f;
-  clip-path: polygon(0 0, 100% 0, 58% 50%, 100% 100%, 0 100%);
-}
-.app-pixel-icon--pacman::after {
-  content: "";
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #111;
-  left: 12px;
-  top: 7px;
-}
 
 /* JUEGOS: estructura común para Canvas, marcador e instrucciones. */
 .game {
@@ -1208,63 +1171,12 @@ select {
   box-shadow: 0 0 36px rgba(109, 255, 155, 0.06);
   image-rendering: pixelated;
 }
-.tetris-layout {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 16px;
-}
-.game-side {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 120px;
-}
-.game-panel {
-  padding: 8px;
-  border: 1px solid #26342b;
-  border-radius: 7px;
-  background: #090d0b;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: center;
-}
-.game-panel span,
-.pac-hud span {
-  font-size: 9px;
-  color: #84938a;
-  letter-spacing: 0.08em;
-}
-.game-panel b,
-.pac-hud b {
-  font-size: 15px;
-  color: var(--accent);
-}
-.tetris-next {
-  width: 96px !important;
-  height: 96px !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
 .game-help {
   max-width: 560px;
   color: #718078;
   text-align: center;
   font-size: 9px;
   line-height: 1.5;
-}
-.pac-hud {
-  width: min(100%, 560px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.game--pacman .pac-canvas {
-  border-color: #243b8a;
-  box-shadow: 0 0 26px rgba(42, 72, 220, 0.12);
 }
 .secret-screen {
   min-height: 100%;
@@ -1636,9 +1548,6 @@ body.reduce-motion * {
   animation: none !important;
   transition: none !important;
 }
-body.reduce-motion #matrix-wall {
-  display: none;
-}
 
 /* ---------- Responsive ---------- */
 
@@ -1724,22 +1633,6 @@ body.reduce-motion #matrix-wall {
   }
   .arcade-grid {
     grid-template-columns: 1fr;
-  }
-  .tetris-layout {
-    flex-direction: column;
-    align-items: center;
-  }
-  .game-side {
-    width: 200px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-  .game-side .game-panel:first-child {
-    grid-row: span 2;
-  }
-  .pac-canvas {
-    max-width: 100%;
-    height: auto;
   }
   .win__body {
     padding: 17px;
@@ -1837,13 +1730,6 @@ body.reduce-motion #matrix-wall {
 .game canvas {
   max-width: 100%;
   object-fit: contain;
-}
-.tetris-canvas {
-  width: 200px;
-  height: 400px;
-}
-.game-controls {
-  padding-bottom: 12px;
 }
 .vault {
   max-width: 650px;
@@ -1976,9 +1862,6 @@ body.reduce-motion #matrix-wall {
   .game {
     padding: 8px;
   }
-  .tetris-layout {
-    gap: 10px;
-  }
   .boot-v2 .boot-shell {
     min-height: 0;
     max-height: calc(100dvh - 24px);
@@ -2001,26 +1884,6 @@ body.reduce-motion #matrix-wall {
   }
   .boot-logo--hero {
     font-size: clamp(6px, 1.7vw, 9px);
-  }
-  .tetris-layout {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-  .tetris-canvas {
-    width: 160px;
-    height: 320px;
-  }
-  .game-side {
-    width: 96px;
-    display: flex;
-  }
-  .game-side .btn {
-    font-size: 8px;
-    padding: 0 6px;
-  }
-  .tetris-next {
-    width: 72px !important;
-    height: 72px !important;
   }
   .arcade-badge {
     display: none;
@@ -3539,129 +3402,7 @@ body[data-atmosphere^="matrix"] .desktop-welcome {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
 }
-.game-card--mario .game-card__number {
-  color: #ffab98;
-  text-shadow: 4px 4px #7e415033;
-}
-/* PLATAFORMAS: Canvas conserva sus proporciones; los controles táctiles quedan debajo. */
-.platform-game {
-  align-items: stretch;
-  justify-content: flex-start;
-  gap: 10px;
-  padding: 16px;
-  max-width: 960px;
-  margin: auto;
-}
-.platform-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  width: 100%;
-}
-.platform-header h2 {
-  font: 700 26px var(--font-display);
-  margin: 6px 0;
-  letter-spacing: -0.05em;
-  color: var(--shell-text);
-}
-.platform-header h2 span {
-  display: block;
-  font: 10px var(--font-mono);
-  letter-spacing: 0.04em;
-  color: var(--shell-muted);
-  margin-top: 6px;
-}
-.platform-world {
-  font: 10px var(--font-mono);
-  color: var(--accent);
-  text-align: right;
-  max-width: 170px;
-}
-.platform-hud {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
-  border: 1px solid var(--shell-border);
-  background: var(--shell-raised);
-  border-radius: 8px;
-}
-.platform-hud span {
-  font: 9px var(--font-mono);
-  color: var(--shell-muted);
-}
-.platform-hud b {
-  display: block;
-  font-size: 16px;
-  color: var(--shell-text);
-  margin-top: 5px;
-}
-.platform-canvas {
-  width: min(100%, 560px);
-  align-self: center;
-  height: auto !important;
-  aspect-ratio: 11/6;
-  image-rendering: pixelated;
-  border-radius: 8px;
-  border: 1px solid var(--shell-border) !important;
-  box-shadow: 0 10px 40px #00000025;
-}
-.platform-actions {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex-wrap: wrap;
-}
-.platform-actions span,
-.platform-note {
-  font: 10px/1.7 var(--font-mono);
-  color: var(--shell-muted);
-}
-.platform-touch {
-  display: none;
-  gap: 8px;
-  justify-content: center;
-}
-.platform-note {
-  margin: 0;
-}
-@media (pointer: coarse), (max-width: 600px) {
-  .platform-touch {
-    display: flex;
-  }
-}
-.platform-touch button {
-  touch-action: none;
-  min-width: 54px;
-  min-height: 44px;
-  user-select: none;
-}
 @media (max-width: 600px) {
-  .platform-game {
-    padding: 10px;
-    gap: 10px;
-  }
-  .platform-header h2 {
-    font-size: 22px;
-  }
-  .platform-hud {
-    gap: 7px;
-    padding: 9px;
-  }
-  .platform-hud b {
-    font-size: 12px;
-  }
-  .platform-hud span {
-    font-size: 8px;
-  }
-  .platform-world {
-    font-size: 8px;
-    max-width: 110px;
-  }
-  .platform-actions span {
-    font-size: 9px;
-  }
   .boot-v5 .boot-shell__body {
     padding: 35px 8px;
   }
@@ -5484,7 +5225,6 @@ body.reduce-motion.is-corrupted .icons {
     font-size: 10px;
   }
 }
-
 
 /* Milo: bombolles amb Markdown segur, sense afectar altres finestres. */
 .mascot-log > .chat-message {

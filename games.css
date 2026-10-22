@@ -1,0 +1,88 @@
+/* JOSEMI ARCADE: Tetris, Pac-Man y Buscaminas. Misma estética pixel art que el resto del sistema. */
+.jg { justify-content: flex-start; gap: 12px; padding: 14px; background: #050807; }
+.jg-top { width: 100%; max-width: 720px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
+.jg-modes, .jg-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.jg .jg-actions .btn { padding: 7px 11px; font-size: 13px; }
+.jg-chip { padding: 6px 10px; font: 16px var(--font-mono, monospace); color: var(--pixel-muted, #95a89e); background: var(--pixel-raised, #18231f); border: 2px solid var(--pixel-edge, #455c4f); box-shadow: 2px 2px 0 var(--pixel-shadow, #020806); cursor: pointer; }
+.jg-chip:hover { border-color: var(--accent); color: var(--pixel-ink, #dbe9e0); }
+.jg-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #10231a; }
+.jg-canvas { display: block; width: 100%; height: auto; flex-shrink: 0; touch-action: none; cursor: pointer; background: #050807; border: 2px solid var(--pixel-edge, #455c4f) !important; border-radius: 0 !important; box-shadow: 4px 4px 0 var(--pixel-shadow, #020806) !important; image-rendering: pixelated; }
+.jg-tetris-canvas { width: auto; max-width: min(100%, 500px); max-height: max(200px, calc(var(--screen-height, 100dvh) - 330px)); }
+.jg-pac-canvas { width: auto; max-width: min(100%, 470px); max-height: max(200px, calc(var(--screen-height, 100dvh) - 330px)); background: #000; }
+.jg-hint, .jg-legend { margin: 0; font: 16px var(--font-mono, monospace); color: var(--pixel-muted, #95a89e); text-align: center; }
+.jg-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.jg-legend span { color: var(--ghost); }
+.jg-legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 5px; background: var(--ghost); }
+.jg-pad { display: none; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; max-width: 520px; }
+.jg-pad .btn { min-width: 54px; min-height: 48px; font: 22px var(--font-mono, monospace); touch-action: none; user-select: none; -webkit-user-select: none; }
+.jg-pad .btn.is-down { background: var(--accent); color: #10231a; border-color: var(--accent); }
+.jg-dpad { grid-template-columns: repeat(3, 60px); grid-template-areas: ". up ." "left down right"; width: auto; }
+.jg-dpad [data-pad="up"] { grid-area: up; }
+.jg-dpad [data-pad="left"] { grid-area: left; }
+.jg-dpad [data-pad="down"] { grid-area: down; }
+.jg-dpad [data-pad="right"] { grid-area: right; }
+@media (pointer: coarse), (max-width: 600px) {
+  .jg-pad { display: flex; }
+  .jg-dpad { display: grid; }
+}
+@media (max-width: 600px) {
+  .jg { padding: 8px; gap: 8px; }
+  .jg-chip { padding: 5px 7px; font-size: 15px; }
+  .jg-modes, .jg-actions { gap: 5px; }
+  .jg .jg-actions .btn { padding: 6px 9px; font-size: 12px; }
+  .jg-tetris-canvas, .jg-pac-canvas { max-height: max(180px, calc(var(--screen-height, 100dvh) - 560px)); }
+  .jg-hint, .jg-legend { font-size: 15px; }
+  .jg-pad { gap: 6px; }
+  .jg-pad .btn { min-height: 44px; }
+}
+
+/* BUSCAMINAS */
+.ms-custom { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; width: 100%; max-width: 720px; }
+.ms-custom[hidden] { display: none; }
+.ms-custom label { display: flex; flex-direction: column; gap: 4px; font: 15px var(--font-mono, monospace); color: var(--pixel-muted, #95a89e); }
+.ms-custom input { width: 92px; }
+.ms-frame { display: flex; flex-direction: column; gap: 10px; max-width: 100%; padding: 10px; background: var(--pixel-raised, #18231f); border: 2px solid var(--pixel-edge, #455c4f); box-shadow: 4px 4px 0 var(--pixel-shadow, #020806); }
+.ms-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px; background: #0b120f; border: 2px solid var(--pixel-edge, #455c4f); }
+.ms-led { min-width: 3.4ch; padding: 3px 7px 0; font: 32px/1 var(--font-mono, monospace); letter-spacing: 2px; text-align: right; color: #ff5148; background: #160606; border: 2px solid #3a1414; }
+.ms-face { display: grid; place-items: center; width: 44px; height: 44px; padding: 4px; background: var(--pixel-raised, #18231f); border: 2px solid var(--pixel-edge, #455c4f); box-shadow: 2px 2px 0 var(--pixel-shadow, #020806); cursor: pointer; }
+.ms-face:active { transform: translate(2px, 2px); box-shadow: none; }
+.ms-face svg { width: 32px; height: 32px; }
+.ms-scroll { position: relative; max-width: 100%; overflow: auto; overscroll-behavior: contain; }
+.ms-grid { --cell: 28px; display: grid; grid-template-columns: repeat(var(--cols), var(--cell)); width: max-content; margin: 0 auto; border: 2px solid #0b120f; }
+.ms-cell { display: grid; place-items: center; width: var(--cell); height: var(--cell); padding: 0; border: 0; font: calc(var(--cell) * 0.85) / 1 var(--font-mono, monospace); color: #0b120f; background: #6f8b7c; box-shadow: inset 2px 2px 0 #b9d4c4, inset -2px -2px 0 #34483e; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.ms-cell:hover { background: #7f9c8c; }
+.ms-cell:focus-visible { outline: 2px dashed var(--accent) !important; outline-offset: -4px !important; position: relative; z-index: 1; }
+.ms-cell.is-pressed { background: #5a7466; box-shadow: inset 1px 1px 0 #34483e; }
+.ms-cell.is-open { background: #121b17; box-shadow: inset 1px 1px 0 #24322b; cursor: default; }
+.ms-cell svg { width: 72%; height: 72%; pointer-events: none; }
+.ms-cell.n1 { color: #6cb6ff; }
+.ms-cell.n2 { color: #6fd479; }
+.ms-cell.n3 { color: #ff6b6b; }
+.ms-cell.n4 { color: #b48cff; }
+.ms-cell.n5 { color: #ffb454; }
+.ms-cell.n6 { color: #4fd8e8; }
+.ms-cell.n7 { color: #f0f0f0; }
+.ms-cell.n8 { color: #9aa5a0; }
+.ms-cell.is-mine { background: #3a1e20; animation: ms-pop 0.24s steps(3) both; animation-delay: var(--d, 0ms); }
+.ms-cell.is-boom { background: #ff4a3d; }
+.ms-cell.is-question { color: #f2d055; }
+.ms-cell.is-wrong { position: relative; background: #4a3a14; }
+.ms-cell.is-wrong::after { content: "×"; position: absolute; inset: 0; display: grid; place-items: center; font: calc(var(--cell) * 1.1) / 1 var(--font-mono, monospace); color: #ff4a3d; }
+.ms-cell.is-hint { outline: 3px solid var(--accent); outline-offset: -3px; animation: ms-blink 0.5s steps(2) infinite; }
+.ms-grid.is-won .ms-cell { animation: ms-wave 0.45s steps(4) both; animation-delay: var(--d, 0ms); }
+.ms-grid.is-lost { animation: ms-shake 0.3s steps(4); }
+.ms-scroll.is-paused .ms-grid { filter: blur(7px) grayscale(1); pointer-events: none; }
+.ms-paused { position: absolute; inset: 50% auto auto 50%; transform: translate(-50%, -50%); }
+.ms-paused[hidden] { display: none; }
+.ms-status { min-height: 1.3em; margin: 0; font: 18px var(--font-mono, monospace); color: var(--pixel-ink, #dbe9e0); text-align: center; }
+.ms-stats { margin: 0; font: 15px var(--font-mono, monospace); color: var(--pixel-muted, #95a89e); text-align: center; }
+.ms-option { display: flex; align-items: center; gap: 8px; font: 15px var(--font-mono, monospace); color: var(--pixel-muted, #95a89e); }
+@keyframes ms-pop { from { transform: scale(0.4); } to { transform: scale(1); } }
+@keyframes ms-blink { 50% { outline-color: transparent; } }
+@keyframes ms-wave { 50% { transform: translateY(-4px); filter: brightness(1.5); } }
+@keyframes ms-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.reduce-motion .ms-cell, .reduce-motion .ms-grid { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .ms-cell, .ms-grid { animation: none !important; } }
+
+/* Tarjeta del Arcade */
+.game-card--minesweeper .game-card__number { color: #ff8a7a; }

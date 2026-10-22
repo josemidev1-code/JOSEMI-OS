@@ -2,3 +2,7 @@
 name = "milo-ai"
 main = "worker.js"
 compatibility_date = "2026-10-01"
+
+# Required by the Cloudflare Builds preview command for pull requests.
+# Preview secrets are configured separately from the production Worker.
+[previews]
