@@ -88,6 +88,8 @@ GitHub Pages publica la raíz de la rama `main`. Las rutas de los estilos y scri
 - [ADR 001: web estática y Worker](docs/arquitectura/0001-web-estatica-y-worker.md) y [ADR 002: estado local](docs/arquitectura/0002-estado-local.md).
 - [Extractos de instrucciones y trazabilidad](prompts/README.md). Se archivan ahora, sin inventar una cronología anterior.
 - [Revisión de los criterios de entrega](REVISION-RUBRICA.md).
+- [Informes Lighthouse y verificación de la demo en producción](docs/evidencias/README.md): rendimiento 96 en móvil y 97 en escritorio; accesibilidad, buenas prácticas y SEO 100. Mediciones del 23 de octubre de 2026, no una garantía permanente.
+- [Evolución v1 → v2](CHANGELOG.md), vinculada a estados reales del historial.
 - Demo real de 30 segundos en Proyectos → JOSEMI-OS: MP4 H.264, 1280×720, 1,16 MB, sin audio, con subtítulos y descripción. Usa controles, póster y `preload="none"`; se pausa al minimizar o dejar la pestaña. [Descripción accesible](media/demo-transcripcion.html).
 
 Los contadores del proyecto leen las aplicaciones y paisajes registrados. La demo muestra una orden local de Milo, no una conversación remota simulada. La fotografía personal sigue pendiente de una imagen que Josemi decida publicar; la captura y el vídeo son medios propios del proyecto, no fotografías personales.

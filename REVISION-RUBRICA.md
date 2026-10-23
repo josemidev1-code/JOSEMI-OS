@@ -11,12 +11,12 @@ Revisión basada en la anatomía de marca personal y los cuatro tutoriales facil
 | Contacto | Correo, GitHub y LinkedIn accesibles directamente desde Inicio. |
 | Pie | Nombre, año automático y «De jugar a construir». |
 | Git | 76 commits en origin/main antes de esta revisión, tras recuperar el historial completo. Hay ramas y PR previas; el número por sí solo no acredita que todos los commits sean atómicos. |
-| Arquitectura documentada | README: separación de archivos, estado local, recursos gráficos y backend sin claves públicas. |
-| Interactividad | Ventanas, ajustes persistentes, juegos, notas y Milo con herramientas/API. La defensa exige explicar el recorrido del dato; una función existente no acredita por sí sola esa explicación. |
-| Medios | SVG pixel art propios, animaciones y fuentes locales. Falta una demo de vídeo propia y no se ha acreditado fotografía propia. La foto de God of War es material de PlayStation atribuido, no fotografía propia. |
-| Lighthouse ≥90 | Pendiente de medición; no se declara cumplido. |
-| Proceso excelente | Hay iteraciones y PR; quedan por acreditar releases v1→v2, archivo de instrucciones clave e issues usados como planificación. No se fabrican evidencias retrospectivas. |
-| Producción sin errores | Requiere comprobación tras cada despliegue; las pruebas locales no sustituyen a esta comprobación. |
+| Arquitectura documentada | README y dos ADR con situación, decisión y consecuencias: web estática + Worker, y estado local. |
+| Interactividad | Ventanas, ajustes persistentes, juegos, notas y Milo con herramientas/API. Hay guía de defensa con un recorrido del dato real; Josemi todavía debe practicar y demostrar que puede explicarlo. |
+| Medios | SVG pixel art propios, animaciones, fuentes locales WOFF2 y demo real MP4 de 30 segundos con póster, subtítulos y descripción. Falta acreditar fotografía propia; la foto de God of War es material atribuido de PlayStation. |
+| Lighthouse ≥90 | Verificado en producción el 23/10/2026: rendimiento móvil 96 y escritorio 97; accesibilidad, buenas prácticas y SEO 100. Los informes y su contexto están en docs/evidencias. |
+| Proceso | Historial, ramas y PR #13–#15, extractos de instrucciones archivados y dos hitos de versión documentados en CHANGELOG. No se fabrica una planificación anterior mediante issues creados después del trabajo. |
+| Producción sin errores | Verificadas las ventanas y la demo publicadas, sin errores de JavaScript ni CSP en los recorridos probados. Repetir después de nuevos cambios. |
 
 ## Qué defender con el proyecto
 
@@ -31,4 +31,12 @@ POST con Origin permitido, limitador compartido por IP, fallo cerrado si falta e
 
 Las listas de aplicaciones y temas ya coincidían; ahora tienen pruebas de contrato. La reorganización completa del CSS y la división de script.js se aplazan por su alcance. El limitador nativo de Cloudflare es aproximado y por ubicación: no es una cuota global estricta ni garantiza un techo de gasto. [Documentación oficial](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
 
-Pruebas repetibles: `node --test tests/worker-security.test.mjs` (10 comprobaciones, sin consumir APIs de pago). La revisión de navegador cubre cancelación de arrastre/redimensionado, CSP, migración de preferencias y vistas adaptables. Las llamadas reales a proveedores se verifican tras desplegar.
+Pruebas repetibles: `node --test tests/worker-security.test.mjs` (10 comprobaciones, sin consumir APIs de pago). La revisión de navegador cubre cancelación de arrastre/redimensionado, CSP, migración de preferencias y vistas adaptables. Las llamadas reales a chat, búsqueda y tiempo se verificaron tras desplegar la auditoría. La revisión de entrega comprueba 25 aplicaciones y 18 combinaciones de pantalla; la demo pública se reprodujo completa y se comprobó a 320, 390 y 768 píxeles.
+
+## Qué falta para cerrar la entrega
+
+1. Una fotografía personal o del espacio de trabajo que Josemi decida publicar y que tenga derecho a usar. Las capturas y el vídeo no se presentan como fotografía personal.
+2. Practicar la defensa y explicar el recorrido de una petición real en F12. La guía no acredita por sí sola ese conocimiento.
+3. La tabla completa de evaluación de Edu, si contiene requisitos que no estén en los tutoriales facilitados. No se asigna una nota oficial ni se da por cumplido un descriptor no disponible.
+
+La división completa de script.js y la consolidación amplia del CSS siguen siendo mejoras de mantenimiento aplazadas, no cambios ya terminados. Los resultados automáticos no sustituyen una revisión manual completa de accesibilidad.
