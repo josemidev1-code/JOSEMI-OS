@@ -1,0 +1,95 @@
+/* ---------- Dock / barra inferior ---------- */
+
+/* DOCK: contenedor inferior de inicio, ventanas abiertas y reloj. */
+.taskbar {
+  position: fixed;
+  z-index: 110;
+  left: 18px;
+  right: 18px;
+  bottom: 14px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  background: rgba(7, 12, 9, 0.84);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 16px 46px rgba(0, 0, 0, 0.35);
+}
+.taskbar__start {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 11px;
+  border: 1px solid rgba(109, 255, 155, 0.18);
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: #c8dfd0;
+  cursor: pointer;
+  font: 600 10px var(--font-mono);
+}
+.taskbar__logo {
+  color: var(--accent);
+}
+.taskbar__start:hover {
+  border-color: rgba(109, 255, 155, 0.38);
+  background: rgba(109, 255, 155, 0.15);
+}
+.taskbar__apps {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 5px;
+  overflow: hidden;
+}
+.tb-app {
+  height: 34px;
+  max-width: 170px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0c1510;
+  color: #9cada2;
+  cursor: pointer;
+  font: 10px var(--font-mono);
+}
+.tb-app.active {
+  border-color: rgba(109, 255, 155, 0.24);
+  color: #d9e8df;
+}
+.tb-app.dim {
+  opacity: 0.45;
+}
+.taskbar__tray {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 0 8px;
+  color: #71847a;
+  font: 9px var(--font-mono);
+}
+.tray__net {
+  color: #699c77;
+}
+.tray__clock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  cursor: pointer;
+}
+.tray__clock #clock__time {
+  color: #d7e5dc;
+  font-size: 11px;
+}
+.tray__clock small {
+  font-size: 8px;
+  color: #6b7b72;
+  margin-top: 1px;
+}

@@ -1,0 +1,13 @@
+node_modules/
+assets/
+media/
+docs/evidencias/
+/script.js
+/style.css
+/responsive.css
+/games.js
+/games.css
+/pixel-*.js
+/pixel-*.css
+/milo-*.js
+/worker.js

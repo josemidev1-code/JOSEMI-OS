@@ -1,19 +1,24 @@
-/* JOSEMI-OS: estructura HTML, estilos CSS y aplicaciones JavaScript. */
+/* GENERADO: editar src/ o styles/ y ejecutar npm run build. Orden: sources.manifest.json. */
+// Almacenamiento local: los navegadores pueden bloquearlo o contener JSON incompleto.
+const OSStorage = {
+  readJSON(key, fallback) {
+    try {
+      return JSON.parse(localStorage.getItem(key)) ?? fallback;
+    } catch {
+      return fallback;
+    }
+  },
+  writeJSON(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch {
+      return false;
+    }
+  },
+};
 
-/* === BEGIN script.js === */
-/* =========================================================
-   JOSEMI-OS · portfolio interactivo
-   WM = motor de ventanas. Apps = contenido plug-in.
-   Este archivo conserva el núcleo y la interfaz; games.js define los juegos y las capas pixel completan las aplicaciones.
-
-   ORDEN MENTAL DEL PROGRAMA
-   1. Se recuperan los ajustes guardados.
-   2. Apps describe el contenido de cada aplicación.
-   3. WM crea, mueve, redimensiona y cierra ventanas.
-   4. Los build... conectan el HTML con eventos del usuario.
-   5. El bloque de interfaz aplica la interfaz y typeLoginArt escribe la intro: terminal Matrix + rótulo JOSEMI-OS descifrado.
-   ========================================================= */
-// Atajos: $(selector) devuelve el primer elemento y $$(selector), un array con todos.
+// src/core/state.js: fuente de JOSEMI-OS.
 const $ = (s, r = document) => r.querySelector(s),
   $$ = (s, r = document) => [...r.querySelectorAll(s)];
 // sleep permite usar "await sleep(ms)"; pad convierte 7 en "07" para el reloj.
@@ -29,27 +34,16 @@ const DEF = {
   sound: false,
   motion: false,
 };
-let state = Object.assign({}, DEF);
-try {
-  state = Object.assign(
-    state,
-    JSON.parse(localStorage.getItem("josemi-os") || "{}"),
-  );
-} catch (e) {}
+let state = Object.assign({}, DEF, OSStorage.readJSON("josemi-os", {}));
 // Corrige una sola vez el ajuste que antes se activaba automáticamente.
 // A partir de aquí, el interruptor de Ajustes conserva la elección del visitante.
 if (state.motionPreferenceVersion !== 1) {
   state.motion = false;
   state.motionPreferenceVersion = 1;
 }
-if (["#6C63FF", "#00C8FF", "#4ade80", "#f5b942"].includes(state.accent))
-  state.accent = "#6dff9b";
+if (["#6C63FF", "#00C8FF", "#4ade80", "#f5b942"].includes(state.accent)) state.accent = "#6dff9b";
 // localStorage conserva datos aunque se cierre o recargue la pestaña.
-const save = () => {
-  try {
-    localStorage.setItem("josemi-os", JSON.stringify(state));
-  } catch (e) {}
-};
+const save = () => OSStorage.writeJSON("josemi-os", state);
 
 /* --- Wallpapers (tonos planos estilo Win95) --- */
 // El índice 4 es el fondo Matrix: lo anima el motor ASCII.
@@ -61,14 +55,9 @@ const WALLS = [
   "matrix",
 ];
 // Un índice guardado no válido vuelve al primer fondo.
-if (!Number.isInteger(state.wp) || state.wp < 0 || state.wp >= WALLS.length)
-  state.wp = 0;
+if (!Number.isInteger(state.wp) || state.wp < 0 || state.wp >= WALLS.length) state.wp = 0;
 
-
-/* FONDOS PIXEL ART: dibujos propios en una rejilla de 480 × 270.
-   Solo rectángulos y pasos enteros: ni fotos, ni filtros, ni archivos extra. */
-// GALERÍA GAMER: escenas propias, con el motivo principal en el centro.
-// Devuelve false para que el dibujante original siga con los cuatro fondos previos.
+// src/wallpapers/extra-scenes.js: fuente de JOSEMI-OS.
 function drawExtraPixelWallpaper(kind, r, rand, stars) {
   const cloud = (x, y, c) => {
     r(x, y, 42, 7, c);
@@ -95,20 +84,12 @@ function drawExtraPixelWallpaper(kind, r, rand, stars) {
     r(x - 2 * size, y, 4 * size, 20 * size, "#263e3c");
     for (let j = 0; j < 4; j++) {
       const w = (6 + j * 3) * size;
-      r(
-        x - w,
-        y - 30 * size + j * 9 * size,
-        w * 2,
-        10 * size,
-        j % 2 ? "#375453" : "#45655e",
-      );
+      r(x - w, y - 30 * size + j * 9 * size, w * 2, 10 * size, j % 2 ? "#375453" : "#45655e");
     }
   };
   if (kind === "cyberpunk") {
     r(0, 0, 480, 270, "#30263e");
-    ["#0b0f24", "#151631", "#212340", "#30263e"].forEach((c, i) =>
-      r(0, i * 54, 480, 54, c),
-    );
+    ["#0b0f24", "#151631", "#212340", "#30263e"].forEach((c, i) => r(0, i * 54, 480, 54, c));
     stars();
     // Skyline lejano y edificios cercanos con antenas, ventanas y rótulos de neón.
     for (let x = 0; x < 480; x += 17) {
@@ -127,8 +108,7 @@ function drawExtraPixelWallpaper(kind, r, rand, stars) {
       r(x + w - 4, y + 5, 2, 195 - y, "#254463");
       for (let wy = y + 11; wy < 204; wy += 8)
         for (let wx = x + 7; wx < x + w - 8; wx += 7)
-          if (rand() > 0.35)
-            r(wx, wy, 3, 4, rand() > 0.5 ? "#3e7c9b" : "#78536a");
+          if (rand() > 0.35) r(wx, wy, 3, 4, rand() > 0.5 ? "#3e7c9b" : "#78536a");
     }
     r(91, 101, 28, 51, "#362445");
     r(93, 103, 2, 47, "#d270ad");
@@ -183,9 +163,7 @@ function drawExtraPixelWallpaper(kind, r, rand, stars) {
     r(304, 199, 3, 8, "#71b9c7");
   } else if (kind === "platformWorld") {
     r(0, 0, 480, 270, "#91a19a");
-    ["#38495c", "#4b6570", "#657d7c", "#91a19a"].forEach((c, i) =>
-      r(0, i * 47, 480, 47, c),
-    );
+    ["#38495c", "#4b6570", "#657d7c", "#91a19a"].forEach((c, i) => r(0, i * 47, 480, 47, c));
     cloud(44, 42, "#c3c9b6");
     cloud(186, 24, "#c3c9b6");
     cloud(365, 58, "#c3c9b6");
@@ -270,8 +248,7 @@ function drawExtraPixelWallpaper(kind, r, rand, stars) {
       r(x + 2 * s, y + 9 * s, 28 * s, 13 * s, "#385e3b");
       r(x + 6 * s, y + 2 * s, 14 * s, 4 * s, "#52774b");
     };
-    for (let x = -20; x < 480; x += 51)
-      canopy(x, 23 + Math.floor(rand() * 28), 2);
+    for (let x = -20; x < 480; x += 51) canopy(x, 23 + Math.floor(rand() * 28), 2);
     r(193, 107, 94, 137, "#4b5c40");
     r(210, 91, 59, 160, "#59684a");
     for (let i = 0; i < 180; i++) {
@@ -330,9 +307,7 @@ function drawExtraPixelWallpaper(kind, r, rand, stars) {
       }
     }
   } else if (kind === "sonicCoast") {
-    ["#29435c", "#3d6076", "#5a8191", "#83a6aa"].forEach((c, i) =>
-      r(0, i * 45, 480, 45, c),
-    );
+    ["#29435c", "#3d6076", "#5a8191", "#83a6aa"].forEach((c, i) => r(0, i * 45, 480, 45, c));
     cloud(27, 32, "#b9c7c0");
     cloud(187, 49, "#b9c7c0");
     cloud(371, 25, "#b9c7c0");
@@ -347,17 +322,14 @@ function drawExtraPixelWallpaper(kind, r, rand, stars) {
     // Suelo a cuadros y césped en dientes de píxel.
     r(0, 227, 480, 43, "#79513b");
     for (let y = 228; y < 270; y += 10)
-      for (let x = 0; x < 480; x += 10)
-        if ((x + y) % 20 < 10) r(x, y, 10, 10, "#a4764b");
+      for (let x = 0; x < 480; x += 10) if ((x + y) % 20 < 10) r(x, y, 10, 10, "#a4764b");
     r(0, 221, 480, 7, "#436747");
     r(0, 221, 480, 2, "#8ba461");
     for (let x = 0; x < 480; x += 8) r(x, 226, 4, 4, "#557c4e");
     // Bucle central: contorno escalonado construido con rectángulos.
     const ring = (cx, cy, rx, ry, c, thick) => {
       for (let y = -ry; y <= ry; y++) {
-        const x = Math.round(
-          rx * Math.sqrt(Math.max(0, 1 - (y * y) / (ry * ry))),
-        );
+        const x = Math.round(rx * Math.sqrt(Math.max(0, 1 - (y * y) / (ry * ry))));
         r(cx - x, cy + y, thick, 1, c);
         r(cx + x - thick + 1, cy + y, thick, 1, c);
       }
@@ -480,9 +452,7 @@ function drawExtraPixelWallpaper(kind, r, rand, stars) {
     r(254, 201, 2, 8, "#637885");
   } else if (kind === "godOfWarPixel") {
     r(0, 0, 480, 270, "#789098");
-    ["#25313c", "#3a4a55", "#506671", "#789098"].forEach((c, i) =>
-      r(0, i * 43, 480, 43, c),
-    );
+    ["#25313c", "#3a4a55", "#506671", "#789098"].forEach((c, i) => r(0, i * 43, 480, 43, c));
     // Montañas nórdicas de nieve, lago y bosque en capas.
     [
       [-20, 88, 180, 101],
@@ -549,6 +519,7 @@ function drawExtraPixelWallpaper(kind, r, rand, stars) {
   return true;
 }
 
+// src/wallpapers/scenes.js: fuente de JOSEMI-OS.
 function drawPixelWallpaper(kind) {
   let shapes = [];
   const r = (x, y, w, h, color) =>
@@ -562,25 +533,14 @@ function drawPixelWallpaper(kind) {
   };
   const stars = () => {
     for (let i = 0; i < 100; i++)
-      r(
-        Math.floor(rand() * 480),
-        Math.floor(rand() * 130),
-        1,
-        1,
-        i % 4 ? "#435766" : "#9ea99b",
-      );
+      r(Math.floor(rand() * 480), Math.floor(rand() * 130), 1, 1, i % 4 ? "#435766" : "#9ea99b");
   };
   if (drawExtraPixelWallpaper(kind, r, rand, stars)) {
     // La escena nueva ya está dibujada.
   } else if (kind.startsWith("matrix")) {
     r(0, 0, 480, 270, "#041012");
     // Cada signo se dibuja en una matriz de 3 × 5, en verde y cian.
-    const glyphs = [
-      "111101101101111",
-      "010110010010111",
-      "111001111100111",
-      "101101111001001",
-    ];
+    const glyphs = ["111101101101111", "010110010010111", "111001111100111", "101101111001001"];
     for (let x = 4; x < 480; x += 12) {
       const head = Math.floor(rand() * 160),
         length = 5 + Math.floor(rand() * 11);
@@ -589,8 +549,7 @@ function drawPixelWallpaper(kind) {
           y = head - j * 8;
         const c = j === 0 ? "#a1efc1" : x % 36 === 4 ? "#164c57" : "#18523b";
         for (let k = 0; k < 15; k++)
-          if (bits[k] === "1" && y >= 0)
-            r(x + (k % 3), y + Math.floor(k / 3), 1, 1, c);
+          if (bits[k] === "1" && y >= 0) r(x + (k % 3), y + Math.floor(k / 3), 1, 1, c);
       }
     }
     if (kind === "matrixCity") {
@@ -601,8 +560,7 @@ function drawPixelWallpaper(kind) {
         r(x, y, 18, h, "#0a2427");
         r(x + 2, y - 3, 14, 3, "#10343a");
         for (let wy = y + 7; wy < 228; wy += 8)
-          for (let wx = x + 3; wx < x + 16; wx += 5)
-            if (rand() > 0.48) r(wx, wy, 2, 3, "#22725e");
+          for (let wx = x + 3; wx < x + 16; wx += 5) if (rand() > 0.48) r(wx, wy, 2, 3, "#22725e");
       }
       r(0, 233, 480, 37, "#020b10");
       r(104, 223, 274, 4, "#306456");
@@ -671,13 +629,7 @@ function drawPixelWallpaper(kind) {
         r(x, y + 6, w, 2, "#2d372b");
         for (let k = 0; k < Math.floor(w / 9); k++) {
           const dx = x + Math.floor(rand() * w);
-          r(
-            dx,
-            y + 9 + Math.floor(rand() * 12),
-            3,
-            3,
-            k % 2 ? "#63513d" : "#332f28",
-          );
+          r(dx, y + 9 + Math.floor(rand() * 12), 3, 3, k % 2 ? "#63513d" : "#332f28");
         }
         for (let k = 0; k < Math.floor(w / 11); k++)
           r(x + Math.floor(rand() * w), y + 1, 3, 2, "#78905b");
@@ -802,12 +754,12 @@ function drawPixelWallpaper(kind) {
     if (layers.at(-1)?.[0] !== color) layers.push([color, ""]);
     layers.at(-1)[1] += `M${x} ${y}h${w}v${h}h-${w}z`;
   });
-  const paths = [...layers]
-    .map(([color, d]) => `<path fill="${color}" d="${d}"/>`)
-    .join("");
+  const paths = [...layers].map(([color, d]) => `<path fill="${color}" d="${d}"/>`).join("");
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" shape-rendering="crispEdges">${paths}</svg>`;
   return "data:image/svg+xml," + encodeURIComponent(svg);
 }
+
+// src/wallpapers/catalog.js: fuente de JOSEMI-OS.
 const PIXEL_WALLPAPERS = Object.fromEntries(
   [
     ["matrixCity", "Matrix · azotea", "Ciudad, código y silueta"],
@@ -820,10 +772,7 @@ const PIXEL_WALLPAPERS = Object.fromEntries(
     ["sonicCoast", "Sonic · costa", "Palmeras, anillos y bucle"],
     ["hollowCavern", "Hollow Knight · cavernas", "Santuario azul y máscara"],
     ["godOfWarPixel", "God of War · nórdico", "Lago helado, runas y hacha"],
-  ].map(([id, name, detail]) => [
-    id,
-    { name, detail, url: drawPixelWallpaper(id) },
-  ]),
+  ].map(([id, name, detail]) => [id, { name, detail, url: drawPixelWallpaper(id) }]),
 );
 function selectPixelWallpaper(id) {
   if (!PIXEL_WALLPAPERS[id]) return false;
@@ -835,14 +784,10 @@ function selectPixelWallpaper(id) {
   return true;
 }
 
-/* --- Aplicar tema (colors + wallpaper + matrix) --- */
-// El fondo base define los colores; shell.js controla una única animación ASCII.
+// src/desktop/theme-base.js: fuente de JOSEMI-OS.
 function applyTheme() {
   document.documentElement.style.setProperty("--accent", state.accent);
-  document.documentElement.style.setProperty(
-    "--accent-soft",
-    state.accent + "1f",
-  );
+  document.documentElement.style.setProperty("--accent-soft", state.accent + "1f");
   document.documentElement.style.setProperty("--bg", state.bg);
   const bg = $("#bg");
   // Con el fondo Matrix (wp 4) la lluvia la dibuja el motor ASCII sobre negro.
@@ -851,7 +796,7 @@ function applyTheme() {
 }
 applyTheme();
 
-/* --- Sonido Win95 "ding" (Web Audio, sin archivos) --- */
+// src/desktop/notifications.js: fuente de JOSEMI-OS.
 let AC;
 // SONIDO: crea un tono corto con Web Audio; solo suena si el usuario lo activa.
 function beep() {
@@ -892,42 +837,36 @@ function toast(m) {
   setTimeout(() => t.remove(), 3000);
 }
 
-/* ========================================================= APPS
-   Cada propiedad es una aplicación. render() devuelve su HTML y bind(), cuando
-   existe, conecta eventos después de insertar ese HTML en una ventana.
-   Añadir una app nueva aquí y su id en ICONS basta para mostrarla en el sistema.
-   ========================================================= */
-// CONTENIDO: datos del autor. Las ventanas leen este objeto para mostrar el portfolio.
+// Datos públicos confirmados por Josemi.
 const PROFILE = {
   nombre: "José Miguel Miralles Gandia",
   corto: "Josemi",
   rol: "Desarrollador de software en proceso",
-  estudios:
-    "DAM · Desarrollo de Aplicaciones Multiplataforma · IES Dr. Lluís Simarro",
+  estudios: "DAM · Desarrollo de Aplicaciones Multiplataforma · IES Dr. Lluís Simarro",
   estado: "Aprendiendo mientras construyo proyectos reales",
   ubicacion: "España",
-  bio: "Soy estudiante de DAM y me interesa especialmente el mundo de la informática. Ahora mismo estoy profundizando en HTML, CSS y JavaScript construyendo este portfolio, y me gusta utilizar la IA como una herramienta para aprender, crear y resolver problemas con más posibilidades.",
+  bio: "Desde pequeño me apasiona la tecnología. Empecé jugando a videojuegos y me despertó la curiosidad por entender cómo funcionan las cosas. La televisión, el móvil y el ordenador tienen código detrás, y ahora quiero aprender a construir mis propias ideas.",
   aspiracion:
-    "Aspiro a desarrollar automatizaciones y aplicaciones para grandes empresas, combinando programación, inteligencia artificial y mucha creatividad para construir soluciones útiles.",
+    "Aspiro a desarrollar automatizaciones y aplicaciones para grandes empresas, combinando programación, inteligencia artificial y creatividad para construir soluciones útiles.",
   gustos: [
-    "Informática",
-    "Inteligencia artificial",
-    "Automatización",
-    "Creatividad",
+    "Programar",
     "Gimnasio",
-    "Boxeo",
-    "Running",
-    "E-commerce / dropshipping",
+    "Deporte",
+    "Proyectos",
+    "Ciencia ficción",
+    "Cine",
+    "Lectura",
+    "IA",
+    "Automatización",
   ],
 };
 
+// src/apps/base.js: fuente de JOSEMI-OS.
 const pixelIcon = (tipo) =>
   `<span class="app-pixel-icon app-pixel-icon--${tipo}" aria-hidden="true"></span>`;
 
 // APLICACIONES: cada entrada tiene título, icono, render() para el HTML y bind() para los eventos.
 const Apps = {
-
-
   // HABILIDADES: barras visuales con porcentajes; no son mediciones automáticas.
   skills: {
     title: "Habilidades",
@@ -1001,7 +940,6 @@ const Apps = {
    </article>`,
   },
 
-
   // PAPELERA: archivos ficticios para la metáfora del escritorio; no borra archivos del ordenador.
   trash: {
     title: "Papelera",
@@ -1035,7 +973,6 @@ const Apps = {
       });
     },
   },
-
 
   // MONITOR: información disponible del navegador y tiempo de sesión, no acceso a CPU o RAM real.
   system: {
@@ -1093,12 +1030,7 @@ function bar(n, v) {
   return `<div class="res"><div class="res__top"><span>${n}</span><span>${v}%</span></div><div class="bar"><i data-w="${v}"></i></div></div>`;
 }
 
-/* ========================================================= WINDOW MANAGER
-   Es una IIFE: la función se ejecuta inmediatamente y solo expone openWindow y
-   closeWindow. Así, variables internas como z y open no contaminan el ámbito global.
-   ========================================================= */
-// VENTANAS: este módulo guarda las abiertas en un Map. Controla foco (z-index), arrastre, tamaño y cierre.
-// Mantiene las ventanas dentro de la pantalla al cambiar el tamaño o la orientación.
+// src/desktop/windows.js: fuente de JOSEMI-OS.
 function fitWindowBounds(rect, viewportWidth, viewportHeight) {
   const topInset = document.body.classList.contains("pixel-system") ? 48 : 12;
   const availableWidth = Math.max(1, viewportWidth - 32);
@@ -1106,7 +1038,8 @@ function fitWindowBounds(rect, viewportWidth, viewportHeight) {
   const width = Math.max(Math.min(300, availableWidth), Math.min(rect.width, availableWidth));
   const height = Math.max(Math.min(220, availableHeight), Math.min(rect.height, availableHeight));
   return {
-    width, height,
+    width,
+    height,
     left: Math.max(16, Math.min(rect.left, viewportWidth - width - 16)),
     top: Math.max(topInset, Math.min(rect.top, viewportHeight - height - 98)),
   };
@@ -1156,10 +1089,16 @@ const WM = (() => {
     win.className = "window";
     win.dataset.id = id;
     win.tabIndex = -1;
-    const bounds = fitWindowBounds({
-      width: app.size?.[0] || 640, height: app.size?.[1] || 500,
-      left: p.x, top: p.y,
-    }, innerWidth, innerHeight);
+    const bounds = fitWindowBounds(
+      {
+        width: app.size?.[0] || 640,
+        height: app.size?.[1] || 500,
+        left: p.x,
+        top: p.y,
+      },
+      innerWidth,
+      innerHeight,
+    );
     for (const [key, value] of Object.entries(bounds)) win.style[key] = value + "px";
     win.style.zIndex = ++z;
     win.innerHTML = `<div class="win__bar"><div class="win__title"><span class="t-ico">${app.icon}</span> ${app.title}</div>
@@ -1180,9 +1119,7 @@ const WM = (() => {
         if (c) c.classList.add("dim");
         beep();
       };
-      typeof minimizeWithMotion === "function"
-        ? minimizeWithMotion(win, finish)
-        : finish();
+      typeof minimizeWithMotion === "function" ? minimizeWithMotion(win, finish) : finish();
     };
     $(".max", win).onclick = () =>
       typeof maximizeWithMotion === "function"
@@ -1242,7 +1179,10 @@ const WM = (() => {
         oy = win.offsetTop;
       const mv = (ev) => {
         let nx = Math.max(0, Math.min(ox + ev.clientX - sx, innerWidth - 120)),
-          ny = Math.max(document.body.classList.contains("pixel-system") ? 48 : 12, Math.min(oy + ev.clientY - sy, innerHeight - 150));
+          ny = Math.max(
+            document.body.classList.contains("pixel-system") ? 48 : 12,
+            Math.min(oy + ev.clientY - sy, innerHeight - 150),
+          );
         win.style.left = nx + "px";
         win.style.top = ny + "px";
       };
@@ -1268,15 +1208,9 @@ const WM = (() => {
         oh = win.offsetHeight;
       const mv = (ev) => {
         win.style.width =
-          Math.max(
-            280,
-            Math.min(ow + ev.clientX - sx, innerWidth - win.offsetLeft - 10),
-          ) + "px";
+          Math.max(280, Math.min(ow + ev.clientX - sx, innerWidth - win.offsetLeft - 10)) + "px";
         win.style.height =
-          Math.max(
-            180,
-            Math.min(oh + ev.clientY - sy, innerHeight - win.offsetTop - 98),
-          ) + "px";
+          Math.max(180, Math.min(oh + ev.clientY - sy, innerHeight - win.offsetTop - 98)) + "px";
       };
       const up = () => {
         document.removeEventListener("pointermove", mv);
@@ -1291,10 +1225,16 @@ const WM = (() => {
   window.addEventListener("resize", () => {
     if (innerWidth <= 820) return;
     for (const { el } of open.values()) {
-      const bounds = fitWindowBounds({
-        width: parseFloat(el.style.width), height: parseFloat(el.style.height),
-        left: parseFloat(el.style.left), top: parseFloat(el.style.top),
-      }, innerWidth, innerHeight);
+      const bounds = fitWindowBounds(
+        {
+          width: parseFloat(el.style.width),
+          height: parseFloat(el.style.height),
+          left: parseFloat(el.style.left),
+          top: parseFloat(el.style.top),
+        },
+        innerWidth,
+        innerHeight,
+      );
       for (const [key, value] of Object.entries(bounds)) el.style[key] = value + "px";
     }
   });
@@ -1302,8 +1242,7 @@ const WM = (() => {
 })();
 let openWindow = WM.openWindow;
 
-/* ========================================================= TERMINAL */
-// TERMINAL: divide lo escrito en comando y argumentos. Un switch ejecuta acciones de la web, no del ordenador.
+// src/apps/terminal.js: fuente de JOSEMI-OS.
 function runCommand(raw, print, openWin) {
   const p = raw.trim().split(/\s+/),
     c = (p[0] || "").toLowerCase(),
@@ -1327,9 +1266,7 @@ function runCommand(raw, print, openWin) {
     case "antivirus":
     case "restaurar":
       stopCorruption();
-      print(
-        '<span class="ok">Integridad recuperada. La información original está intacta.</span>',
-      );
+      print('<span class="ok">Integridad recuperada. La información original está intacta.</span>');
       break;
     case "whoami":
     case "quien-soy":
@@ -1399,9 +1336,7 @@ function runCommand(raw, print, openWin) {
       break;
     case "sudo":
       if (a.startsWith("rm -rf")) {
-        print(
-          '<span class="err">Buen intento. JOSEMI_OS se niega a autodestruirse.</span>',
-        );
+        print('<span class="err">Buen intento. JOSEMI_OS se niega a autodestruirse.</span>');
         break;
       }
       print("Permiso concedido.\nLanzando protocolo de contacto...");
@@ -1419,9 +1354,7 @@ function runCommand(raw, print, openWin) {
       state.atmosphere = "matrix";
       applyTheme();
       save();
-      print(
-        '<span class="ok">Código en cascada activado.</span> Usa "fondo 0" para salir.',
-      );
+      print('<span class="ok">Código en cascada activado.</span> Usa "fondo 0" para salir.');
       break;
     case "wallpaper":
     case "fondo":
@@ -1437,9 +1370,7 @@ function runCommand(raw, print, openWin) {
         print("Fondo Matrix activado.");
         break;
       }
-      if (
-        ["matrix", "storm", "rain", "aurora", "stars", "terrain"].includes(a)
-      ) {
+      if (["matrix", "storm", "rain", "aurora", "stars", "terrain"].includes(a)) {
         state.atmosphere = a;
         applyTheme();
         save();
@@ -1485,16 +1416,15 @@ function runCommand(raw, print, openWin) {
       print("Hola, humano. JOSEMI_OS te está observando 👀");
       break;
     case "42":
-      print(
-        '<span class="ok">42.</span> La respuesta estaba aquí. La pregunta sigue pendiente.',
-      );
+      print('<span class="ok">42.</span> La respuesta estaba aquí. La pregunta sigue pendiente.');
       openWin("easter");
       break;
     default:
       print(`<span class="err">comando no encontrado: ${escapeHTML(c)}</span>`);
   }
 }
-/* ========================================================= PROYECTOS */
+
+// src/data/projects.js: fuente de JOSEMI-OS.
 const PROJECTS = {
   web: {
     name: "JOSEMI-OS",
@@ -1538,7 +1468,8 @@ const PROJECTS = {
     tags: ["IA", "Creatividad", "Roadmap"],
   },
 };
-// PROYECTOS: crea una aplicación temporal con los detalles del proyecto elegido.
+
+// src/apps/project-window.js: fuente de JOSEMI-OS.
 function openProject(k) {
   const p = PROJECTS[k];
   if (!p) return;
@@ -1546,8 +1477,7 @@ function openProject(k) {
   Apps[id] = {
     title: p.name,
     icon: Apps.projects.icon,
-    render:
-      () => `<div class="app-title">${p.name.toUpperCase()}</div><p class="bio">${p.desc}</p>
+    render: () => `<div class="app-title">${p.name.toUpperCase()}</div><p class="bio">${p.desc}</p>
     <div class="proj">${p.tags.map((t) => `<span class="tag">${t}</span>`).join("")}</div>
     <dl class="kv"><dt>Lenguaje</dt><dd>${p.lang}</dd><dt>Base de datos</dt><dd>${p.db}</dd><dt>Framework</dt><dd>${p.fw}</dd><dt>Fecha</dt><dd>${p.date}</dd></dl>
     <span class="status ${p.status}">${p.status === "done" ? "COMPLETADO" : p.status === "dev" ? "EN DESARROLLO" : "EXPERIMENTAL"}</span>
@@ -1556,7 +1486,7 @@ function openProject(k) {
   openWindow(id);
 }
 
-/* ========================================================= REINICIO */
+// src/desktop/desktop.js: fuente de JOSEMI-OS.
 function boot() {
   location.reload();
 }
@@ -1577,30 +1507,6 @@ const ICONS = [
 ];
 let startTime = Date.now();
 // ICONOS: construye accesos desde currentUser.apps. shell.js sustituye esta versión por botones SVG accesibles.
-function buildIcons() {
-  const c = $("#icons");
-  c.innerHTML = "";
-  const llista = currentUser && currentUser.apps ? currentUser.apps : ICONS;
-  llista.forEach((id) => {
-    const a = Apps[id];
-    if (!a) return;
-    const el = document.createElement("div");
-    el.className = "icon";
-    el.dataset.id = id;
-    el.tabIndex = 0;
-    el.innerHTML = `<span class="glyph">${a.icon}</span><span class="lbl">${a.title}</span>`;
-    el.addEventListener("click", () => {
-      $$(".icon").forEach((i) => i.classList.remove("sel"));
-      el.classList.add("sel");
-    });
-    el.addEventListener("dblclick", () => openWindow(id));
-    el.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") openWindow(id);
-    });
-    c.appendChild(el);
-  });
-}
-// MENÚ: convierte las aplicaciones permitidas en botones que llaman al gestor de ventanas.
 function buildMenu() {
   const m = $("#menu__apps");
   m.innerHTML = "";
@@ -1637,7 +1543,9 @@ function buildClock() {
   };
   tick();
   setInterval(tick, 1000);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) tick();
+  });
 }
 // PROFUNDIDAD: desplaza el fondo unos píxeles con el ratón. Los paisajes pixel art, Matrix ASCII y reducir movimiento lo desactivan.
 // RENDIMIENTO: como máximo un cálculo por fotograma y solo se escribe el estilo si cambia.
@@ -1674,8 +1582,7 @@ function buildStart() {
     m.classList.toggle("hidden");
   };
   document.addEventListener("click", (e) => {
-    if (!e.target.closest("#menu") && !e.target.closest("#start"))
-      m.classList.add("hidden");
+    if (!e.target.closest("#menu") && !e.target.closest("#start")) m.classList.add("hidden");
   });
   $$(".menu__power button").forEach(
     (b) =>
@@ -1730,8 +1637,7 @@ function shutdown() {
   s.classList.remove("hidden");
   $("#shutdown__msg").textContent = "Apagando JOSEMI-OS...";
   setTimeout(() => {
-    $("#shutdown__msg").textContent =
-      "Ahora puedes cerrar esta pestaña con seguridad.";
+    $("#shutdown__msg").textContent = "Ahora puedes cerrar esta pestaña con seguridad.";
     $("#reboot").classList.remove("hidden");
   }, 1600);
   $("#reboot").onclick = () => location.reload();
@@ -1752,11 +1658,7 @@ function buildKonami() {
   ];
   let i = 0;
   addEventListener("keydown", (e) => {
-    if (
-      e.target.closest(".game") ||
-      e.target.closest(".window")?.querySelector(".game")
-    )
-      return;
+    if (e.target.closest(".game") || e.target.closest(".window")?.querySelector(".game")) return;
     const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
     if (key === s[i]) i++;
     else if (key === s[0]) i = 1;
@@ -1796,9 +1698,7 @@ function buildKonami() {
   });
 }
 
-/* ========================================================= ACCESO DIRECTO
-   Ya no hay contraseña: el perfil de Josemi se carga automáticamente.
-   ========================================================= */
+// src/data/user.js: fuente de JOSEMI-OS.
 const currentUser = {
   nom: "José Miguel",
   rol: "Desarrollador en proceso · DAM",
@@ -1818,6 +1718,7 @@ const currentUser = {
   auto: [],
 };
 
+// src/boot/access.js: fuente de JOSEMI-OS.
 let typeLoginArt;
 
 let enteringOS = false,
@@ -1857,10 +1758,7 @@ function enterOS() {
   enteringOS = true;
   bootRun++;
   document.documentElement.style.setProperty("--accent", state.accent);
-  document.documentElement.style.setProperty(
-    "--accent-soft",
-    state.accent + "1f",
-  );
+  document.documentElement.style.setProperty("--accent-soft", state.accent + "1f");
   $(".menu__head strong").textContent = currentUser.nom;
   $(".menu__head small").textContent = currentUser.rol;
   buildIcons();
@@ -1890,21 +1788,14 @@ function initDirectAccess() {
   });
 }
 
-/* ========================================================= INICIO */
-
-/* === END script.js === */
-
-/* === BEGIN upgrade.js === */
+// src/games/lifecycle.js: fuente de JOSEMI-OS.
 ("use strict");
 // Shared game lifecycle: time stops when the player leaves a game.
 // SEGURIDAD DEL TEXTO: convierte símbolos HTML en entidades para mostrar lo escrito sin ejecutarlo.
 const escapeHTML = (s) =>
   String(s).replace(
     /[&<>"']/g,
-    (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        c
-      ],
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
   );
 // RÉCORDS: localStorage conserva la mayor puntuación de cada juego en este navegador.
 function recordScore(id, n) {
@@ -1912,9 +1803,7 @@ function recordScore(id, n) {
     const key = "josemi-best-" + id,
       best = Math.max(n, Number(localStorage.getItem(key)) || 0);
     localStorage.setItem(key, best);
-    const label = document.querySelector(
-      `.game-card--${id} .game-card__bottom span`,
-    );
+    const label = document.querySelector(`.game-card--${id} .game-card__bottom span`);
     if (label) label.textContent = "RÉCORD " + best;
   } catch {}
 }
@@ -1963,11 +1852,7 @@ const NAME_ART = [
 ICONS.push("easter");
 currentUser.apps.push("easter");
 
-// Original raycaster, no external assets or downloads required.
-
-/* === END upgrade.js === */
-
-/* === BEGIN shell.js === */
+// src/desktop/preferences.js: fuente de JOSEMI-OS.
 ("use strict");
 // Browser-native interpretation of per-character terminal animation.
 // PREFERENCIAS: valores por defecto y validación de lo guardado para evitar opciones inexistentes.
@@ -2030,10 +1915,7 @@ if (state.shellVersion !== 4) {
   state.shellVersion = 4;
 }
 if (!ATMOSPHERES[state.atmosphere]) state.atmosphere = "storm";
-state.weatherDensity = Math.max(
-  15,
-  Math.min(90, Number(state.weatherDensity) || 55),
-);
+state.weatherDensity = Math.max(15, Math.min(90, Number(state.weatherDensity) || 55));
 state.weatherSpeed = [0.5, 1, 1.5].includes(Number(state.weatherSpeed))
   ? Number(state.weatherSpeed)
   : 1;
@@ -2055,12 +1937,11 @@ const CURSORS = {
 if (!THEMES[state.theme]) state.theme = "night";
 if (!CURSORS[state.cursor]) state.cursor = "system";
 if (!EFFECTS[state.bootEffect]) state.bootEffect = "beams";
-state.cursorSize = [20, 24, 32].includes(Number(state.cursorSize))
-  ? Number(state.cursorSize)
-  : 24;
+state.cursorSize = [20, 24, 32].includes(Number(state.cursorSize)) ? Number(state.cursorSize) : 24;
 if (!["full", "calm"].includes(state.intensity)) state.intensity = "full";
 state.idle = [0, 60, 180].includes(Number(state.idle)) ? Number(state.idle) : 0;
-// ICONOS SVG: pequeños dibujos vectoriales que comparten tamaño, trazo y paleta.
+
+// src/desktop/icons.js: fuente de JOSEMI-OS.
 const ICON_PATHS = {
   readme:
     '<path d="M13 8h23l9 9v34H13z" fill="#dfe5d6"/><path d="M36 8v10h9M20 26h18M20 33h18M20 40h11"/>',
@@ -2093,10 +1974,9 @@ const ICON_PATHS = {
 function osIcon(id) {
   return `<svg class="os-icon os-icon--${id}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="#293934" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round">${ICON_PATHS[id] || ICON_PATHS.projects}</g></svg>`;
 }
-for (const id of Object.keys(ICON_PATHS))
-  if (Apps[id]) Apps[id].icon = osIcon(id);
+for (const id of Object.keys(ICON_PATHS)) if (Apps[id]) Apps[id].icon = osIcon(id);
 
-// CURSORES: genera un SVG y lo convierte en una URL de datos para la propiedad cursor del navegador.
+// src/desktop/themes.js: fuente de JOSEMI-OS.
 function cursorSVG(kind, size) {
   const color = THEMES[state.theme].accent;
   const paths = {
@@ -2127,9 +2007,7 @@ function applyShell() {
     "--motion-ms",
     state.intensity === "calm" ? "180ms" : "400ms",
   );
-  $("#shell-theme-name")?.replaceChildren(
-    document.createTextNode(THEMES[state.theme].name),
-  );
+  $("#shell-theme-name")?.replaceChildren(document.createTextNode(THEMES[state.theme].name));
   syncAtmosphere();
 }
 const baseApplyTheme = applyTheme;
@@ -2146,7 +2024,7 @@ function chooseTheme(id) {
   save();
 }
 
-// MINIMIZAR: mide ventana y botón del dock, anima entre ambos y después oculta la ventana.
+// src/desktop/window-motion.js: fuente de JOSEMI-OS.
 function minimizeWithMotion(win, finish) {
   if (win.classList.contains("minimizing")) return;
   if (state.motion || !win.animate) {
@@ -2205,19 +2083,12 @@ function maximizeWithMotion(win) {
   );
 }
 
-// Text coordinates stay on a fixed grid. Animation is based on elapsed time,
-// so 60 Hz and 120 Hz displays settle at the same moment.
-// AZAR ESTABLE: el mismo número devuelve siempre el mismo ruido; los caracteres no vibran sin control.
-// Ajusta la firma al ancho real de su contenedor; sirve también al girar un móvil.
-// Courier es local: el dibujo no cambia de medidas al llegar una fuente de Google.
+// src/ascii/renderer.js: fuente de JOSEMI-OS.
 function fitAsciiText(el) {
   // El salvapantallas calcula su tamaño con su propia firma y el alto de pantalla.
   if (el.closest("#os-screensaver")) return;
   const container = el.closest(".boot-shell__body") || el;
-  const available = Math.max(
-    1,
-    container.clientWidth - (el === container ? 32 : 48),
-  );
+  const available = Math.max(1, container.clientWidth - (el === container ? 32 : 48));
   const columns = Math.max(...NAME_ART.map((row) => row.length));
   el.style.setProperty(
     "--ascii-size",
@@ -2246,13 +2117,7 @@ function signatureFrame(art, effect, p) {
       for (let y = 0; y < h; y++)
         for (let x = 0; x < w; x++)
           if (seededNoise(x + y * w + Math.floor(p * 90)) > 0.64 - q * 0.12)
-            put(
-              x,
-              y,
-              "01/<>*"[
-                Math.floor(seededNoise(x + y * 71 + Math.floor(p * 70)) * 6)
-              ],
-            );
+            put(x, y, "01/<>*"[Math.floor(seededNoise(x + y * 71 + Math.floor(p * 70)) * 6)]);
       return grid.map((row) => row.join("")).join("\n");
     }
     if (p < 0.7) {
@@ -2268,12 +2133,7 @@ function signatureFrame(art, effect, p) {
             front = q * 1.35;
           if (distance < front - 0.08) put(x, y, ch);
           else if (distance < front + 0.06) put(x, y, "▓");
-          else
-            put(
-              x,
-              y,
-              seededNoise(x + y * w + Math.floor(q * 30)) > 0.8 ? "+" : ch,
-            );
+          else put(x, y, seededNoise(x + y * w + Math.floor(q * 30)) > 0.8 ? "+" : ch);
         }
       return grid.map((row) => row.join("")).join("\n");
     }
@@ -2306,11 +2166,7 @@ function signatureFrame(art, effect, p) {
           angle = n * Math.PI * 2 + (1 - q) * Math.PI * 3;
         const ox = w / 2 + Math.cos(angle) * (w * 0.46),
           oy = h / 2 + Math.sin(angle) * (h * 0.43);
-        put(
-          ox + (x - ox) * ease,
-          oy + (y - oy) * ease,
-          q > 0.84 ? ch : [".", "+", "*"][seed % 3],
-        );
+        put(ox + (x - ox) * ease, oy + (y - oy) * ease, q > 0.84 ? ch : [".", "+", "*"][seed % 3]);
       } else if (effect === "laser") {
         if (x < scan - 3) put(x, y, ch);
         else if (Math.abs(x - scan) < 2) put(x, y, "#");
@@ -2320,15 +2176,11 @@ function signatureFrame(art, effect, p) {
         put(
           x,
           y,
-          p > threshold
-            ? ch
-            : "01/+<>*"[Math.floor(seededNoise(seed + Math.floor(p * 60)) * 7)],
+          p > threshold ? ch : "01/+<>*"[Math.floor(seededNoise(seed + Math.floor(p * 60)) * 7)],
         );
-      } else if (effect === "storm" && (p > 0.82 || n < p * 0.85))
-        put(x, y, ch);
+      } else if (effect === "storm" && (p > 0.82 || n < p * 0.85)) put(x, y, ch);
     }
-  if (effect === "laser" && scan < w)
-    for (let y = 0; y < h; y++) put(scan, y, "|");
+  if (effect === "laser" && scan < w) for (let y = 0; y < h; y++) put(scan, y, "|");
   return grid.map((row) => row.join("")).join("\n");
 }
 // EFECTOS: usa la rejilla para lluvia, barrido o convergencia. En progreso 1 devuelve la firma exacta.
@@ -2349,25 +2201,17 @@ function asciiFrame(art, effect, progress) {
       if (effect === "gather") {
         const ease = 1 - (1 - p) ** 3,
           ox = Math.round(x + (seededNoise(seed + 9) * width - x) * (1 - ease)),
-          oy = Math.round(
-            y + (seededNoise(seed + 21) * height - y) * (1 - ease),
-          );
-        grid[Math.max(0, Math.min(height - 1, oy))][
-          Math.max(0, Math.min(width - 1, ox))
-        ] = p > 0.9 ? ch : "·";
+          oy = Math.round(y + (seededNoise(seed + 21) * height - y) * (1 - ease));
+        grid[Math.max(0, Math.min(height - 1, oy))][Math.max(0, Math.min(width - 1, ox))] =
+          p > 0.9 ? ch : "·";
       } else if (effect === "rain") {
-        const fall = Math.max(
-          0,
-          Math.min(1, (progress - (x / width) * 0.2) / 0.72),
-        );
+        const fall = Math.max(0, Math.min(1, (progress - (x / width) * 0.2) / 0.72));
         const cy = Math.round(-height + (y + height) * fall);
         if (cy >= 0)
           grid[cy][x] =
             fall > 0.97
               ? ch
-              : ["0", "1", "│", "╎"][
-                  Math.floor(seededNoise(seed + Math.floor(progress * 35)) * 4)
-                ];
+              : ["0", "1", "│", "╎"][Math.floor(seededNoise(seed + Math.floor(progress * 35)) * 4)];
       } else {
         const sweep = progress * (width + 8);
         grid[y][x] =
@@ -2378,28 +2222,15 @@ function asciiFrame(art, effect, progress) {
               : " ";
       }
     }
-  return progress >= 1
-    ? art.join("\n")
-    : grid.map((row) => row.join("")).join("\n");
+  return progress >= 1 ? art.join("\n") : grid.map((row) => row.join("")).join("\n");
 }
 // ANIMACIÓN: requestAnimationFrame aporta el tiempo real; cancel() termina el bucle y resuelve la promesa.
-function animateAscii(
-  el,
-  effect,
-  { duration = 1900, signal = () => false } = {},
-) {
+function animateAscii(el, effect, { duration = 1900, signal = () => false } = {}) {
   if (typeof fitAsciiText === "function") fitAsciiText(el);
   if (effect === "random")
-    effect = [
-      "cinematic",
-      "storm",
-      "orbit",
-      "laser",
-      "decrypt",
-      "beams",
-      "rain",
-      "gather",
-    ][Math.floor(Math.random() * 8)];
+    effect = ["cinematic", "storm", "orbit", "laser", "decrypt", "beams", "rain", "gather"][
+      Math.floor(Math.random() * 8)
+    ];
   let handle = 0,
     resolveDone,
     settled = false,
@@ -2435,8 +2266,8 @@ function animateAscii(
   return { done, cancel: () => end(false) };
 }
 let currentBootAnimation = null;
-// RÓTULO DE ARRANQUE: JOSEMI-OS dibujado con barras (estilo «slant»). Solo usa / \\ _ | y espacios,
-// que existen en cualquier fuente monoespaciada. Todas las filas miden lo mismo.
+
+// src/boot/animation.js: fuente de JOSEMI-OS.
 const BOOT_ART = [
   "       ______  _____ ________  _______     ____  _____",
   "      / / __ \\/ ___// ____/  |/  /  _/    / __ \\/ ___/",
@@ -2451,18 +2282,20 @@ function fitBootLogo() {
   const logo = out?.querySelector(".boot-logo:not(.boot-logo--hot)");
   if (!login || !logo || login.dataset.phase !== "signature") return;
   const padding = getComputedStyle(login);
-  const available = Math.max(1, login.clientWidth -
-    parseFloat(padding.paddingLeft) - parseFloat(padding.paddingRight));
+  const available = Math.max(
+    1,
+    login.clientWidth - parseFloat(padding.paddingLeft) - parseFloat(padding.paddingRight),
+  );
   const context = document.createElement("canvas").getContext("2d");
   if (context) context.font = `700 100px ${getComputedStyle(logo).fontFamily}`;
-  const width = Math.max(...BOOT_ART.map((row) =>
-    context ? context.measureText(row).width : row.length * 62));
-  out.style.setProperty("--boot-logo-size", `${Math.min(27, available * 100 / width)}px`);
+  const width = Math.max(
+    ...BOOT_ART.map((row) => (context ? context.measureText(row).width : row.length * 62)),
+  );
+  out.style.setProperty("--boot-logo-size", `${Math.min(27, (available * 100) / width)}px`);
 }
 
 const BOOT_NOISE = "/\\\\|_-=+<>*#01";
-const bootNoise = () =>
-  BOOT_NOISE[Math.floor(Math.random() * BOOT_NOISE.length)];
+const bootNoise = () => BOOT_NOISE[Math.floor(Math.random() * BOOT_NOISE.length)];
 // Cada carácter del rótulo recibe el instante (0–1) en que deja de ser ruido: avanza de
 // izquierda a derecha con algo de azar, como un descifrado. Se calcula una sola vez.
 function bootPlan() {
@@ -2499,16 +2332,11 @@ function bootFrame(plan, p) {
       if (p < at) {
         const ch = bootNoise();
         a += ch;
-        b +=
-          Math.random() < 0.08 || (p < 0.12 && x / row.length > p / 0.12 - 0.06)
-            ? ch
-            : " ";
+        b += Math.random() < 0.08 || (p < 0.12 && x / row.length > p / 0.12 - 0.06) ? ch : " ";
         continue;
       }
       const beam =
-        p > 0.82 &&
-        Math.abs(x + y * 1.5 - ((p - 0.82) / 0.18) * (row.length + 12) + 4) <
-          2.5;
+        p > 0.82 && Math.abs(x + y * 1.5 - ((p - 0.82) / 0.18) * (row.length + 12) + 4) < 2.5;
       a += row[x];
       b += p - at < 0.045 || beam ? row[x] : " ";
     }
@@ -2541,8 +2369,7 @@ typeLoginArt = async function () {
     neo.textContent = "";
     if (!still) await bootDelay(600);
     if (!active()) return;
-    if (!(await typeBootText(neo, "Wake up, Neo...", still ? 0 : 110, run)))
-      return;
+    if (!(await typeBootText(neo, "Wake up, Neo...", still ? 0 : 110, run))) return;
     await bootDelay(still ? 900 : 1200);
     if (!active()) return;
     // Borrado: retrocede letra a letra, como si alguien pulsara la tecla de borrar.
@@ -2555,10 +2382,7 @@ typeLoginArt = async function () {
     neo.textContent = "";
     if (!still) await bootDelay(450);
     if (!active()) return;
-    if (
-      !(await typeBootText(neo, "The Matrix has you...", still ? 0 : 95, run))
-    )
-      return;
+    if (!(await typeBootText(neo, "The Matrix has you...", still ? 0 : 95, run))) return;
     await bootDelay(still ? 900 : 1300);
     if (!active()) return;
 
@@ -2596,7 +2420,7 @@ typeLoginArt = async function () {
   }
 };
 
-// ASCII STUDIO: reproduce el efecto elegido; al cerrar cancela el bucle para liberar recursos.
+// src/apps/ascii-studio.js: fuente de JOSEMI-OS.
 Apps.screensaver = {
   title: "ASCII Studio",
   icon: osIcon("screensaver"),
@@ -2606,13 +2430,8 @@ Apps.screensaver = {
       EFFECTS,
     )
       .filter(([id]) => id !== "random")
-      .map(
-        ([id, name]) =>
-          `<button class="btn" data-effect="${id}">${name}</button>`,
-      )
-      .join(
-        "",
-      )}</div><p>Selecciona un efecto. Cada carácter encuentra su sitio.</p></div>`,
+      .map(([id, name]) => `<button class="btn" data-effect="${id}">${name}</button>`)
+      .join("")}</div><p>Selecciona un efecto. Cada carácter encuentra su sitio.</p></div>`,
   bind(body, win) {
     let animation;
     const play = (effect) => {
@@ -2621,14 +2440,10 @@ Apps.screensaver = {
         duration: state.intensity === "calm" ? 2200 : 4200,
       });
     };
-    $$("[data-effect]", body).forEach(
-      (b) => (b.onclick = () => play(b.dataset.effect)),
-    );
+    $$("[data-effect]", body).forEach((b) => (b.onclick = () => play(b.dataset.effect)));
     const stage = $(".ascii-stage", body);
     const observer =
-      typeof ResizeObserver === "function"
-        ? new ResizeObserver(() => fitAsciiText(stage))
-        : null;
+      typeof ResizeObserver === "function" ? new ResizeObserver(() => fitAsciiText(stage)) : null;
     observer?.observe(stage);
     win.__cleanup = () => {
       animation?.cancel();
@@ -2640,9 +2455,8 @@ Apps.screensaver = {
 ICONS.push("screensaver");
 currentUser.apps.push("screensaver");
 
-// Desktop icons use one consistent illustrated SVG family.
-// ACCESOS: botones con doble clic, Enter o un toque en móvil. Los iconos tienen etiquetas accesibles.
-buildIcons = function () {
+// src/desktop/shortcuts.js: fuente de JOSEMI-OS.
+function buildIcons() {
   const container = $("#icons");
   container.innerHTML = "";
   currentUser.apps.forEach((id, i) => {
@@ -2671,10 +2485,9 @@ buildIcons = function () {
     };
     container.append(button);
   });
-};
+}
 
-// SALVAPANTALLAS / TERMINAL: escenas de texto propias y Matrix a pantalla completa.
-// Escenas del terminal ASCII.
+// src/ascii/scenes.js: fuente de JOSEMI-OS.
 const SAVER_LETTERS = {
   J: ["00111", "00010", "00010", "00010", "10010", "10010", "01100"],
   O: ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
@@ -2691,9 +2504,7 @@ function saverWord(text) {
   return Array.from({ length: 7 }, (_, row) =>
     [...text]
       .map((letter) =>
-        (SAVER_LETTERS[letter] || SAVER_LETTERS[" "])[row]
-          .replace(/1/g, "█")
-          .replace(/0/g, " "),
+        (SAVER_LETTERS[letter] || SAVER_LETTERS[" "])[row].replace(/1/g, "█").replace(/0/g, " "),
       )
       .join(" "),
   );
@@ -2829,6 +2640,8 @@ const SAVER_SCENES = [
     ],
   },
 ];
+
+// src/ascii/screensaver.js: fuente de JOSEMI-OS.
 let saverAnimation = null,
   saverCycle = 0,
   idleTimer = 0,
@@ -2844,10 +2657,7 @@ function hideScreensaver() {
   $("#launch-saver")?.focus({ preventScroll: true });
 }
 function showScreensaver() {
-  if (
-    $("#desktop").classList.contains("hidden") ||
-    !$("#shutdown").classList.contains("hidden")
-  )
+  if ($("#desktop").classList.contains("hidden") || !$("#shutdown").classList.contains("hidden"))
     return;
   const overlay = $("#os-screensaver");
   if (!overlay || !overlay.hidden) return;
@@ -2893,18 +2703,14 @@ function showScreensaver() {
     const widest = Math.max(...rows.map((row) => row.length));
     const size = Math.max(
       5,
-      Math.min(
-        64,
-        (width * 0.87) / (widest * 0.61),
-        (height * 0.48) / (rows.length * 1.15),
-      ),
+      Math.min(64, (width * 0.87) / (widest * 0.61), (height * 0.48) / (rows.length * 1.15)),
     );
     art.style.fontSize = `${size}px`;
   }
   function matrix(time, elapsed) {
     ctx.fillStyle = "rgba(2,8,5,.17)";
     ctx.fillRect(0, 0, width, height);
-    ctx.font = "20px VT323";
+    ctx.font = "20px JetBrains Mono";
     drops.forEach((drop, i) => {
       drop.y += drop.speed * elapsed;
       if (drop.y > height + 240) drop.y = -20;
@@ -2916,11 +2722,7 @@ function showScreensaver() {
             : i % 7 === 0
               ? `rgba(80,199,215,${0.55 - tail * 0.05})`
               : `rgba(67,199,112,${0.65 - tail * 0.065})`;
-        ctx.fillText(
-          chars[(Math.floor(time * 5) + i * 13 + tail * 7) % chars.length],
-          i * 18,
-          y,
-        );
+        ctx.fillText(chars[(Math.floor(time * 5) + i * 13 + tail * 7) % chars.length], i * 18, y);
       }
     });
   }
@@ -2961,33 +2763,23 @@ function showScreensaver() {
           ),
         );
         const index = col + line * cols;
-        if (
-          col >= 0 &&
-          col < cols &&
-          line >= 0 &&
-          line < lines &&
-          z > depths[index]
-        ) {
+        if (col >= 0 && col < cols && line >= 0 && line < lines && z > depths[index]) {
           depths[index] = z;
           pixels[index] = ".,-~:;=!*#$@"[lum];
         }
       }
     const cell = Math.min(width / (cols + 2), height / (lines + 4));
-    ctx.font = `${cell}px VT323`;
+    ctx.font = `${cell}px JetBrains Mono`;
     ctx.fillStyle = "#307a60";
     const x = (width - cols * cell * 0.61) / 2,
       y = (height - lines * cell) / 2;
     for (let row = 0; row < lines; row++)
-      ctx.fillText(
-        pixels.slice(row * cols, (row + 1) * cols).join(""),
-        x,
-        y + row * cell,
-      );
+      ctx.fillText(pixels.slice(row * cols, (row + 1) * cols).join(""), x, y + row * cell);
   }
   function stars(time) {
     ctx.fillStyle = "#030806";
     ctx.fillRect(0, 0, width, height);
-    ctx.font = "20px VT323";
+    ctx.font = "20px JetBrains Mono";
     for (let i = 0; i < 140; i++) {
       const phase = (time * 0.025 + seededNoise(i + 100)) % 1;
       const angle = seededNoise(i + 800) * Math.PI * 2;
@@ -2998,24 +2790,17 @@ function showScreensaver() {
     }
   }
   function frame(now) {
-    if (closed || cycle !== saverCycle || overlay.hidden || document.hidden)
-      return;
+    if (closed || cycle !== saverCycle || overlay.hidden || document.hidden) return;
     if (now - last < 42) {
       raf = requestAnimationFrame(frame);
       return;
     }
-    const step = Math.min(
-      0.08,
-      Number.isFinite(last) ? (now - last) / 1000 : 0.042,
-    );
+    const step = Math.min(0.08, Number.isFinite(last) ? (now - last) / 1000 : 0.042);
     last = now;
     const position = state.motion ? 4000 : (now - start) % total;
     let offset = 0,
       index = 0;
-    while (
-      index < SAVER_SCENES.length - 1 &&
-      position >= offset + SAVER_SCENES[index].duration
-    )
+    while (index < SAVER_SCENES.length - 1 && position >= offset + SAVER_SCENES[index].duration)
       offset += SAVER_SCENES[index++].duration;
     const scene = SAVER_SCENES[index],
       age = position - offset,
@@ -3035,15 +2820,10 @@ function showScreensaver() {
     else matrix(time, step);
     const p = state.motion ? 1 : Math.min(1, age / 2900);
     art.textContent = asciiFrame(rows, scene.effect, p);
-    art.style.opacity = String(
-      state.motion ? 1 : Math.min(1, (scene.duration - age) / 650),
-    );
+    art.style.opacity = String(state.motion ? 1 : Math.min(1, (scene.duration - age) / 650));
     const note =
       scene.notes[
-        Math.min(
-          scene.notes.length - 1,
-          Math.floor(age / (scene.duration / scene.notes.length)),
-        )
+        Math.min(scene.notes.length - 1, Math.floor(age / (scene.duration / scene.notes.length)))
       ];
     notes.textContent = "> " + note;
     progress.style.transform = `scaleX(${state.motion ? 1 : age / scene.duration})`;
@@ -3062,7 +2842,7 @@ function showScreensaver() {
   frame(start);
 }
 
-// ESCRITORIO: crea bienvenida, barra de herramientas y salvapantallas; registra actividad para el temporizador.
+// src/desktop/toolbar.js: fuente de JOSEMI-OS.
 function setupDesktop() {
   const toolbar = document.createElement("div");
   toolbar.className = "shell-tools";
@@ -3113,9 +2893,7 @@ function setupDesktop() {
       saver.hidden &&
       Date.now() - lastInput > state.idle * 1000 &&
       !document.activeElement?.closest(".game") &&
-      !$$(".window").some(
-        (w) => !w.classList.contains("minimized") && w.querySelector(".game"),
-      )
+      !$$(".window").some((w) => !w.classList.contains("minimized") && w.querySelector(".game"))
     )
       showScreensaver();
   }, 5000);
@@ -3126,14 +2904,8 @@ function setupDesktop() {
       const target = e.target.closest(".icon");
       if (!target) return;
       const rect = target.getBoundingClientRect();
-      target.style.setProperty(
-        "--tilt-x",
-        `${(e.clientY - rect.top - rect.height / 2) / 16}deg`,
-      );
-      target.style.setProperty(
-        "--tilt-y",
-        `${-(e.clientX - rect.left - rect.width / 2) / 16}deg`,
-      );
+      target.style.setProperty("--tilt-x", `${(e.clientY - rect.top - rect.height / 2) / 16}deg`);
+      target.style.setProperty("--tilt-y", `${-(e.clientX - rect.left - rect.width / 2) / 16}deg`);
     },
     { passive: true },
   );
@@ -3146,6 +2918,7 @@ function setupDesktop() {
   });
 }
 
+// src/desktop/search.js: fuente de JOSEMI-OS.
 let paletteFocus = null,
   paletteIndex = 0;
 // BUSCADOR: abre un diálogo con foco en el campo y devuelve el foco anterior al cerrar.
@@ -3245,7 +3018,7 @@ function setupPalette() {
   });
 }
 
-// Animate the desktop only on entry, not endlessly behind work windows.
+// src/desktop/window-effects.js: fuente de JOSEMI-OS.
 const shellEnterOS = enterOS;
 enterOS = function () {
   if (enteringOS) return;
@@ -3266,10 +3039,8 @@ const windowObserver = new MutationObserver((records) => {
         });
       }
 });
-// A single bounded character canvas; no per-particle DOM or accumulating timers.
-// FONDOS: devuelve una matriz de caracteres y brillo. Es cálculo puro: todavía no dibuja nada.
-// RENDIMIENTO: el búfer se reutiliza entre fotogramas y solo recuerda las celdas ocupadas,
-// así no se crean miles de objetos por fotograma ni se recorren las celdas vacías al dibujar.
+
+// src/wallpapers/atmosphere-renderer.js: fuente de JOSEMI-OS.
 const atmosphereBuffer = { size: 0, w: 0, h: 0, ch: [], light: null, ink: [], used: [] };
 function atmosphereFrame(kind, w, h, t, density = 55) {
   const buf = atmosphereBuffer;
@@ -3314,11 +3085,9 @@ function atmosphereFrame(kind, w, h, t, density = 55) {
           put(x, y, "/", light);
           put(x + 1, y, "/", light);
           if (y > h * 0.24 && y < h * 0.7 && y % 5 === 0)
-            for (let b = 0; b < 7; b++)
-              put(x + b, y + b * 0.55, "/", light * 0.7);
+            for (let b = 0; b < 7; b++) put(x + b, y + b * 0.55, "/", light * 0.7);
         }
-        const impactX =
-          root + Math.sin((h - 1) * 0.6 + cycle) * 3 - (h - 1) * 0.28;
+        const impactX = root + Math.sin((h - 1) * 0.6 + cycle) * 3 - (h - 1) * 0.28;
         if (growth >= h)
           for (let s = 0; s < 18; s++) {
             const angle = s * 0.7,
@@ -3358,8 +3127,7 @@ function atmosphereFrame(kind, w, h, t, density = 55) {
         y = seededNoise(i + 7) * h,
         light = 0.28 + (Math.sin(t * 0.8 + i) + 1) * 0.2;
       put(x, y, i % 6 === 0 ? "+" : ".", light);
-      if (i % 9 === 0)
-        for (let j = 1; j < 5; j++) put(x + j, y + j * 0.2, ".", 0.16);
+      if (i % 9 === 0) for (let j = 1; j < 5; j++) put(x + j, y + j * 0.2, ".", 0.16);
     }
     const cycle = Math.floor(t / 9),
       phase = t % 9;
@@ -3373,8 +3141,7 @@ function atmosphereFrame(kind, w, h, t, density = 55) {
         );
   } else if (["matrix", "matrixBlue", "matrixDepth"].includes(kind)) {
     // Cada columna tiene su velocidad y longitud. La cabeza brilla y la cola se desvanece.
-    const glyphs =
-      "012345789アイウエオカキクケコサシスセソタチツテトナニヌネノ<>/{}";
+    const glyphs = "012345789アイウエオカキクケコサシスセソタチツテトナニヌネノ<>/{}";
     for (let x = 0; x < w; x++) {
       const layer = seededNoise(x + 230),
         speed = 3 + layer * 11,
@@ -3385,33 +3152,31 @@ function atmosphereFrame(kind, w, h, t, density = 55) {
       for (let tail = 0; tail < length; tail++) {
         const y = Math.floor(head - tail);
         if (y < 0 || y >= h) continue;
-        const light =
-          tail === 0
-            ? 1
-            : Math.pow(1 - tail / length, 1.7) * (0.35 + layer * 0.5);
+        const light = tail === 0 ? 1 : Math.pow(1 - tail / length, 1.7) * (0.35 + layer * 0.5);
         put(
           x,
           y,
           glyphs[
             Math.floor(
-              seededNoise(x * 73 + y * 19 + Math.floor(t * (layer + 1) * 4)) *
-                glyphs.length,
+              seededNoise(x * 73 + y * 19 + Math.floor(t * (layer + 1) * 4)) * glyphs.length,
             )
           ],
           kind === "matrixDepth" ? light * (0.3 + layer * 0.7) : light,
         );
         buf.ink[y * w + x] =
-            tail === 0
-              ? "head"
-              : kind === "matrixBlue" && (x % 7 < 2 || layer > 0.8)
-                ? "cyan"
-                : "green";
+          tail === 0
+            ? "head"
+            : kind === "matrixBlue" && (x % 7 < 2 || layer > 0.8)
+              ? "cyan"
+              : "green";
       }
     }
   }
 
   return buf;
 }
+
+// src/wallpapers/atmosphere.js: fuente de JOSEMI-OS.
 let atmosphereCanvas = null,
   atmosphereContext = null,
   atmosphereRAF = 0,
@@ -3431,9 +3196,7 @@ function atmosphereActive() {
     !$("#desktop").classList.contains("hidden") &&
     $("#shutdown").classList.contains("hidden") &&
     $("#os-screensaver")?.hidden &&
-    !$$(".window").some(
-      (w) => !w.classList.contains("minimized") && w.querySelector(".game"),
-    )
+    !$$(".window").some((w) => !w.classList.contains("minimized") && w.querySelector(".game"))
   );
 }
 // LIENZO: limita resolución y número de celdas, obtiene la matriz y dibuja cada carácter con Canvas 2D.
@@ -3455,8 +3218,8 @@ function drawAtmosphere() {
   }
   atmosphereContext.clearRect(0, 0, width, height);
   atmosphereContext.font = state.atmosphere.startsWith("matrix")
-    ? "18px VT323"
-    : "16px VT323";
+    ? "18px JetBrains Mono"
+    : "16px JetBrains Mono";
   atmosphereContext.textBaseline = "top";
   const frame = atmosphereFrame(
     state.atmosphere,
@@ -3486,8 +3249,7 @@ function atmosphereTick(now) {
     return;
   }
   if (atmosphereLast !== null)
-    atmosphereTime +=
-      Math.min(0.1, (now - atmosphereLast) / 1000) * state.weatherSpeed;
+    atmosphereTime += Math.min(0.1, (now - atmosphereLast) / 1000) * state.weatherSpeed;
   atmosphereLast = now;
   if (now - atmosphereDrawn > (state.intensity === "calm" ? 83 : 42)) {
     drawAtmosphere();
@@ -3516,9 +3278,10 @@ function syncAtmosphere() {
     cancelAnimationFrame(atmosphereRAF);
     atmosphereRAF = 0;
     atmosphereLast = null;
-  } else if (!atmosphereRAF)
-    atmosphereRAF = requestAnimationFrame(atmosphereTick);
+  } else if (!atmosphereRAF) atmosphereRAF = requestAnimationFrame(atmosphereTick);
 }
+
+// src/bootstrap/desktop.js: fuente de JOSEMI-OS.
 setupDesktop();
 setupPalette();
 windowObserver.observe($("#desktop"), { childList: true });
@@ -3527,8 +3290,7 @@ new MutationObserver((records) => {
     records.some(
       (r) =>
         (r.type === "attributes" &&
-          (r.target.id === "desktop" ||
-            r.target.classList.contains("window"))) ||
+          (r.target.id === "desktop" || r.target.classList.contains("window"))) ||
         (r.type === "childList" &&
           [...r.addedNodes, ...r.removedNodes].some(
             (n) => n.nodeType === 1 && n.classList.contains("window"),
@@ -3575,50 +3337,20 @@ buildContext();
 buildKonami();
 initDirectAccess();
 
-/* === END shell.js === */
-
-/* PERSONALIZACIÓN: datos, iconos, Secret Vault y ajustes existentes. */
-/* PERSONALIZACIÓN: datos, Secret Vault, fondos, ajustes e iconos pixel.
-   Este bloque sigue al motor dentro del mismo script.js. */
 (() => {
+  // src/portfolio/preferences.js: fuente de JOSEMI-OS.
   "use strict";
 
-  const GOW_URL =
-    "assets/wallpapers/god-of-war-ragnarok.jpg";
+  const GOW_URL = "assets/wallpapers/god-of-war-ragnarok.jpg";
 
   // Estado para desbloqueos y fondo personalizado.
   if (!state.vault) state.vault = { matrix: false, gof: false };
   if (!state.wallpaper) state.wallpaper = state.wp === 4 ? "matrix" : "static";
-  if (state.wallpaper === "godOfWar" && !state.vault.gof)
-    state.wallpaper = "static";
-  if (!state.vault.matrix && state.atmosphere === "matrixBlue")
-    state.atmosphere = "matrix";
+  if (state.wallpaper === "godOfWar" && !state.vault.gof) state.wallpaper = "static";
+  if (!state.vault.matrix && state.atmosphere === "matrixBlue") state.atmosphere = "matrix";
   save();
 
-  // DATOS PERSONALES confirmados por Josemi.
-  Object.assign(PROFILE, {
-    nombre: "José Miguel Miralles Gandia",
-    corto: "Josemi",
-    rol: "Desarrollador de software en proceso",
-    estudios:
-      "DAM · Desarrollo de Aplicaciones Multiplataforma · IES Dr. Lluís Simarro",
-    estado: "Aprendiendo mientras construyo proyectos reales",
-    ubicacion: "España",
-    bio: "Desde pequeño me apasiona la tecnología. Empecé jugando a videojuegos y me despertó la curiosidad por entender cómo funcionan las cosas. La televisión, el móvil y el ordenador tienen código detrás, y ahora quiero aprender a construir mis propias ideas.",
-    aspiracion:
-      "Aspiro a desarrollar automatizaciones y aplicaciones para grandes empresas, combinando programación, inteligencia artificial y creatividad para construir soluciones útiles.",
-    gustos: [
-      "Programar",
-      "Gimnasio",
-      "Deporte",
-      "Proyectos",
-      "Ciencia ficción",
-      "Cine",
-      "Lectura",
-      "IA",
-      "Automatización",
-    ],
-  });
+  // src/portfolio/data.js: fuente de JOSEMI-OS.
 
   // Proyectos.
   Object.assign(PROJECTS, {
@@ -3635,8 +3367,7 @@ initDirectAccess();
     },
   });
 
-  // ICONOS PROPIOS: rejilla de 32 píxeles, contorno oscuro y tres tonos por material.
-  // Cada rectángulo tiene coordenadas enteras: los detalles conservan bordes pixel art.
+  // src/portfolio/icons.js: fuente de JOSEMI-OS.
   const pixelRects = (rects) =>
     rects
       .map(
@@ -3918,7 +3649,8 @@ initDirectAccess();
   // JOSEMI Music deja de ser app/icono.
   if (Apps.music) delete Apps.music;
   currentUser.apps = (currentUser.apps || []).filter((id) => id !== "music");
-  // Sobre mí.
+
+  // src/apps/about.js: fuente de JOSEMI-OS.
   Apps.about = {
     title: "Sobre mí",
     icon: pixelIcon("about"),
@@ -3953,7 +3685,7 @@ initDirectAccess();
       </div>`,
   };
 
-  // Proyectos.
+  // src/apps/projects.js: fuente de JOSEMI-OS.
   Apps.projects = {
     title: "Proyectos",
     icon: pixelIcon("projects"),
@@ -3986,7 +3718,7 @@ initDirectAccess();
     },
   };
 
-  // Contacto real.
+  // src/apps/contact.js: fuente de JOSEMI-OS.
   Apps.contact = {
     title: "Contacto",
     icon: pixelIcon("contact"),
@@ -4016,7 +3748,7 @@ initDirectAccess();
     },
   };
 
-  // Secret Vault personal.
+  // src/apps/vault.js: fuente de JOSEMI-OS.
   Apps.easter = {
     title: "Secret Vault",
     icon: pixelIcon("easter"),
@@ -4041,10 +3773,17 @@ initDirectAccess();
         <p class="vault-copy">Dos secretos bajo llave. Elige un candado y descubre su pregunta.</p>
 
         <div class="vault-locks" aria-label="Candados de la Secret Vault">
-          ${["matrix", "gof"].map((key, index) => `<button type="button" class="vault-lock ${state.vault[key] ? "unlocked" : ""}" data-lock="${key}" aria-label="${index === 0 ? "Candado izquierdo" : "Candado derecho"}${state.vault[key] ? ", desbloqueado" : ""}" aria-expanded="false" aria-controls="vault-question-${key}">
+          ${["matrix", "gof"]
+            .map(
+              (
+                key,
+                index,
+              ) => `<button type="button" class="vault-lock ${state.vault[key] ? "unlocked" : ""}" data-lock="${key}" aria-label="${index === 0 ? "Candado izquierdo" : "Candado derecho"}${state.vault[key] ? ", desbloqueado" : ""}" aria-expanded="false" aria-controls="vault-question-${key}">
             <pre class="vault-lock-art" aria-hidden="true">${state.vault[key] ? "   .----.\n   |    |\n .-+----'-.\n |   o   |\n |   |   |\n '-------'" : "  .---.\n /     \\\n |     |\n.+-----+.\n|   o   |\n|   |   |\n'-------'"}</pre>
             <span class="vault-lock-caption">${state.vault[key] ? "DESBLOQUEADO" : "EXPLORAR"}</span>
-          </button>`).join("")}
+          </button>`,
+            )
+            .join("")}
         </div>
 
         <div class="vault-challenges">
@@ -4084,13 +3823,21 @@ initDirectAccess();
           .trim();
 
       function refresh() {
-        body.querySelector(".vault-status").textContent = state.vault.matrix && state.vault.gof ? "DESBLOQUEADA" : "SECRETOS GUARDADOS";
+        body.querySelector(".vault-status").textContent =
+          state.vault.matrix && state.vault.gof ? "DESBLOQUEADA" : "SECRETOS GUARDADOS";
         body.querySelectorAll("[data-lock]").forEach((button) => {
           const unlocked = !!state.vault[button.dataset.lock];
           button.classList.toggle("unlocked", unlocked);
-          button.querySelector(".vault-lock-caption").textContent = unlocked ? "DESBLOQUEADO" : "EXPLORAR";
-          button.setAttribute("aria-label", `${button.dataset.lock === "matrix" ? "Candado izquierdo" : "Candado derecho"}${unlocked ? ", desbloqueado" : ""}`);
-          if (unlocked) button.querySelector("pre").textContent = "   .----.\n   |    |\n .-+----'-.\n |   o   |\n |   |   |\n '-------'";
+          button.querySelector(".vault-lock-caption").textContent = unlocked
+            ? "DESBLOQUEADO"
+            : "EXPLORAR";
+          button.setAttribute(
+            "aria-label",
+            `${button.dataset.lock === "matrix" ? "Candado izquierdo" : "Candado derecho"}${unlocked ? ", desbloqueado" : ""}`,
+          );
+          if (unlocked)
+            button.querySelector("pre").textContent =
+              "   .----.\n   |    |\n .-+----'-.\n |   o   |\n |   |   |\n '-------'";
         });
         body.querySelectorAll("[data-reward]").forEach((btn) => {
           btn.disabled = !state.vault[btn.dataset.reward];
@@ -4153,30 +3900,24 @@ initDirectAccess();
         });
       }
 
-      body
-        .querySelector('[data-reward="matrix"]')
-        ?.addEventListener("click", () => {
-          if (!state.vault.matrix)
-            return toast("Primero desbloquea la llave Matrix.");
-          state.wallpaper = "matrix";
-          state.wp = 4;
-          state.atmosphere = "matrixBlue";
-          applyTheme();
-          save();
-          toast("Fondo Matrix verde/azul activado.");
-        });
+      body.querySelector('[data-reward="matrix"]')?.addEventListener("click", () => {
+        if (!state.vault.matrix) return toast("Primero desbloquea la llave Matrix.");
+        state.wallpaper = "matrix";
+        state.wp = 4;
+        state.atmosphere = "matrixBlue";
+        applyTheme();
+        save();
+        toast("Fondo Matrix verde/azul activado.");
+      });
 
-      body
-        .querySelector('[data-reward="gof"]')
-        ?.addEventListener("click", () => {
-          if (!state.vault.gof)
-            return toast("Primero desbloquea la llave God of War.");
-          state.wallpaper = "godOfWar";
-          state.atmosphere = "none";
-          applyTheme();
-          save();
-          toast("Fondo God of War activado.");
-        });
+      body.querySelector('[data-reward="gof"]')?.addEventListener("click", () => {
+        if (!state.vault.gof) return toast("Primero desbloquea la llave God of War.");
+        state.wallpaper = "godOfWar";
+        state.atmosphere = "none";
+        applyTheme();
+        save();
+        toast("Fondo God of War activado.");
+      });
 
       body.querySelector('[data-hint="matrix"]').onclick = () => {
         body.querySelector('[data-feedback="matrix"]').textContent =
@@ -4186,16 +3927,14 @@ initDirectAccess();
         body.querySelector('[data-feedback="gof"]').textContent =
           "Kratos es el protagonista. Hay otra pista en mis aficiones.";
       };
-      body
-        .querySelector(".vault-play")
-        ?.addEventListener("click", () => openWindow("arcade"));
+      body.querySelector(".vault-play")?.addEventListener("click", () => openWindow("arcade"));
       body
         .querySelector(".vault-settings")
         ?.addEventListener("click", () => openWindow("settings"));
     },
   };
 
-  // Ajustes ampliados con fondo God of War y Matrix.
+  // src/apps/settings.js: fuente de JOSEMI-OS.
   Apps.settings = {
     title: "Ajustes",
     icon: pixelIcon("settings"),
@@ -4345,11 +4084,7 @@ initDirectAccess();
         const key = el.dataset.setting;
         if (el.type !== "checkbox") el.value = String(state[key]);
         el.addEventListener(el.type === "range" ? "input" : "change", () => {
-          if (
-            key === "atmosphere" &&
-            el.value === "matrixBlue" &&
-            !state.vault.matrix
-          ) {
+          if (key === "atmosphere" && el.value === "matrixBlue" && !state.vault.matrix) {
             el.value = state.atmosphere;
             toast("El fondo especial Matrix se desbloquea en Secret Vault.");
             return;
@@ -4357,21 +4092,14 @@ initDirectAccess();
           state[key] =
             el.type === "checkbox"
               ? el.checked
-              : [
-                    "idle",
-                    "wp",
-                    "cursorSize",
-                    "weatherDensity",
-                    "weatherSpeed",
-                  ].includes(key)
+              : ["idle", "wp", "cursorSize", "weatherDensity", "weatherSpeed"].includes(key)
                 ? Number(el.value)
                 : el.value;
 
           // La animación y la imagen son independientes: cambiar un efecto no borra el fondo.
           if (key === "atmosphere") state.universeUserAtmosphere = true;
 
-          if (key === "sound" && state.sound && typeof beep === "function")
-            beep();
+          if (key === "sound" && state.sound && typeof beep === "function") beep();
           applyTheme();
           save();
         });
@@ -4442,20 +4170,15 @@ initDirectAccess();
           save();
         };
 
-      $(".preview-ascii", body)?.addEventListener("click", () =>
-        openWindow("screensaver"),
-      );
-      $(".start-saver", body)?.addEventListener("click", () =>
-        showScreensaver(),
-      );
+      $(".preview-ascii", body)?.addEventListener("click", () => openWindow("screensaver"));
+      $(".start-saver", body)?.addEventListener("click", () => showScreensaver());
     },
   };
 
-  // Aplicar fondo God of War por encima del applyTheme base.
+  // src/portfolio/wallpaper.js: fuente de JOSEMI-OS.
   const previousApplyTheme = applyTheme;
   applyTheme = function () {
-    if (!state.vault.matrix && state.atmosphere === "matrixBlue")
-      state.atmosphere = "matrix";
+    if (!state.vault.matrix && state.atmosphere === "matrixBlue") state.atmosphere = "matrix";
     previousApplyTheme();
     const bg = document.querySelector("#bg");
     if (!bg) return;
@@ -4466,20 +4189,15 @@ initDirectAccess();
     }
     const pixel = PIXEL_WALLPAPERS[state.wallpaper];
     document.body.classList.toggle("has-pixel-wallpaper", !!pixel);
-    if (pixel)
-      bg.style.background = `url("${pixel.url}") center / cover no-repeat, #08101b`;
+    if (pixel) bg.style.background = `url("${pixel.url}") center / cover no-repeat, #08101b`;
   };
 
   applyTheme();
   buildIcons();
   buildMenu();
 })();
-/* =========================================================
-   MEJORAS SOBRE EL ESCRITORIO EXISTENTE
-   Conservamos WM, Apps, el arranque, los temas y los juegos.
-   ========================================================= */
 
-// Milo abre aplicaciones con el motor original del escritorio.
+// src/milo/local-replies.js: fuente de JOSEMI-OS.
 function launchPortfolioApp(id) {
   if (!Apps[id]) return;
   if ($("#desktop").classList.contains("hidden")) {
@@ -4506,28 +4224,12 @@ const RAMAS = [
     app: "projects",
   },
   {
-    keys: [
-      "estudia",
-      "estudias",
-      "estudios",
-      "study",
-      "dam",
-      "instituto",
-      "sobre mi",
-    ],
+    keys: ["estudia", "estudias", "estudios", "study", "dam", "instituto", "sobre mi"],
     text: "Josemi estudia DAM en el IES Dr. Lluís Simarro. Está aprendiendo HTML, CSS, JavaScript y Git con proyectos reales.",
     app: "about",
   },
   {
-    keys: [
-      "contacto",
-      "correo",
-      "email",
-      "escribir",
-      "contact",
-      "horario",
-      "presupuesto",
-    ],
+    keys: ["contacto", "correo", "email", "escribir", "contact", "horario", "presupuesto"],
     text: "Puedes escribir a Josemi en josemidev1@gmail.com. Para horarios, oportunidades o presupuestos, consúltale directamente.",
     app: "contact",
   },
@@ -4578,11 +4280,7 @@ function getLocalReply(message) {
         " Pulsa Escape para recuperar los datos reales.",
       simulated: true,
     };
-  if (
-    /direccion|dni|telefono|edad|madre|padre|instrucciones|ignora|olvida/.test(
-      text,
-    )
-  )
+  if (/direccion|dni|telefono|edad|madre|padre|instrucciones|ignora|olvida/.test(text))
     return {
       text: "Solo comparto los datos públicos de este portfolio. Para otras consultas puedes escribir a josemidev1@gmail.com.",
     };
@@ -4604,8 +4302,7 @@ async function getAssistantReply(message) {
   return window.MiloAI.reply(message, chatHistory);
 }
 
-// MILO: ajolote rosa en una rejilla propia, inspirado en el estilo de Minecraft.
-// El dibujo es inline: no descarga imágenes ni cambia el punto de conexión del chat.
+// src/milo/panel.js: fuente de JOSEMI-OS.
 const MILO_SVG = `<svg class="mascot-svg" viewBox="0 0 48 40" shape-rendering="crispEdges" aria-hidden="true">
   <g class="axolotl-tail"><path fill="#bd607c" d="M32 27h8v-3h4v9H32z"/><path fill="#f4abc2" d="M34 28h8v-3h2v6H34z"/></g>
   <path fill="#a34b68" d="M15 28h20v7H15zM14 33h7v4h-7zM28 33h7v4h-7z"/>
@@ -4677,8 +4374,7 @@ async function sendChat(message) {
         timer = setTimeout(() => reject(new Error("Tiempo agotado")), 32000);
       }),
     ]);
-    if (!response || typeof response.text !== "string")
-      throw new Error("Respuesta no válida");
+    if (!response || typeof response.text !== "string") throw new Error("Respuesta no válida");
     if (response.simulated) pending.textContent = response.text.slice(0, 3000);
     else if (window.MiloRender) window.MiloRender.render(pending, response.text.slice(0, 3000));
     else pending.textContent = response.text.slice(0, 3000);
@@ -4692,8 +4388,7 @@ async function sendChat(message) {
     if (response.app && Apps[response.app]) {
       const button = document.createElement("button");
       button.className = "btn milo-launch";
-      button.textContent =
-        "ABRIR " + Apps[response.app].title.toUpperCase() + " ↗";
+      button.textContent = "ABRIR " + Apps[response.app].title.toUpperCase() + " ↗";
       button.onclick = () => {
         toggleMilo(false);
         launchPortfolioApp(response.app);
@@ -4702,7 +4397,10 @@ async function sendChat(message) {
     }
   } catch (error) {
     pending.textContent =
-      "No he podido conectar con la IA (" + (error?.message || "error de red") + "). " + getLocalReply(text).text;
+      "No he podido conectar con la IA (" +
+      (error?.message || "error de red") +
+      "). " +
+      getLocalReply(text).text;
     console.warn("[MiloAI]", error);
   } finally {
     clearTimeout(timer);
@@ -4728,10 +4426,8 @@ addChatMessage(
 $("#launch-settings").innerHTML = Apps.settings.icon;
 
 // INICIO: ejecutar directamente la secuencia Matrix original.
-typeLoginArt();
 
-/* EASTER EGG / VIRUS SIMULADO: solo cambia la vista durante esta sesión.
-   No modifica PROFILE, archivos, contactos, preferencias ni localStorage. */
+// src/apps/corruption.js: fuente de JOSEMI-OS.
 let corruptionActive = false;
 let corruptionObserver = null;
 const corruptionOriginals = new Map();
@@ -4798,6 +4494,8 @@ function stopCorruption() {
 document.addEventListener("keydown", (e) => {
   if (corruptionActive && e.key === "Escape") stopCorruption();
 });
+
+// src/bootstrap/viewport.js: fuente de JOSEMI-OS.
 window.openWindow = openWindow;
 window.chooseTheme = chooseTheme;
 // Espai visible real: barres del navegador, teclat virtual i canvis d'orientació.

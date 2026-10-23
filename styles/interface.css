@@ -1,0 +1,906 @@
+/* MEJORAS SOBRE JOSEMI-OS: se reutilizan colores, tipografías, Apps y ventanas. */
+/* La barra superior se retira; sus herramientas se conservan en el dock. */
+.desktop {
+  padding-top: 24px;
+}
+.desktop__hint {
+  top: 18px;
+}
+.icons {
+  top: 46px;
+  bottom: 100px;
+}
+.window.maximized {
+  top: 12px !important;
+  height: calc(100% - 104px) !important;
+}
+.taskbar {
+  left: 50%;
+  right: auto;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: max-content;
+  min-width: 260px;
+  max-width: calc(100vw - 240px);
+  height: 58px;
+  padding: 7px;
+  gap: 7px;
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--shell-panel) 94%, transparent);
+}
+.taskbar__start {
+  padding: 0 10px;
+  min-width: 42px;
+  height: 40px;
+}
+.taskbar__start > span:last-child {
+  display: none;
+}
+.taskbar__apps {
+  flex: 0 1 auto;
+  max-width: min(470px, 38vw);
+  overflow-x: auto;
+}
+.tb-app {
+  width: 40px;
+  min-width: 40px;
+  padding: 0;
+  justify-content: center;
+  height: 40px;
+}
+.tb-app > span:last-child {
+  display: none;
+}
+.tb-app .os-icon {
+  width: 28px;
+  height: 28px;
+}
+.taskbar__tray {
+  gap: 4px;
+  padding: 0 6px;
+}
+.tray__net {
+  display: none;
+}
+#desktop-tools {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.taskbar .shell-tools {
+  margin: 0;
+  gap: 3px;
+}
+.taskbar .shell-tools button {
+  width: 34px;
+  height: 38px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.taskbar .shell-tools button span,
+.taskbar .shell-tools kbd {
+  display: none;
+}
+.taskbar .shell-tools .os-icon {
+  width: 25px;
+  height: 25px;
+}
+.menu {
+  left: 50%;
+  bottom: 90px;
+  transform: translateX(-50%);
+  max-height: calc(100dvh - 110px);
+  overflow: auto;
+}
+/* Pixel art existente, con todos los accesos y el motor original. */
+.os-icon {
+  image-rendering: pixelated;
+}
+/* Secret Vault: las preguntas existentes tienen ahora pistas y dos tarjetas. */
+.vault-challenges {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 25px;
+}
+.vault-challenges .vault-question {
+  margin: 0;
+  padding: 22px;
+  min-width: 0;
+  border-radius: 8px;
+  background: var(--shell-raised);
+}
+.vault-question h3 {
+  min-height: 64px;
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 16px 0;
+}
+.vault-question form {
+  display: grid;
+  gap: 9px;
+}
+.vault-question input {
+  min-width: 0;
+  width: 100%;
+}
+.vault-question .vault-reward {
+  width: 100%;
+  font-size: 9px;
+}
+.vault-feedback {
+  min-height: 54px;
+}
+.vault-hint-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--shell-muted);
+  color: var(--shell-muted);
+  font: 10px var(--font-mono);
+  margin: 16px 0 0;
+  cursor: pointer;
+}
+.vault-note {
+  margin-top: 24px;
+}
+/* Milo: criatura coral pixel art y panel con el estilo de tu escritorio. */
+#mascot-button {
+  left: 18px;
+  right: auto;
+  bottom: 16px;
+  width: 66px;
+  height: 66px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+#mascot-button .mascot-svg {
+  width: 62px;
+  height: 62px;
+  filter: drop-shadow(3px 4px 0 #0005);
+}
+#mascot-button:hover {
+  background: none;
+}
+.milo-label {
+  position: absolute;
+  bottom: 65px;
+  right: 5px;
+  font: 10px var(--font-mono);
+  background: var(--shell-panel);
+  padding: 5px 10px;
+  border: 1px solid var(--shell-border);
+  border-radius: 4px;
+}
+#mascot-chat {
+  left: 18px;
+  right: auto;
+  bottom: 105px;
+  width: 370px;
+  height: min(520px, calc(100dvh - 135px));
+}
+.mascot-head > div > small {
+  display: block;
+  margin-top: 4px;
+  font: 10px var(--font-ui);
+  color: var(--shell-muted);
+}
+.milo-mode {
+  text-align: center;
+  font: 8px/1.5 var(--font-mono);
+  color: var(--shell-muted);
+  padding-bottom: 6px;
+}
+.milo-launch {
+  margin-top: 12px;
+  font-size: 9px;
+}
+.mascot-log p {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 820px) {
+  .desktop {
+    padding: 36px 12px 100px;
+  }
+  .icons {
+    top: auto;
+    bottom: auto;
+  }
+  .taskbar {
+    max-width: calc(100vw - 130px);
+    min-width: 0;
+    left: auto;
+    right: 12px;
+    transform: none;
+    height: 52px;
+    bottom: 14px;
+  }
+  .taskbar__tray {
+    display: none;
+  }
+  .taskbar__apps {
+    max-width: calc(100vw - 245px);
+  }
+  .taskbar .shell-tools {
+    gap: 0;
+  }
+  #launch-saver,
+  #launch-settings {
+    display: none;
+  }
+  .taskbar .shell-tools button {
+    width: 30px;
+  }
+  .window,
+  .window.maximized {
+    top: 12px !important;
+    height: calc(100dvh - 100px) !important;
+  }
+  .menu {
+    left: 12px;
+    transform: none;
+    bottom: 80px;
+    width: min(340px, calc(100vw - 24px));
+  }
+  .vault-challenges {
+    grid-template-columns: 1fr;
+  }
+  .vault-question h3 {
+    min-height: 0;
+  }
+}
+@media (max-width: 600px) {
+  #mascot-chat {
+    left: 10px;
+    right: 10px;
+    width: auto;
+    bottom: 95px;
+    height: min(520px, calc(100dvh - 120px));
+  }
+  #mascot-button {
+    left: 10px;
+    right: auto;
+    bottom: 12px;
+    width: 58px;
+    height: 58px;
+  }
+  #mascot-button .mascot-svg {
+    width: 54px;
+    height: 54px;
+  }
+  .milo-label {
+    display: none;
+  }
+}
+
+/* PIXEL ART PERSONALIZADO / 32×32: detalles nítidos también en el dock. */
+.icon .os-icon {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 3px 0 #0005);
+}
+.icon .glyph {
+  overflow: visible;
+}
+#mascot-button {
+  width: 92px;
+  height: 78px;
+  left: 18px;
+  right: auto;
+  bottom: 14px;
+}
+#mascot-button .mascot-svg {
+  width: 92px;
+  height: 78px;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 4px 0 #0005);
+}
+#mascot-button .milo-label {
+  bottom: 80px;
+  right: 22px;
+}
+.axolotl-tail {
+  transform-origin: 32px 28px;
+  animation: axolotlTail 3.6s steps(2, end) infinite;
+}
+.axolotl-gills {
+  transform-origin: 24px 18px;
+  animation: axolotlGills 4s steps(2, end) infinite;
+}
+@keyframes axolotlTail {
+  0%,
+  75%,
+  100% {
+    transform: none;
+  }
+  80%,
+  90% {
+    transform: translateY(-1px);
+  }
+}
+@keyframes axolotlGills {
+  0%,
+  70%,
+  100% {
+    transform: none;
+  }
+  75%,
+  85% {
+    transform: scaleX(1.035);
+  }
+}
+body.reduce-motion .axolotl-tail,
+body.reduce-motion .axolotl-gills {
+  animation: none;
+}
+
+/* Terminal inmersivo: el lienzo llena la pantalla; la firma ocupa el centro. */
+#os-screensaver {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  background: #020805;
+  color: #aef3c1;
+  cursor: none;
+  isolation: isolate;
+}
+#os-screensaver .saver-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+}
+#os-screensaver::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, #020805aa 5%, transparent 65%),
+    repeating-linear-gradient(0deg, #0002 0px, #0002 1px, transparent 1px, transparent 4px);
+}
+#os-screensaver .saver-terminal-head {
+  position: absolute;
+  inset: 28px 4vw auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font: 11px/1.6 var(--font-mono);
+  color: #61a883;
+  letter-spacing: 0.06em;
+}
+#os-screensaver .saver-command {
+  color: #9cd7b7;
+}
+#os-screensaver .saver-stage {
+  position: absolute;
+  inset: 16% 0 20%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+}
+#os-screensaver .saver-art {
+  flex: none;
+  width: auto;
+  max-width: 96vw;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0;
+  white-space: pre;
+  color: #b6f7cc;
+  -webkit-text-fill-color: currentColor;
+  background: none;
+  animation: none;
+  transform: none;
+  text-shadow:
+    0 0 15px #54f19466,
+    0 2px 0 #06190e;
+}
+#os-screensaver[data-scene="orbit"] .saver-art {
+  color: #a6e9e3;
+  text-shadow: 0 0 16px #60cfd866;
+}
+#os-screensaver .saver-subtitle {
+  max-width: 90vw;
+  text-align: center;
+  font: 11px/1.8 var(--font-mono);
+  letter-spacing: 0.22em;
+  color: #a2bfae;
+}
+#os-screensaver .saver-terminal-foot {
+  position: absolute;
+  left: 4vw;
+  right: 4vw;
+  bottom: 30px;
+  display: grid;
+  gap: 14px;
+  font: 11px/1.5 var(--font-mono);
+}
+#os-screensaver .saver-notes {
+  margin: 0;
+  letter-spacing: 0.02em;
+  color: #81cda5;
+  min-height: 2em;
+}
+#os-screensaver .saver-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  color: #4e896b;
+}
+#os-screensaver .saver-exit {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: #75a48b;
+  cursor: pointer;
+}
+#os-screensaver .saver-exit:focus-visible {
+  outline: 2px solid #aef3c1;
+  outline-offset: 5px;
+}
+#os-screensaver .saver-track {
+  height: 1px;
+  background: #173e2b;
+  width: 100%;
+}
+#os-screensaver .saver-progress {
+  display: block;
+  height: 1px;
+  background: #82d9ab;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+@media (max-width: 600px) {
+  .icon .os-icon {
+    width: 56px;
+    height: 56px;
+  }
+  #mascot-button {
+    width: 76px;
+    height: 65px;
+    left: 10px;
+    right: auto;
+    bottom: 12px;
+  }
+  #mascot-button .mascot-svg {
+    width: 76px;
+    height: 65px;
+  }
+  #os-screensaver .saver-terminal-head {
+    top: 18px;
+    display: block;
+    font-size: 9px;
+  }
+  #os-screensaver .saver-scene {
+    display: block;
+    margin-top: 8px;
+  }
+  #os-screensaver .saver-stage {
+    inset: 20% 0 28%;
+    gap: 24px;
+  }
+  #os-screensaver .saver-subtitle {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+  #os-screensaver .saver-terminal-foot {
+    bottom: 22px;
+    font-size: 10px;
+  }
+  #os-screensaver .saver-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* FONDOS PIXEL ART: centrados, sin parallax ni capas que emborronen los bloques. */
+body.has-pixel-wallpaper #bg {
+  inset: 0;
+  transform: none !important;
+  image-rendering: pixelated;
+  transition: none;
+}
+body.has-pixel-wallpaper #bg::before,
+body.has-pixel-wallpaper #bg::after,
+body.has-pixel-wallpaper #ascii-wall {
+  display: none;
+}
+body.has-pixel-wallpaper .icon .lbl {
+  text-shadow:
+    0 1px 3px #000,
+    0 0 8px #000;
+  background: #08101baa;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+body.has-pixel-wallpaper .desktop__hint {
+  color: #dbe4df;
+  text-shadow: 0 1px 3px #000;
+}
+.wallpaper-option--pixel {
+  padding: 8px 8px 12px;
+}
+.wallpaper-preview {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-position: center;
+  background-size: cover;
+  image-rendering: pixelated;
+  border-radius: 4px;
+  border: 1px solid #ffffff20;
+}
+.wallpaper-option--pixel b,
+.wallpaper-option--pixel small {
+  padding-inline: 4px;
+}
+/* Corrupción de arcade: aberración cromática y cortes breves, sin destellos de pantalla. */
+body.is-corrupted #desktop {
+  text-shadow:
+    -2px 0 #e4549766,
+    2px 0 #41d6df66;
+}
+body.is-corrupted .window .win__bar {
+  border-color: #dd5898;
+  color: #f79dcc;
+}
+body.is-corrupted .icon .glyph,
+body.is-corrupted #mascot-button svg {
+  filter: drop-shadow(-3px 0 #d9519677) drop-shadow(3px 0 #41e0d577) hue-rotate(60deg);
+}
+body.is-corrupted #bg {
+  filter: hue-rotate(75deg) saturate(1.8);
+}
+body.is-corrupted #desktop::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5000;
+  background: repeating-linear-gradient(0deg, transparent 0 5px, #ce469908 5px 7px);
+}
+body.is-corrupted .icons {
+  animation: corruption-slice 7s steps(1) infinite;
+}
+@keyframes corruption-slice {
+  0%,
+  88%,
+  94%,
+  100% {
+    transform: none;
+  }
+  89%,
+  92% {
+    transform: translateX(3px) skewX(1deg);
+  }
+  90%,
+  93% {
+    transform: translateX(-3px);
+  }
+}
+#corruption-recovery {
+  position: fixed;
+  z-index: 20000;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  max-width: calc(100% - 32px);
+  width: max-content;
+  padding: 12px 16px;
+  border: 1px solid #b95788;
+  background: #201024f5;
+  color: #ffd5e7;
+  box-shadow: 0 8px 24px #0008;
+  font: 11px var(--font-mono);
+}
+#corruption-recovery small {
+  display: block;
+  margin-top: 6px;
+  color: #dfadc7;
+  font-size: 10px;
+  line-height: 1.4;
+}
+#corruption-recovery button {
+  flex-shrink: 0;
+  background: #ffd5e7;
+  color: #261425;
+  padding: 9px 12px;
+  border: 0;
+  cursor: pointer;
+  font: 600 11px var(--font-mono);
+}
+body.reduce-motion.is-corrupted .icons {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.is-corrupted .icons {
+    animation: none;
+  }
+}
+@media (max-width: 600px) {
+  #corruption-recovery {
+    top: 8px;
+    gap: 10px;
+    padding: 10px;
+  }
+  #corruption-recovery b {
+    font-size: 10px;
+  }
+  #corruption-recovery button {
+    padding: 9px;
+    font-size: 10px;
+  }
+}
+
+/* Milo: bombolles amb Markdown segur, sense afectar altres finestres. */
+.mascot-log > .chat-message {
+  max-width: 94%;
+  width: fit-content;
+  margin: 7px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font: 12px/1.55 var(--font-ui, sans-serif);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.mascot-log > .chat-message.assistant {
+  align-self: flex-start;
+  white-space: normal;
+}
+.mascot-log > .chat-message.user {
+  align-self: flex-end;
+  white-space: pre-wrap;
+}
+.mascot-log > .chat-message.assistant p {
+  max-width: none;
+  margin: 0 0 9px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  white-space: normal;
+}
+.mascot-log > .chat-message.assistant > :last-child {
+  margin-bottom: 0;
+}
+.mascot-log > .chat-message.assistant strong {
+  font-weight: 750;
+  color: var(--shell-text, #edf7f0);
+}
+.mascot-log > .chat-message.assistant h4 {
+  font: 700 12px/1.4 var(--font-ui, sans-serif);
+  color: var(--shell-text, #edf7f0);
+  margin: 12px 0 6px;
+}
+.mascot-log > .chat-message.assistant :is(ul, ol) {
+  padding-left: 18px;
+  margin: 6px 0 10px;
+  list-style-position: outside;
+}
+.mascot-log > .chat-message.assistant ul {
+  list-style-type: disc;
+}
+.mascot-log > .chat-message.assistant ol {
+  list-style-type: decimal;
+}
+.mascot-log > .chat-message.assistant li {
+  margin: 4px 0;
+}
+.mascot-log > .chat-message.assistant li > :is(ul, ol) {
+  margin: 4px 0;
+}
+.mascot-log > .chat-message.assistant a {
+  color: var(--accent, #93d6a0);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.mascot-log > .chat-message.assistant a:hover {
+  opacity: 0.82;
+}
+.mascot-log > .chat-message.assistant code {
+  font: 11px/1.5 var(--font-mono, monospace);
+  background: rgba(0, 0, 0, 0.28);
+  padding: 1px 4px;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+.mascot-log > .chat-message.assistant pre {
+  max-width: 100%;
+  margin: 7px 0;
+  padding: 10px;
+  overflow-x: auto;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.38);
+}
+.mascot-log > .chat-message.assistant pre code {
+  background: none;
+  padding: 0;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+.mascot-log > .chat-message.assistant blockquote {
+  margin: 8px 0;
+  padding: 3px 0 3px 10px;
+  border-left: 2px solid var(--accent, #93d6a0);
+  color: var(--shell-muted, #a3b9aa);
+}
+.mascot-log > .chat-message.assistant hr {
+  border: 0;
+  border-top: 1px solid var(--shell-border, #395644);
+  margin: 10px 0;
+}
+.mascot-log > .chat-message.assistant .milo-table-scroll {
+  max-width: 100%;
+  margin: 8px 0 10px;
+  overflow-x: auto;
+}
+.mascot-log > .chat-message.assistant table {
+  border-collapse: collapse;
+  width: 100%;
+  font: inherit;
+  white-space: normal;
+}
+.mascot-log > .chat-message.assistant :is(th, td) {
+  text-align: left;
+  vertical-align: top;
+  border: 1px solid var(--shell-border, #395644);
+  padding: 6px;
+  overflow-wrap: anywhere;
+}
+.mascot-log > .chat-message.assistant th {
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 700;
+}
+
+/* Secret Vault: entrada ASCII y secretos detrás de dos candados. */
+.vault--personal {
+  position: relative;
+  min-height: 340px;
+}
+.vault-opening {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  border-radius: 12px;
+  background: var(--shell-panel, #08110d);
+  color: var(--accent);
+  font: 10px var(--font-mono);
+  letter-spacing: 0.12em;
+  perspective: 600px;
+  animation: vault-entry 1.8s steps(8, end) forwards;
+}
+.vault-ascii-door {
+  margin: 0;
+  font: 14px/1.25 var(--font-mono);
+  white-space: pre;
+  transform-origin: left center;
+  animation: vault-door 1.6s steps(7, end) forwards;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.vault-locks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+.vault-lock {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 18px;
+  padding: 28px 12px;
+  border: 1px solid var(--shell-border);
+  border-radius: 12px;
+  background: var(--shell-raised);
+  color: var(--shell-muted);
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
+}
+.vault-lock:hover,
+.vault-lock:focus-visible,
+.vault-lock[aria-expanded="true"],
+.vault-lock.unlocked {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--shell-panel));
+}
+.vault-lock:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.vault-lock-art {
+  margin: 0;
+  font: 18px/1.2 var(--font-mono);
+  white-space: pre;
+}
+.vault-lock-caption {
+  font: 10px var(--font-mono);
+  letter-spacing: 0.08em;
+}
+.vault--personal .vault-challenges {
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 18px;
+}
+.vault--personal .vault-question[hidden],
+.vault--personal .vault-reward[hidden] {
+  display: none;
+}
+.vault--personal .vault-question h3 {
+  min-height: 0;
+}
+@keyframes vault-door {
+  0%,
+  30% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(-105deg);
+    opacity: 0.2;
+  }
+}
+@keyframes vault-entry {
+  0%,
+  80% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@media (max-width: 480px) {
+  .vault-locks {
+    gap: 10px;
+  }
+  .vault-lock {
+    padding: 24px 8px;
+  }
+  .vault-lock-art {
+    font-size: 15px;
+  }
+  .vault-lock-caption {
+    font-size: 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vault-opening {
+    display: none;
+    animation: none;
+  }
+  .vault-ascii-door {
+    animation: none;
+  }
+}
+body.reduce-motion .vault-opening {
+  display: none;
+  animation: none;
+}

@@ -1,23 +1,12 @@
-/* JOSEMI ARCADE: Tetris, Pac-Man y Buscaminas.
-   Cada juego vive en su ventana. Comparten récords, sonido, bucle de animación y controles táctiles. */
+/* GENERADO: editar src/ o styles/ y ejecutar npm run build. Orden: sources.manifest.json. */
 (() => {
+  // src/games/shared.js: fuente de JOSEMI-OS.
   "use strict";
 
   /* ========================================================= UTILIDADES */
   // ALMACÉN: lee y guarda JSON en localStorage sin romper el juego si el navegador lo bloquea.
-  const read = (key, fallback) => {
-    try {
-      const value = JSON.parse(localStorage.getItem(key));
-      return value ?? fallback;
-    } catch {
-      return fallback;
-    }
-  };
-  const write = (key, value) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch {}
-  };
+  const read = OSStorage.readJSON;
+  const write = OSStorage.writeJSON;
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
   const shuffle = (list) => {
     for (let i = list.length - 1; i > 0; i--) {
@@ -49,7 +38,8 @@
         gain = audio.createGain();
       osc.type = type;
       osc.frequency.setValueAtTime(freq, start);
-      if (slide) osc.frequency.exponentialRampToValueAtTime(Math.max(30, freq + slide), start + duration);
+      if (slide)
+        osc.frequency.exponentialRampToValueAtTime(Math.max(30, freq + slide), start + duration);
       gain.gain.setValueAtTime(volume, start);
       gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
       osc.connect(gain);
@@ -89,7 +79,7 @@
     return ctx;
   }
   function label(ctx, str, x, y, size = 16, color = "#dbe9e0", align = "left", shadow = false) {
-    ctx.font = `${size}px VT323, monospace`;
+    ctx.font = `${size}px JetBrains Mono, monospace`;
     ctx.textAlign = align;
     ctx.textBaseline = "alphabetic";
     if (shadow) {
@@ -143,7 +133,7 @@
       .map(([x, y, w, h, c]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`)
       .join("")}</svg>`;
 
-  /* ========================================================= TETRIS */
+  // src/games/tetris.js: fuente de JOSEMI-OS.
   const T_COLS = 10,
     T_ROWS = 22,
     T_HIDDEN = 2,
@@ -216,29 +206,128 @@
   );
   // SRS: pruebas de desplazamiento («wall kicks») con el eje y hacia arriba, como en la guía oficial.
   const KICKS = {
-    "0>1": [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
-    "1>0": [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
-    "1>2": [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
-    "2>1": [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
-    "2>3": [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
-    "3>2": [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]],
-    "3>0": [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]],
-    "0>3": [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
+    "0>1": [
+      [0, 0],
+      [-1, 0],
+      [-1, 1],
+      [0, -2],
+      [-1, -2],
+    ],
+    "1>0": [
+      [0, 0],
+      [1, 0],
+      [1, -1],
+      [0, 2],
+      [1, 2],
+    ],
+    "1>2": [
+      [0, 0],
+      [1, 0],
+      [1, -1],
+      [0, 2],
+      [1, 2],
+    ],
+    "2>1": [
+      [0, 0],
+      [-1, 0],
+      [-1, 1],
+      [0, -2],
+      [-1, -2],
+    ],
+    "2>3": [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, -2],
+      [1, -2],
+    ],
+    "3>2": [
+      [0, 0],
+      [-1, 0],
+      [-1, -1],
+      [0, 2],
+      [-1, 2],
+    ],
+    "3>0": [
+      [0, 0],
+      [-1, 0],
+      [-1, -1],
+      [0, 2],
+      [-1, 2],
+    ],
+    "0>3": [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, -2],
+      [1, -2],
+    ],
   };
   const KICKS_I = {
-    "0>1": [[0, 0], [-2, 0], [1, 0], [-2, -1], [1, 2]],
-    "1>0": [[0, 0], [2, 0], [-1, 0], [2, 1], [-1, -2]],
-    "1>2": [[0, 0], [-1, 0], [2, 0], [-1, 2], [2, -1]],
-    "2>1": [[0, 0], [1, 0], [-2, 0], [1, -2], [-2, 1]],
-    "2>3": [[0, 0], [2, 0], [-1, 0], [2, 1], [-1, -2]],
-    "3>2": [[0, 0], [-2, 0], [1, 0], [-2, -1], [1, 2]],
-    "3>0": [[0, 0], [1, 0], [-2, 0], [1, -2], [-2, 1]],
-    "0>3": [[0, 0], [-1, 0], [2, 0], [-1, 2], [2, -1]],
+    "0>1": [
+      [0, 0],
+      [-2, 0],
+      [1, 0],
+      [-2, -1],
+      [1, 2],
+    ],
+    "1>0": [
+      [0, 0],
+      [2, 0],
+      [-1, 0],
+      [2, 1],
+      [-1, -2],
+    ],
+    "1>2": [
+      [0, 0],
+      [-1, 0],
+      [2, 0],
+      [-1, 2],
+      [2, -1],
+    ],
+    "2>1": [
+      [0, 0],
+      [1, 0],
+      [-2, 0],
+      [1, -2],
+      [-2, 1],
+    ],
+    "2>3": [
+      [0, 0],
+      [2, 0],
+      [-1, 0],
+      [2, 1],
+      [-1, -2],
+    ],
+    "3>2": [
+      [0, 0],
+      [-2, 0],
+      [1, 0],
+      [-2, -1],
+      [1, 2],
+    ],
+    "3>0": [
+      [0, 0],
+      [1, 0],
+      [-2, 0],
+      [1, -2],
+      [-2, 1],
+    ],
+    "0>3": [
+      [0, 0],
+      [-1, 0],
+      [2, 0],
+      [-1, 2],
+      [2, -1],
+    ],
   };
   const rotateCW = (m) => m[0].map((_, i) => m.map((row) => row[i]).reverse());
   const rotateCCW = (m) => m[0].map((_, i) => m.map((row) => row[row.length - 1 - i]));
   const TETRIS_MODES = {
-    marathon: { label: "MARATÓN", hint: "Partida infinita: cada 10 líneas subes de nivel y la caída se acelera." },
+    marathon: {
+      label: "MARATÓN",
+      hint: "Partida infinita: cada 10 líneas subes de nivel y la caída se acelera.",
+    },
     sprint: { label: "SPRINT 40", hint: "Limpia 40 líneas en el menor tiempo posible." },
     ultra: { label: "ULTRA 2:00", hint: "Consigue la mayor puntuación posible en dos minutos." },
   };
@@ -262,7 +351,10 @@
     <div class="game jg jg-tetris">
       <div class="jg-top">
         <div class="jg-modes" role="group" aria-label="Modo de juego">${Object.entries(TETRIS_MODES)
-          .map(([id, m]) => `<button type="button" class="jg-chip" data-mode="${id}" aria-pressed="false">${m.label}</button>`)
+          .map(
+            ([id, m]) =>
+              `<button type="button" class="jg-chip" data-mode="${id}" aria-pressed="false">${m.label}</button>`,
+          )
           .join("")}</div>
         <div class="jg-actions">
           <button type="button" class="btn btn--accent" data-act="start">JUGAR</button>
@@ -309,7 +401,9 @@
     function selectMode(id) {
       mode = id;
       write("josemi-tetris-mode", id);
-      body.querySelectorAll("[data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === id)));
+      body
+        .querySelectorAll("[data-mode]")
+        .forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === id)));
       hintEl.textContent = TETRIS_MODES[id].hint;
     }
 
@@ -537,7 +631,8 @@
         difficult = false;
       if (spin) {
         points = (spin === "mini" ? [100, 200, 400, 400] : [400, 800, 1200, 1600])[n];
-        name = (spin === "mini" ? "T-SPIN MINI" : "T-SPIN") + ["", " SIMPLE", " DOBLE", " TRIPLE"][n];
+        name =
+          (spin === "mini" ? "T-SPIN MINI" : "T-SPIN") + ["", " SIMPLE", " DOBLE", " TRIPLE"][n];
         difficult = n > 0;
       } else if (n) {
         points = [0, 100, 300, 500, 800][n];
@@ -555,7 +650,12 @@
         points += 50 * Math.max(0, g.combo);
         const rest = g.board.every((row, y) => full.includes(y) || row.every((c) => !c));
         if (rest) points += [0, 800, 1200, 1800, 2000][n];
-        if (name) popup(name, spin ? "#d4a5ff" : n === 4 ? "#4fd8e8" : "#e9f5ee", n === 4 || spin ? 30 : 24);
+        if (name)
+          popup(
+            name,
+            spin ? "#d4a5ff" : n === 4 ? "#4fd8e8" : "#e9f5ee",
+            n === 4 || spin ? 30 : 24,
+          );
         if (g.combo > 0) popup(`COMBO ×${g.combo}`, "#f2d055", 20);
         if (rest) popup("¡PERFECT CLEAR!", "#6fd479", 26);
         if (spin) T_SFX.tspin();
@@ -762,7 +862,9 @@
         ph = (Math.max(...ys) - minY + 1) * size,
         ox = Math.round(x + (w - pw) / 2),
         oy = Math.round(y + (h - ph) / 2);
-      cells.forEach(([cx, cy]) => block(ox + (cx - minX) * size, oy + (cy - minY) * size, type, size, alpha));
+      cells.forEach(([cx, cy]) =>
+        block(ox + (cx - minX) * size, oy + (cy - minY) * size, type, size, alpha),
+      );
     }
     function stat(name, value, y, color = "#e9f5ee") {
       label(ctx, name, 14, y, 15, "#7d9488");
@@ -782,7 +884,11 @@
       ctx.fillStyle = "#050807";
       ctx.fillRect(0, 0, W, H);
       ctx.save();
-      if (g && g.shake > 0) ctx.translate(Math.round((Math.random() - 0.5) * g.shake), Math.round((Math.random() - 0.5) * g.shake));
+      if (g && g.shake > 0)
+        ctx.translate(
+          Math.round((Math.random() - 0.5) * g.shake),
+          Math.round((Math.random() - 0.5) * g.shake),
+        );
       // Columna izquierda: pieza guardada y marcador.
       label(ctx, "GUARDAR", 14, 15, 15, "#7d9488");
       frame(12, 20, 80, 60);
@@ -797,7 +903,11 @@
         stat("PUNTOS", String(g?.score || 0), 104);
         stat("NIVEL", String(g?.level || 1), 156);
         stat("LÍNEAS", String(g?.lines || 0), 208);
-        stat(mode === "ultra" ? "QUEDA" : "TIEMPO", clock(mode === "ultra" ? 120000 - (g?.time || 0) : g?.time || 0, 0), 260);
+        stat(
+          mode === "ultra" ? "QUEDA" : "TIEMPO",
+          clock(mode === "ultra" ? 120000 - (g?.time || 0) : g?.time || 0, 0),
+          260,
+        );
         stat("RÉCORD", r, 312, "#f2d055");
       }
       if (g?.b2b) label(ctx, "B2B ACTIVO", 14, 386, 16, "#4fd8e8");
@@ -822,13 +932,18 @@
       ctx.fillStyle = "#070c0a";
       ctx.fillRect(BX, BY, BW, BH);
       ctx.fillStyle = "#13201a";
-      for (let x = 1; x < T_COLS; x++) for (let y = 1; y < T_ROWS - T_HIDDEN; y++) ctx.fillRect(BX + x * T_CELL - 1, BY + y * T_CELL - 1, 2, 2);
+      for (let x = 1; x < T_COLS; x++)
+        for (let y = 1; y < T_ROWS - T_HIDDEN; y++)
+          ctx.fillRect(BX + x * T_CELL - 1, BY + y * T_CELL - 1, 2, 2);
       if (g) {
         const grayRows = g.phase === "over" ? Math.floor(g.phaseTime / 0.035) : 0;
         g.board.forEach((row, y) => {
           if (y < T_HIDDEN) return;
           const gray = T_ROWS - y <= grayRows;
-          row.forEach((type, x) => type && block(BX + x * T_CELL, BY + (y - T_HIDDEN) * T_CELL, gray ? "X" : type));
+          row.forEach(
+            (type, x) =>
+              type && block(BX + x * T_CELL, BY + (y - T_HIDDEN) * T_CELL, gray ? "X" : type),
+          );
         });
         // Animación de líneas: destello que se cierra hacia el centro.
         if (g.phase === "clear") {
@@ -867,7 +982,17 @@
           // El bloqueo inminente se nota: la pieza parpadea durante el retardo.
           const fading = g.lockTimer > 0 ? 1 - (g.lockTimer / LOCK_DELAY) * 0.45 : 1;
           p.shape.forEach((row, y) =>
-            row.forEach((v, x) => v && block(BX + (p.x + x) * T_CELL, BY + (p.y + y - T_HIDDEN) * T_CELL, p.type, T_CELL, fading)),
+            row.forEach(
+              (v, x) =>
+                v &&
+                block(
+                  BX + (p.x + x) * T_CELL,
+                  BY + (p.y + y - T_HIDDEN) * T_CELL,
+                  p.type,
+                  T_CELL,
+                  fading,
+                ),
+            ),
           );
           ctx.restore();
         }
@@ -893,12 +1018,22 @@
           ["C GUARDAR   P PAUSA", 17],
           ["ENTER O JUGAR", 20, "#4fd8e8"],
         ]);
-      else if (g.phase === "countdown") overlay([[String(3 - Math.floor(g.phaseTime / 0.6)), 72, "#f2d055"], ["PREPÁRATE", 20]]);
-      else if (paused) overlay([["PAUSA", 40, "#f2d055"], ["P O ESC PARA SEGUIR", 18]]);
+      else if (g.phase === "countdown")
+        overlay([
+          [String(3 - Math.floor(g.phaseTime / 0.6)), 72, "#f2d055"],
+          ["PREPÁRATE", 20],
+        ]);
+      else if (paused)
+        overlay([
+          ["PAUSA", 40, "#f2d055"],
+          ["P O ESC PARA SEGUIR", 18],
+        ]);
       else if (g.phase === "over" && g.phaseTime > 0.8)
         overlay([
           ["FIN DE PARTIDA", 30, "#ef6a6a"],
-          mode === "sprint" ? [`${Math.min(40, g.lines)}/40 LÍNEAS`, 22] : [`${g.score} PUNTOS`, 24],
+          mode === "sprint"
+            ? [`${Math.min(40, g.lines)}/40 LÍNEAS`, 22]
+            : [`${g.score} PUNTOS`, 24],
           [`${g.lines} LÍNEAS · COMBO MÁX ${Math.max(0, g.maxCombo)}`, 16, "#9fb3a7"],
           ...(g.newRecord ? [["¡NUEVO RÉCORD!", 22, "#f2d055"]] : []),
           ["ENTER PARA REPETIR", 18, "#4fd8e8"],
@@ -907,7 +1042,11 @@
         overlay([
           [mode === "sprint" ? "¡SPRINT COMPLETADO!" : "¡TIEMPO!", 28, "#6fd479"],
           mode === "sprint" ? [clock(g.time), 36, "#e9f5ee"] : [`${g.score} PUNTOS`, 30, "#e9f5ee"],
-          [`${g.pieces} PIEZAS · ${(g.pieces / Math.max(1, g.time / 1000)).toFixed(2)} PPS`, 16, "#9fb3a7"],
+          [
+            `${g.pieces} PIEZAS · ${(g.pieces / Math.max(1, g.time / 1000)).toFixed(2)} PPS`,
+            16,
+            "#9fb3a7",
+          ],
           ...(g.newRecord ? [["¡NUEVO RÉCORD!", 22, "#f2d055"]] : []),
           ["ENTER PARA REPETIR", 18, "#4fd8e8"],
         ]);
@@ -977,7 +1116,8 @@
     }
     const keydown = (e) => {
       if (e.target.closest("input, select, textarea, a, [contenteditable='true']")) return;
-      if (e.target.closest("button") && !/^(Arrow(Up|Down|Left|Right)|[wasd])$/i.test(e.key)) return;
+      if (e.target.closest("button") && !/^(Arrow(Up|Down|Left|Right)|[wasd])$/i.test(e.key))
+        return;
       const action = KEYS[e.key.toLowerCase()];
       if (!action) return;
       e.preventDefault();
@@ -1079,8 +1219,7 @@
     requestAnimationFrame(() => focusGame(win));
   };
 
-  /* ========================================================= PAC-MAN */
-  // LABERINTO PROPIO: # pared, . punto, o energía, - puerta, G casa de fantasmas, P salida de Pac-Man.
+  // src/games/pacman.js: fuente de JOSEMI-OS.
   const PAC_MAZE = [
     "#####################",
     "#.........#.........#",
@@ -1119,10 +1258,42 @@
   // Orden de desempate clásico: arriba, izquierda, abajo, derecha.
   const PAC_ORDER = [PAC_DIRS.up, PAC_DIRS.left, PAC_DIRS.down, PAC_DIRS.right];
   const PAC_GHOSTS = [
-    { id: "blinky", name: "BLINKY", role: "PERSEGUIDOR", color: "#ff4b4b", corner: { x: PAC_COLS - 2, y: -3 }, start: { x: 10, y: 7 }, release: [0, 0] },
-    { id: "pinky", name: "PINKY", role: "EMBOSCADA", color: "#ffa3e0", corner: { x: 1, y: -3 }, start: { x: 10, y: 9 }, release: [0, 0.6] },
-    { id: "inky", name: "INKY", role: "IMPREDECIBLE", color: "#48e0ff", corner: { x: PAC_COLS - 1, y: PAC_ROWS + 1 }, start: { x: 9, y: 9 }, release: [30, 5] },
-    { id: "clyde", name: "CLYDE", role: "DESPISTADO", color: "#ffb347", corner: { x: 0, y: PAC_ROWS + 1 }, start: { x: 11, y: 9 }, release: [60, 10] },
+    {
+      id: "blinky",
+      name: "BLINKY",
+      role: "PERSEGUIDOR",
+      color: "#ff4b4b",
+      corner: { x: PAC_COLS - 2, y: -3 },
+      start: { x: 10, y: 7 },
+      release: [0, 0],
+    },
+    {
+      id: "pinky",
+      name: "PINKY",
+      role: "EMBOSCADA",
+      color: "#ffa3e0",
+      corner: { x: 1, y: -3 },
+      start: { x: 10, y: 9 },
+      release: [0, 0.6],
+    },
+    {
+      id: "inky",
+      name: "INKY",
+      role: "IMPREDECIBLE",
+      color: "#48e0ff",
+      corner: { x: PAC_COLS - 1, y: PAC_ROWS + 1 },
+      start: { x: 9, y: 9 },
+      release: [30, 5],
+    },
+    {
+      id: "clyde",
+      name: "CLYDE",
+      role: "DESPISTADO",
+      color: "#ffb347",
+      corner: { x: 0, y: PAC_ROWS + 1 },
+      start: { x: 11, y: 9 },
+      release: [60, 10],
+    },
   ];
   const PAC_FRUITS = [
     { name: "CEREZA", points: 100, color: "#ff3b4e" },
@@ -1158,7 +1329,11 @@
   const P_SFX = {
     waka: () => {
       wakaFlip = !wakaFlip;
-      tone(wakaFlip ? 330 : 260, 0.07, { type: "triangle", volume: 0.05, slide: wakaFlip ? -90 : 90 });
+      tone(wakaFlip ? 330 : 260, 0.07, {
+        type: "triangle",
+        volume: 0.05,
+        slide: wakaFlip ? -90 : 90,
+      });
     },
     power: () => tone(140, 0.4, { type: "sawtooth", volume: 0.035, slide: 260 }),
     ghost: () => tone(200, 0.35, { volume: 0.04, slide: 1200 }),
@@ -1166,8 +1341,18 @@
     life: () => melody([1046, 0, 1046, 0, 1046], 0.08, { volume: 0.035 }),
     death: () => tone(700, 1.2, { type: "triangle", volume: 0.05, slide: -620 }),
     start: () => {
-      melody([494, 988, 740, 622, 988, 740, 622, 0, 523, 1046, 784, 659, 1046, 784, 659, 0, 494, 988, 740, 622, 988, 740, 622, 587, 622, 659, 659, 698, 740, 784, 988], 0.105, { volume: 0.035 });
-      melody([247, 0, 247, 0, 247, 0, 247, 0, 262, 0, 262, 0, 262, 0, 262], 0.21, { type: "triangle", volume: 0.018 });
+      melody(
+        [
+          494, 988, 740, 622, 988, 740, 622, 0, 523, 1046, 784, 659, 1046, 784, 659, 0, 494, 988,
+          740, 622, 988, 740, 622, 587, 622, 659, 659, 698, 740, 784, 988,
+        ],
+        0.105,
+        { volume: 0.035 },
+      );
+      melody([247, 0, 247, 0, 247, 0, 247, 0, 262, 0, 262, 0, 262, 0, 262], 0.21, {
+        type: "triangle",
+        volume: 0.018,
+      });
     },
     clear: () => melody([523, 659, 784, 1046, 784, 1046], 0.08, { volume: 0.035 }),
   };
@@ -1231,13 +1416,21 @@
       layer.height = MH * 2;
       const c = layer.getContext("2d");
       c.scale(2, 2);
-      const isWall = (x, y) => (x < 0 || x >= PAC_COLS || y < 0 || y >= PAC_ROWS ? y !== PAC_TUNNEL : "#-".includes(PAC_MAZE[y][x]));
+      const isWall = (x, y) =>
+        x < 0 || x >= PAC_COLS || y < 0 || y >= PAC_ROWS
+          ? y !== PAC_TUNNEL
+          : "#-".includes(PAC_MAZE[y][x]);
       for (let y = 0; y < PAC_ROWS; y++)
         for (let x = 0; x < PAC_COLS; x++) {
           if (PAC_MAZE[y][x] !== "#") continue;
           const px = x * T,
             py = y * T,
-            open = { t: !isWall(x, y - 1), b: !isWall(x, y + 1), l: !isWall(x - 1, y), r: !isWall(x + 1, y) };
+            open = {
+              t: !isWall(x, y - 1),
+              b: !isWall(x, y + 1),
+              l: !isWall(x - 1, y),
+              r: !isWall(x + 1, y),
+            };
           c.fillStyle = fill;
           c.fillRect(px, py, T, T);
           c.fillStyle = edge;
@@ -1250,7 +1443,12 @@
           if (open.l) c.fillRect(px + 3, y0, 2, y1 - y0);
           if (open.r) c.fillRect(px + T - 5, y0, 2, y1 - y0);
           // Esquinas interiores: une los contornos de las paredes vecinas.
-          [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([dx, dy]) => {
+          [
+            [-1, -1],
+            [1, -1],
+            [-1, 1],
+            [1, 1],
+          ].forEach(([dx, dy]) => {
             if (isWall(x + dx, y) && isWall(x, y + dy) && !isWall(x + dx, y + dy)) {
               c.fillRect(dx < 0 ? px : px + T - 5, dy < 0 ? py + 3 : py + T - 5, 5, 2);
               c.fillRect(dx < 0 ? px + 3 : px + T - 5, dy < 0 ? py : py + T - 5, 2, 5);
@@ -1282,7 +1480,9 @@
       P_SFX.start();
     }
     function buildLevel() {
-      game.pellets = PAC_MAZE.map((row) => [...row].map((c) => (c === "." ? 1 : c === "o" ? 2 : 0)));
+      game.pellets = PAC_MAZE.map((row) =>
+        [...row].map((c) => (c === "." ? 1 : c === "o" ? 2 : 0)),
+      );
       game.left = game.pellets.flat().filter(Boolean).length;
       game.eaten = 0;
       game.fresh = true;
@@ -1290,7 +1490,14 @@
       resetActors();
     }
     function resetActors() {
-      game.pac = { x: PAC_HOME.x, y: PAC_HOME.y, dir: { ...PAC_DIRS.left }, facing: PAC_DIRS.left, prog: 0, anim: 0 };
+      game.pac = {
+        x: PAC_HOME.x,
+        y: PAC_HOME.y,
+        dir: { ...PAC_DIRS.left },
+        facing: PAC_DIRS.left,
+        prog: 0,
+        anim: 0,
+      };
       queued = null;
       game.ghosts = PAC_GHOSTS.map((spec) => ({
         ...spec,
@@ -1319,7 +1526,8 @@
     }
     function ghostSpeed(gh) {
       if (gh.state === "eyes") return BASE * 1.7;
-      if (gh.y === PAC_TUNNEL && (gh.x < 5 || gh.x > PAC_COLS - 6)) return BASE * [0.4, 0.45, 0.5][tier()];
+      if (gh.y === PAC_TUNNEL && (gh.x < 5 || gh.x > PAC_COLS - 6))
+        return BASE * [0.4, 0.45, 0.5][tier()];
       if (gh.fright) return BASE * [0.5, 0.55, 0.6][tier()];
       return BASE * ([0.75, 0.85, 0.95][tier()] + (gh.id === "blinky" && elroy() ? 0.06 : 0));
     }
@@ -1331,7 +1539,13 @@
         game.bonusLife = true;
         game.lives++;
         P_SFX.life();
-        game.popups.push({ text: "¡VIDA EXTRA!", x: W / 2, y: TOP + 11.5 * T, life: 1.6, color: "#6fd479" });
+        game.popups.push({
+          text: "¡VIDA EXTRA!",
+          x: W / 2,
+          y: TOP + 11.5 * T,
+          life: 1.6,
+          color: "#6fd479",
+        });
       }
     }
     function eatAt(x, y) {
@@ -1347,7 +1561,8 @@
         addScore(50);
         frighten();
       }
-      if (game.eaten === 70 || game.eaten === 170) game.fruit = { ...PAC_FRUITS[Math.min(game.level - 1, PAC_FRUITS.length - 1)], time: 9.5 };
+      if (game.eaten === 70 || game.eaten === 170)
+        game.fruit = { ...PAC_FRUITS[Math.min(game.level - 1, PAC_FRUITS.length - 1)], time: 9.5 };
       if (!game.left) {
         game.phase = "clear";
         game.phaseTime = 0;
@@ -1368,7 +1583,8 @@
     function movePac(dt) {
       const p = game.pac;
       p.anim += dt;
-      if (queued && (p.dir.x || p.dir.y) && queued.x === -p.dir.x && queued.y === -p.dir.y) reverse(p);
+      if (queued && (p.dir.x || p.dir.y) && queued.x === -p.dir.x && queued.y === -p.dir.y)
+        reverse(p);
       if (!p.dir.x && !p.dir.y) {
         if (!queued || !canGo(p.x, p.y, queued)) return;
         p.dir = { ...queued };
@@ -1405,9 +1621,12 @@
       return { x: p.x, y: p.y };
     }
     function chooseDir(gh) {
-      const options = PAC_ORDER.filter((d) => !(d.x === -gh.dir.x && d.y === -gh.dir.y) && canGo(gh.x, gh.y, d));
+      const options = PAC_ORDER.filter(
+        (d) => !(d.x === -gh.dir.x && d.y === -gh.dir.y) && canGo(gh.x, gh.y, d),
+      );
       if (!options.length) return { x: -gh.dir.x, y: -gh.dir.y };
-      if (gh.fright && gh.state === "normal") return options[Math.floor(Math.random() * options.length)];
+      if (gh.fright && gh.state === "normal")
+        return options[Math.floor(Math.random() * options.length)];
       const t = target(gh);
       let best = options[0],
         bestDist = Infinity;
@@ -1430,12 +1649,23 @@
       if (gh.state === "house") {
         gh.fy = gh.start.y + Math.sin(game.roundTime * 7 + gh.start.x) * 0.25;
         const [dots, seconds] = gh.release;
-        if ((game.fresh && game.eaten >= dots && game.roundTime >= seconds * 0.3) || game.roundTime >= seconds) gh.state = "leaving";
+        if (
+          (game.fresh && game.eaten >= dots && game.roundTime >= seconds * 0.3) ||
+          game.roundTime >= seconds
+        )
+          gh.state = "leaving";
         return;
       }
       if (gh.state === "leaving") {
         if (approach(gh, PAC_DOOR.x, PAC_DOOR.y, 4 * dt)) {
-          Object.assign(gh, { state: "normal", free: false, x: PAC_DOOR.x, y: PAC_DOOR.y, prog: 0, dir: { ...PAC_DIRS.left } });
+          Object.assign(gh, {
+            state: "normal",
+            free: false,
+            x: PAC_DOOR.x,
+            y: PAC_DOOR.y,
+            prog: 0,
+            dir: { ...PAC_DIRS.left },
+          });
         }
         return;
       }
@@ -1472,7 +1702,13 @@
           game.ghostCombo = Math.min(3, game.ghostCombo + 1);
           addScore(points);
           const gp = pos(gh);
-          game.popups.push({ text: String(points), x: gp.x * T + T / 2, y: TOP + gp.y * T + T / 2 + 4, life: 0.9, color: "#48e0ff" });
+          game.popups.push({
+            text: String(points),
+            x: gp.x * T + T / 2,
+            y: TOP + gp.y * T + T / 2 + 4,
+            life: 0.9,
+            color: "#48e0ff",
+          });
           Object.assign(gh, { state: "eyes", fright: false });
           game.phase = "eat";
           game.phaseTime = 0;
@@ -1487,7 +1723,13 @@
       }
       if (game.fruit && game.pac.x === 10 && game.pac.y === 11 && near(pp, { x: 10, y: 11 })) {
         addScore(game.fruit.points);
-        game.popups.push({ text: String(game.fruit.points), x: 10 * T + T / 2, y: TOP + 11 * T + 12, life: 1.4, color: "#ffb8de" });
+        game.popups.push({
+          text: String(game.fruit.points),
+          x: 10 * T + T / 2,
+          y: TOP + 11 * T + 12,
+          life: 1.4,
+          color: "#ffb8de",
+        });
         game.fruits.push(game.fruit);
         game.fruit = null;
         P_SFX.fruit();
@@ -1606,7 +1848,10 @@
         for (let sx = -7; sx <= 8; sx++) {
           const forward = dir.x < 0 ? -sx : dir.x > 0 ? sx : dir.y < 0 ? -sy : sy,
             across = dir.y ? sx : sy,
-            inside = sx <= 7 && sx * sx + sy * sy <= r2 && !(forward > 0 && Math.abs(across) < forward * open);
+            inside =
+              sx <= 7 &&
+              sx * sx + sy * sy <= r2 &&
+              !(forward > 0 && Math.abs(across) < forward * open);
           if (inside && start === null) start = sx;
           else if (!inside && start !== null) {
             ctx.fillRect(cx + start, cy + sy, sx - start, 1);
@@ -1673,14 +1918,19 @@
       const flash = game?.phase === "clear" && Math.floor(game.phaseTime * 4) % 2 === 1;
       ctx.drawImage(flash ? wallsFlash : walls, 0, TOP, W, MH);
       // Puntos y energía.
-      const pellets = game?.pellets || PAC_MAZE.map((row) => [...row].map((c) => (c === "." ? 1 : c === "o" ? 2 : 0)));
+      const pellets =
+        game?.pellets ||
+        PAC_MAZE.map((row) => [...row].map((c) => (c === "." ? 1 : c === "o" ? 2 : 0)));
       ctx.fillStyle = "#f6d7a7";
       pellets.forEach((row, y) =>
         row.forEach((v, x) => {
           const px = x * T,
             py = TOP + y * T;
           if (v === 1) ctx.fillRect(px + 7, py + 7, 2, 2);
-          else if (v === 2 && (!game || game.phase !== "play" || Math.floor(attract * 4) % 2 === 0)) {
+          else if (
+            v === 2 &&
+            (!game || game.phase !== "play" || Math.floor(attract * 4) % 2 === 0)
+          ) {
             ctx.fillRect(px + 5, py + 4, 6, 8);
             ctx.fillRect(px + 4, py + 5, 8, 6);
           }
@@ -1696,8 +1946,11 @@
       label(ctx, "NIVEL", W - 6, 11, 13, "#7d9488", "right");
       label(ctx, String(game?.level || 1), W - 6, 23, 17, "#f6f0dc", "right");
       const reserve = game ? Math.max(0, game.lives - (game.phase === "over" ? 0 : 1)) : 2;
-      for (let i = 0; i < Math.min(reserve, 6); i++) drawPac(12 + i * 18, TOP + MH + 13, PAC_DIRS.left, 0.6, 6);
-      (game?.fruits || []).slice(-6).forEach((f, i) => drawFruit(f, W - 12 - i * 18, TOP + MH + 14));
+      for (let i = 0; i < Math.min(reserve, 6); i++)
+        drawPac(12 + i * 18, TOP + MH + 13, PAC_DIRS.left, 0.6, 6);
+      (game?.fruits || [])
+        .slice(-6)
+        .forEach((f, i) => drawFruit(f, W - 12 - i * 18, TOP + MH + 14));
       if (!game) {
         attractScreen();
         return;
@@ -1708,13 +1961,16 @@
       ctx.clip();
       const at = (p, dx = 0) => [(p.x + dx) * T + T / 2, TOP + p.y * T + T / 2];
       if (game.fruit) drawFruit(game.fruit, ...at({ x: 10, y: 11 }));
-      const showGhosts = !["dying", "clear"].includes(game.phase) || (game.phase === "dying" && game.phaseTime < 0.5);
+      const showGhosts =
+        !["dying", "clear"].includes(game.phase) ||
+        (game.phase === "dying" && game.phaseTime < 0.5);
       if (showGhosts)
         game.ghosts.forEach((gh) => {
           if (gh === game.hidden) return;
           const p = pos(gh);
           drawGhost(gh, ...at(p));
-          if (p.y === PAC_TUNNEL && (p.x < 1 || p.x > PAC_COLS - 2)) drawGhost(gh, ...at(p, p.x < 1 ? PAC_COLS : -PAC_COLS));
+          if (p.y === PAC_TUNNEL && (p.x < 1 || p.x > PAC_COLS - 2))
+            drawGhost(gh, ...at(p, p.x < 1 ? PAC_COLS : -PAC_COLS));
         });
       const pp = pos(game.pac);
       if (game.phase === "dying") {
@@ -1722,21 +1978,39 @@
         if (t < 1) drawPac(...at(pp), PAC_DIRS.up, t * 6, 7 * (1 - t * 0.35));
       } else if (game.phase !== "eat") {
         const moving = game.pac.dir.x || game.pac.dir.y,
-          open = game.phase === "play" && moving ? [0.05, 0.55, 1.05, 0.55][Math.floor(game.pac.anim * 18) % 4] : 0.55;
+          open =
+            game.phase === "play" && moving
+              ? [0.05, 0.55, 1.05, 0.55][Math.floor(game.pac.anim * 18) % 4]
+              : 0.55;
         drawPac(...at(pp), game.pac.facing, open);
-        if (pp.y === PAC_TUNNEL && (pp.x < 1 || pp.x > PAC_COLS - 2)) drawPac(...at(pp, pp.x < 1 ? PAC_COLS : -PAC_COLS), game.pac.facing, open);
+        if (pp.y === PAC_TUNNEL && (pp.x < 1 || pp.x > PAC_COLS - 2))
+          drawPac(...at(pp, pp.x < 1 ? PAC_COLS : -PAC_COLS), game.pac.facing, open);
       }
       ctx.restore();
-      game.popups.forEach((p) => label(ctx, p.text, p.x, Math.round(p.y), 15, p.color, "center", true));
+      game.popups.forEach((p) =>
+        label(ctx, p.text, p.x, Math.round(p.y), 15, p.color, "center", true),
+      );
       const textY = TOP + 11 * T + 13;
-      if (game.phase === "ready") centerText(game.level > 1 && game.readyFor === 2 ? `NIVEL ${game.level}` : "¡PREPARADO!", textY, 20, "#ffd51f");
-      if (game.phase === "over" && game.phaseTime <= 1) centerText("FIN DE PARTIDA", textY, 20, "#ff4b4b");
+      if (game.phase === "ready")
+        centerText(
+          game.level > 1 && game.readyFor === 2 ? `NIVEL ${game.level}` : "¡PREPARADO!",
+          textY,
+          20,
+          "#ffd51f",
+        );
+      if (game.phase === "over" && game.phaseTime <= 1)
+        centerText("FIN DE PARTIDA", textY, 20, "#ff4b4b");
       if (game.phase === "over" && game.phaseTime > 1) {
         ctx.fillStyle = "rgba(0,0,0,.8)";
         ctx.fillRect(0, TOP, W, MH);
         centerText("FIN DE PARTIDA", TOP + MH / 2 - 44, 30, "#ff4b4b");
         centerText(`${game.score} PUNTOS`, TOP + MH / 2 - 8, 26, "#f6f0dc");
-        centerText(game.newRecord ? "¡NUEVO RÉCORD!" : `NIVEL ${game.level}`, TOP + MH / 2 + 22, 18, game.newRecord ? "#ffd51f" : "#9fb3a7");
+        centerText(
+          game.newRecord ? "¡NUEVO RÉCORD!" : `NIVEL ${game.level}`,
+          TOP + MH / 2 + 22,
+          18,
+          game.newRecord ? "#ffd51f" : "#9fb3a7",
+        );
         centerText("ENTER O JUGAR PARA REPETIR", TOP + MH / 2 + 52, 16, "#48e0ff");
       }
       if (paused) {
@@ -1761,12 +2035,19 @@
         }
       });
       const t = (attract * 70) % (W + 120);
-      drawPac(t - 30, TOP + 262, PAC_DIRS.right, [0.05, 0.55, 1.05, 0.55][Math.floor(attract * 14) % 4]);
-      for (let x = 0; x < W; x += 16) if (x > t - 30) {
-        ctx.fillStyle = "#f6d7a7";
-        ctx.fillRect(x + 7, TOP + 261, 2, 2);
-      }
-      if (Math.floor(attract * 2) % 2 === 0) centerText("ENTER O JUGAR PARA EMPEZAR", TOP + 300, 18, "#48e0ff");
+      drawPac(
+        t - 30,
+        TOP + 262,
+        PAC_DIRS.right,
+        [0.05, 0.55, 1.05, 0.55][Math.floor(attract * 14) % 4],
+      );
+      for (let x = 0; x < W; x += 16)
+        if (x > t - 30) {
+          ctx.fillStyle = "#f6d7a7";
+          ctx.fillRect(x + 7, TOP + 261, 2, 2);
+        }
+      if (Math.floor(attract * 2) % 2 === 0)
+        centerText("ENTER O JUGAR PARA EMPEZAR", TOP + 300, 18, "#48e0ff");
     }
 
     /* --- Entrada --- */
@@ -1788,7 +2069,8 @@
     }
     const keydown = (e) => {
       if (e.target.closest("input, select, textarea, a, [contenteditable='true']")) return;
-      if (e.target.closest("button") && !/^(Arrow(Up|Down|Left|Right)|[wasd])$/i.test(e.key)) return;
+      if (e.target.closest("button") && !/^(Arrow(Up|Down|Left|Right)|[wasd])$/i.test(e.key))
+        return;
       const k = e.key.toLowerCase();
       if (KEYS[k]) {
         e.preventDefault();
@@ -1854,7 +2136,7 @@
     requestAnimationFrame(() => focusGame(win));
   };
 
-  /* ========================================================= BUSCAMINAS */
+  // src/games/minesweeper.js: fuente de JOSEMI-OS.
   const MS_LEVELS = {
     easy: { label: "FÁCIL", rows: 9, cols: 9, mines: 10 },
     medium: { label: "MEDIO", rows: 16, cols: 16, mines: 40 },
@@ -1910,7 +2192,14 @@
     const features = {
       smile: [...eyes, ...smile],
       wow: [...eyes, [7, 9, 2, 3, ink], [6, 10, 4, 1, ink]],
-      cool: [[3, 5, 10, 1, ink], [4, 5, 3, 3, ink], [9, 5, 3, 3, ink], [5, 6, 1, 1, "#6aa0ff"], [10, 6, 1, 1, "#6aa0ff"], ...smile],
+      cool: [
+        [3, 5, 10, 1, ink],
+        [4, 5, 3, 3, ink],
+        [9, 5, 3, 3, ink],
+        [5, 6, 1, 1, "#6aa0ff"],
+        [10, 6, 1, 1, "#6aa0ff"],
+        ...smile,
+      ],
       dead: [
         ...[4, 9].flatMap((x) => [
           [x, 4, 1, 1, ink],
@@ -1928,7 +2217,10 @@
   }
   const MS_SFX = {
     open: () => tone(880, 0.03, { volume: 0.02 }),
-    cascade: (n) => melody([523, 659, 784].slice(0, Math.min(3, 1 + Math.floor(n / 10))), 0.04, { volume: 0.025 }),
+    cascade: (n) =>
+      melody([523, 659, 784].slice(0, Math.min(3, 1 + Math.floor(n / 10))), 0.04, {
+        volume: 0.025,
+      }),
     flag: () => tone(440, 0.05, { type: "triangle", volume: 0.04, slide: 220 }),
     unflag: () => tone(520, 0.05, { type: "triangle", volume: 0.03, slide: -200 }),
     boom: () => {
@@ -1945,7 +2237,8 @@
   };
   function msBestLabel() {
     const data = msData();
-    for (const id of ["medium", "easy", "hard"]) if (data[id]?.best) return `${clock(data[id].best * 1000, 0)} ${MS_LEVELS[id].label}`;
+    for (const id of ["medium", "easy", "hard"])
+      if (data[id]?.best) return `${clock(data[id].best * 1000, 0)} ${MS_LEVELS[id].label}`;
     return "--";
   }
   function updateMinesCard() {
@@ -1980,7 +2273,10 @@
       <div class="game jg jg-mines">
         <div class="jg-top">
           <div class="jg-modes" role="group" aria-label="Dificultad">${Object.entries(MS_LEVELS)
-            .map(([id, l]) => `<button type="button" class="jg-chip" data-level="${id}" aria-pressed="false">${l.label}</button>`)
+            .map(
+              ([id, l]) =>
+                `<button type="button" class="jg-chip" data-level="${id}" aria-pressed="false">${l.label}</button>`,
+            )
             .join("")}</div>
           <div class="jg-actions">
             <button type="button" class="btn" data-act="hint">PISTA</button>
@@ -2023,7 +2319,9 @@
         hintBtn = body.querySelector('[data-act="hint"]'),
         pausedBtn = body.querySelector(".ms-paused"),
         questionBox = body.querySelector(".ms-question");
-      let level = MS_LEVELS[read("josemi-minesweeper-level")] ? read("josemi-minesweeper-level") : "easy",
+      let level = MS_LEVELS[read("josemi-minesweeper-level")]
+          ? read("josemi-minesweeper-level")
+          : "easy",
         custom = read("josemi-minesweeper-custom", { rows: 12, cols: 20, mines: 45 }),
         cfg,
         cells = [],
@@ -2056,7 +2354,10 @@
       }
       const seconds = () => Math.floor((elapsed + (timer ? performance.now() - since : 0)) / 1000);
       const flags = () => cells.filter((c) => c.flag === 1).length;
-      const pad3 = (n) => (n < 0 ? "-" + String(Math.min(99, -n)).padStart(2, "0") : String(Math.min(999, n)).padStart(3, "0"));
+      const pad3 = (n) =>
+        n < 0
+          ? "-" + String(Math.min(99, -n)).padStart(2, "0")
+          : String(Math.min(999, n)).padStart(3, "0");
       function leds() {
         leftEl.value = leftEl.textContent = pad3(cfg.mines - flags());
         timeEl.value = timeEl.textContent = pad3(seconds());
@@ -2076,14 +2377,22 @@
       /* --- Tablero --- */
       function newGame() {
         cfg = level === "custom" ? { ...custom } : { ...MS_LEVELS[level] };
-        cells = Array.from({ length: total() }, () => ({ mine: false, n: 0, open: false, flag: 0 }));
+        cells = Array.from({ length: total() }, () => ({
+          mine: false,
+          n: 0,
+          open: false,
+          flag: 0,
+        }));
         started = over = paused = false;
         opened = elapsed = 0;
         stopClock();
         grid.className = "ms-grid";
         grid.style.setProperty("--cols", cfg.cols);
         grid.innerHTML = cells
-          .map((_, i) => `<button type="button" class="ms-cell" data-i="${i}" role="gridcell" tabindex="${i ? -1 : 0}"></button>`)
+          .map(
+            (_, i) =>
+              `<button type="button" class="ms-cell" data-i="${i}" role="gridcell" tabindex="${i ? -1 : 0}"></button>`,
+          )
           .join("");
         els = [...grid.children];
         focusIndex = 0;
@@ -2164,7 +2473,8 @@
         paused = true;
         scroll.classList.add("is-paused");
         pausedBtn.hidden = false;
-        statusEl.textContent = "Partida en pausa. El tablero se oculta para que nadie haga trampas.";
+        statusEl.textContent =
+          "Partida en pausa. El tablero se oculta para que nadie haga trampas.";
       }
       function resume() {
         if (!paused) return;
@@ -2202,7 +2512,8 @@
           opened++;
           count++;
           paint(j);
-          if (!d.n) for (const k of neighbors(j)) if (!cells[k].open && !cells[k].mine) stack.push(k);
+          if (!d.n)
+            for (const k of neighbors(j)) if (!cells[k].open && !cells[k].mine) stack.push(k);
         }
         count > 1 ? MS_SFX.cascade(count) : MS_SFX.open();
         if (opened === total() - cfg.mines) win_();
@@ -2213,7 +2524,9 @@
         if (over || paused || !c.open || !c.n) return;
         const around = neighbors(i);
         if (around.filter((k) => cells[k].flag === 1).length !== c.n) {
-          around.forEach((k) => !cells[k].open && !cells[k].flag && els[k].classList.add("is-pressed"));
+          around.forEach(
+            (k) => !cells[k].open && !cells[k].flag && els[k].classList.add("is-pressed"),
+          );
           setTimeout(() => around.forEach((k) => els[k]?.classList.remove("is-pressed")), 140);
           MS_SFX.no();
           return;
@@ -2325,7 +2638,8 @@
         if (over) return;
         if (paused) return resume();
         if (!started) {
-          statusEl.textContent = "Empieza por cualquier casilla: el primer clic siempre es seguro y abre una zona.";
+          statusEl.textContent =
+            "Empieza por cualquier casilla: el primer clic siempre es seguro y abre una zona.";
           return;
         }
         const safe = deduceSafe();
@@ -2333,7 +2647,9 @@
           penalty = false;
         if (safe.length) i = safe[Math.floor(Math.random() * safe.length)];
         else {
-          const candidates = cells.map((c, k) => k).filter((k) => !cells[k].open && !cells[k].mine && cells[k].flag !== 1);
+          const candidates = cells
+            .map((c, k) => k)
+            .filter((k) => !cells[k].open && !cells[k].mine && cells[k].flag !== 1);
           if (!candidates.length) return;
           i = candidates[Math.floor(Math.random() * candidates.length)];
           penalty = true;
@@ -2362,7 +2678,14 @@
         if (!el || over) return;
         const i = Number(el.dataset.i);
         if (paused) return resume();
-        press = { i, type: e.pointerType, button: e.button, x: e.clientX, y: e.clientY, done: false };
+        press = {
+          i,
+          type: e.pointerType,
+          button: e.button,
+          x: e.clientX,
+          y: e.clientY,
+          done: false,
+        };
         if (e.button === 2) return;
         if (!cells[i].open && !cells[i].flag) el.classList.add("is-pressed");
         setFace("wow");
@@ -2378,7 +2701,11 @@
         }
       });
       grid.addEventListener("pointermove", (e) => {
-        if (press && press.type !== "mouse" && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 10) {
+        if (
+          press &&
+          press.type !== "mouse" &&
+          Math.hypot(e.clientX - press.x, e.clientY - press.y) > 10
+        ) {
           clearTimeout(press.timer);
           els[press.i].classList.remove("is-pressed");
           press = null;
@@ -2431,12 +2758,17 @@
       function selectLevel(id) {
         level = id;
         write("josemi-minesweeper-level", id);
-        body.querySelectorAll("[data-level]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.level === id)));
+        body
+          .querySelectorAll("[data-level]")
+          .forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.level === id)));
         customForm.hidden = id !== "custom";
-        if (id === "custom") ["rows", "cols", "mines"].forEach((k) => (customForm.elements[k].value = custom[k]));
+        if (id === "custom")
+          ["rows", "cols", "mines"].forEach((k) => (customForm.elements[k].value = custom[k]));
         newGame();
       }
-      body.querySelectorAll("[data-level]").forEach((b) => b.addEventListener("click", () => selectLevel(b.dataset.level)));
+      body
+        .querySelectorAll("[data-level]")
+        .forEach((b) => b.addEventListener("click", () => selectLevel(b.dataset.level)));
       customForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const rows = clamp(Math.round(+customForm.elements.rows.value) || 9, 5, 24),
@@ -2454,9 +2786,13 @@
         flagMode = !flagMode;
         flagBtn.setAttribute("aria-pressed", String(flagMode));
         flagBtn.classList.toggle("btn--accent", flagMode);
-        statusEl.textContent = flagMode ? "Modo bandera: cada toque pone o quita una bandera." : "Modo normal: cada toque descubre una casilla.";
+        statusEl.textContent = flagMode
+          ? "Modo bandera: cada toque pone o quita una bandera."
+          : "Modo normal: cada toque descubre una casilla.";
       });
-      questionBox.addEventListener("change", () => write("josemi-minesweeper-question", questionBox.checked));
+      questionBox.addEventListener("change", () =>
+        write("josemi-minesweeper-question", questionBox.checked),
+      );
       bindSound(body.querySelector('[data-act="sound"]'));
 
       const observer = new ResizeObserver(fit);
@@ -2471,16 +2807,39 @@
     },
   };
 
-  /* ========================================================= ARCADE */
+  // src/games/arcade.js: fuente de JOSEMI-OS.
   const ARCADE_GAMES = [
-    ["tetris", "▟", "3 MODOS · SRS", "Tetris", "Maratón, Sprint 40 y Ultra. Pieza guardada, cinco siguientes, T-spins, combos y back-to-back.", "← → · ↑ · Espacio · C"],
-    ["pacman", "●", "4 FANTASMAS", "Pac-Man", "Laberinto propio, cuatro fantasmas con personalidad, frutas, túnel y niveles cada vez más rápidos.", "Flechas · P pausa"],
-    ["minesweeper", "✱", "4 DIFICULTADES", "Buscaminas", "Fácil, medio, difícil o a medida. Primer clic seguro, acordes, pistas por deducción y estadísticas.", "Clic · Clic derecho · F"],
+    [
+      "tetris",
+      "▟",
+      "3 MODOS · SRS",
+      "Tetris",
+      "Maratón, Sprint 40 y Ultra. Pieza guardada, cinco siguientes, T-spins, combos y back-to-back.",
+      "← → · ↑ · Espacio · C",
+    ],
+    [
+      "pacman",
+      "●",
+      "4 FANTASMAS",
+      "Pac-Man",
+      "Laberinto propio, cuatro fantasmas con personalidad, frutas, túnel y niveles cada vez más rápidos.",
+      "Flechas · P pausa",
+    ],
+    [
+      "minesweeper",
+      "✱",
+      "4 DIFICULTADES",
+      "Buscaminas",
+      "Fácil, medio, difícil o a medida. Primer clic seguro, acordes, pistas por deducción y estadísticas.",
+      "Clic · Clic derecho · F",
+    ],
   ];
   Apps.arcade.size = [960, 660];
   Apps.arcade.render = () =>
     `<div class="arcade-heading"><div><span class="card-kicker">JOSEMI / ARCADE COLLECTION</span><h2>Una partida más.</h2><p>Tres clásicos reconstruidos desde cero dentro del sistema.</p></div><span class="arcade-badge">INSERT COIN<br>FREE PLAY</span></div><div class="arcade-grid arcade-grid--v2">${ARCADE_GAMES.map(
       ([id, mark, kicker, title, desc, keys]) =>
         `<button class="game-shortcut game-card game-card--${id}" data-game="${id}"><span class="game-card__number">${mark}</span><span class="card-kicker">${kicker}</span><strong>${title}</strong><p>${desc}</p><small>${keys}</small><span class="game-card__bottom">JUGAR ↗ <span>RÉCORD ${id === "minesweeper" ? msBestLabel() : bestScore(id)}</span></span></button>`,
-    ).join("")}</div><p class="arcade-footnote">Las partidas se pausan al cambiar de ventana o pestaña. Haz clic en el juego para recuperar el teclado. El sonido del arcade se activa o desactiva desde cada juego.</p>`;
+    ).join(
+      "",
+    )}</div><p class="arcade-footnote">Las partidas se pausan al cambiar de ventana o pestaña. Haz clic en el juego para recuperar el teclado. El sonido del arcade se activa o desactiva desde cada juego.</p>`;
 })();

@@ -1,0 +1,136 @@
+/* ---------- Ventanas ---------- */
+
+/* VENTANAS: posición, tamaño, capas y apariencia; JavaScript cambia posición y estado. */
+.window {
+  position: absolute;
+  z-index: 10;
+  min-width: 300px;
+  min-height: 220px;
+  width: 640px;
+  height: 450px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(8, 14, 10, 0.96);
+  border: 1px solid rgba(156, 221, 177, 0.18);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(8px) scale(0.99);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    border-color 0.18s ease;
+}
+.window.open {
+  opacity: 1;
+  transform: none;
+}
+.window.maximized {
+  left: 12px !important;
+  top: 82px !important;
+  width: calc(100% - 24px) !important;
+  height: calc(100% - 94px) !important;
+  border-radius: 14px;
+}
+.window.minimized {
+  display: none;
+}
+.window:focus-within {
+  border-color: rgba(109, 255, 155, 0.3);
+}
+.win__bar {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 11px 0 14px;
+  background: linear-gradient(180deg, rgba(20, 31, 24, 0.98), rgba(11, 18, 14, 0.98));
+  border-bottom: 1px solid rgba(164, 225, 184, 0.12);
+  cursor: grab;
+  user-select: none;
+}
+.win__bar:active {
+  cursor: grabbing;
+}
+.win__title {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 11px var(--font-mono);
+  letter-spacing: 0.02em;
+  color: #dce9e1;
+}
+.t-ico {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+.win__btns {
+  display: flex;
+  gap: 6px;
+}
+.win-btn {
+  position: relative;
+  width: 24px;
+  height: 22px;
+  border: 1px solid rgba(181, 230, 198, 0.12);
+  border-radius: 6px;
+  background: #111b15;
+  color: #91a099;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.win-btn:hover {
+  border-color: rgba(109, 255, 155, 0.4);
+  background: #17241b;
+}
+.win-btn.min::after {
+  content: "–";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.win-btn.max::after {
+  content: "□";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+}
+.win-btn.close::after {
+  content: "×";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+.win-btn.close:hover {
+  border-color: rgba(255, 107, 122, 0.55);
+  color: #ff8793;
+  background: rgba(255, 107, 122, 0.08);
+}
+.win__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 24px;
+  background: linear-gradient(180deg, rgba(10, 17, 13, 0.92), rgba(6, 10, 8, 0.96));
+  scrollbar-color: #294233 transparent;
+  scrollbar-width: thin;
+}
+.win__resize {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+  border-right: 2px solid rgba(109, 255, 155, 0.25);
+  border-bottom: 2px solid rgba(109, 255, 155, 0.25);
+}

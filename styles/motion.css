@@ -1,0 +1,59 @@
+/* INTRO: negro real y fósforo verde. La fase cambia por data-phase en shell.js. */
+/* MATRIX: el lienzo sigue debajo del escritorio. Oscurecemos la base para dar contraste. */
+body[data-atmosphere^="matrix"] #bg {
+  background: radial-gradient(ellipse at 70% 30%, #071c20, #030906 70%) !important;
+}
+body[data-atmosphere="matrix"] #bg {
+  background: #020804 !important;
+}
+body[data-atmosphere="matrixDepth"] #ascii-wall {
+  filter: drop-shadow(0 0 3px #42e69955);
+}
+body[data-atmosphere^="matrix"] .desktop-welcome {
+  background: color-mix(in srgb, var(--shell-panel) 86%, transparent);
+  backdrop-filter: blur(16px);
+}
+/* ESCRITORIO: profundidad sutil, jerarquía tipográfica y foco visible para el teclado. */
+.desktop-welcome {
+  box-shadow:
+    0 24px 100px #00000026,
+    inset 0 1px #ffffff12;
+}
+.welcome-body h1 {
+  letter-spacing: -0.065em;
+}
+.shell-tools button,
+.taskbar__start,
+.icon {
+  transition:
+    transform 0.25s,
+    background 0.25s,
+    box-shadow 0.25s;
+}
+.icon:focus-visible,
+.btn:focus-visible,
+.shell-tools button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+@media (max-width: 600px) {
+  .boot-v5 .boot-shell__body {
+    padding: 35px 8px;
+  }
+  .boot-v5[data-phase="matrix"] .boot-terminal-output {
+    font-size: 21px;
+  }
+  .boot-v5 .boot-shell {
+    min-height: 350px;
+  }
+  .boot-v5 .boot-dim {
+    font-size: 8px;
+  }
+  .boot-v5 .boot-shell__footer {
+    font-size: 8px;
+  }
+  .boot-v5[data-phase="signature"] .boot-logo--hero {
+    font-size: clamp(4px, 1.15vw, 7px);
+  }
+}
+/* Accesibilidad: si se reduce el movimiento, la intro y el cursor muestran estados estáticos. */
