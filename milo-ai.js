@@ -118,6 +118,7 @@ const MiloAI = (() => {
           return await music(String(args.query || "chill"), signal);
         case "open_app":
           if (!allowedApps.has(args.app)) return { error: "App desconeguda" };
+          if (window.PixelOS) return window.PixelOS.perform("open", args.app);
           if (typeof window.openWindow !== "function") return { error: "No es pot obrir l'app" };
           window.openWindow(args.app);
           return { ok: true, app: args.app };

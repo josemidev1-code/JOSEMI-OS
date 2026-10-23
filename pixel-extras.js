@@ -207,11 +207,9 @@
   }};
 
   const extras=['gallery','notes','calculator','focus'];
-  Apps.launchpad={title:'Aplicaciones',icon:spriteIcon('launchpad'),size:[760,610],render:()=>`<section class="pixel-launchpad"><div class="extra-heading"><span class="card-kicker">TODO TU SISTEMA, EN UN LUGAR</span><h2>¿Qué quieres hacer?</h2><p>También puedes buscar cualquier aplicación con Ctrl + K.</p></div><div class="pixel-app-grid">${['welcome',...new Set([...currentUser.apps,...extras])].filter(id=>Apps[id]&&id!=='trash').map(id=>`<button data-extra-open="${id}">${Apps[id].icon}<strong>${escape(Apps[id].title)}</strong></button>`).join('')}</div></section>`,bind(body){body.addEventListener('click',e=>{const id=e.target.closest('[data-extra-open]')?.dataset.extraOpen;if(id)openWindow(id);});}};
+  Apps.launchpad={title:'Aplicaciones',icon:spriteIcon('launchpad'),size:[760,610],render:()=>`<section class="pixel-launchpad"><div class="extra-heading"><span class="card-kicker">TODO TU SISTEMA, EN UN LUGAR</span><h2>¿Qué quieres hacer?</h2><p>También puedes buscar cualquier aplicación con Ctrl + K.</p></div><div class="pixel-app-grid">${[...new Set(['welcome',...currentUser.apps,...extras])].filter(id=>Apps[id]&&!['trash','tetris','pacman','minesweeper'].includes(id)).map(id=>`<button data-extra-open="${id}">${Apps[id].icon}<strong>${escape(Apps[id].title)}</strong></button>`).join('')}</div></section>`,bind(body){body.addEventListener('click',e=>{const id=e.target.closest('[data-extra-open]')?.dataset.extraOpen;if(id)openWindow(id);});}};
   [...extras,'launchpad'].forEach(id=>{if(!currentUser.apps.includes(id))currentUser.apps.push(id);if(!ICONS.includes(id))ICONS.push(id);});
   const appsButton=document.createElement('button');appsButton.textContent='APPS';appsButton.onclick=()=>openWindow('launchpad');document.querySelector('.pixel-system-bar nav').prepend(appsButton);
-  const originalHome=Apps.welcome.render;
-  Apps.welcome.render=()=>originalHome().replace('<div class="pixel-home-footer">',`<nav class="pixel-extra-shortcuts" aria-label="Herramientas personales">${extras.map(id=>`<button data-extra-open="${id}">${Apps[id].icon}<span>${escape(Apps[id].title)}</span></button>`).join('')}</nav><div class="pixel-home-footer">`);
-  const homeBind=Apps.welcome.bind;Apps.welcome.bind=(body,win)=>{homeBind?.(body,win);body.addEventListener('click',e=>{const id=e.target.closest('[data-extra-open]')?.dataset.extraOpen;if(id)openWindow(id);});};
+
   buildIcons();buildMenu();
 })();

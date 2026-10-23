@@ -84,6 +84,9 @@ Los fondos reinterpretan estéticas de ciencia ficción y videojuegos mediante d
 
 El fondo fotográfico desbloqueable de God of War utiliza una imagen del [kit oficial de PlayStation](https://www.playstation.com/en-us/god-of-war/community/), servida desde `assets/wallpapers`. Su procedencia y atribución figuran en `assets/wallpapers/SOURCES.md`. Las fuentes Pixelify Sans y VT323 (licencia OFL, procedentes de Google Fonts) se sirven desde `assets/fonts`.
 
-Los 22 paisajes pixel art tienen detalles específicos de su escena y una capa animada compartida; se detiene al ocultar la pestaña o activar «Reducir movimiento». Las animaciones ASCII pueden superponerse sin sustituir el paisaje.
+Los 22 paisajes pixel art tienen detalles específicos de su escena y una capa animada compartida; se detiene al ocultar la pestaña o activar «Reducir movimiento».
+Los paisajes utilizan exclusivamente su animación pixel art. Los efectos ASCII del escritorio se reservan para fondos de color, y la foto de God of War no recibe partículas superpuestas. ASCII Studio conserva sus propios efectos.
+
+El escritorio muestra seis accesos esenciales: Sobre mí, Proyectos, Arcade, Bloc de notas, Fondos y Contacto. El resto está en Aplicaciones y el buscador; los tres juegos se agrupan dentro de Arcade. La primera entrada a un juego pasa por la máquina y su moneda, también si se solicita a Milo. Inicio, Proyectos, Arcade y Ajustes permanecen en la barra de tareas.
 
 Milo puede abrir las 25 aplicaciones, cerrar/minimizar/maximizar ventanas, cambiar tema, fondo, cursor, sonido y movimiento, añadir notas locales, calcular e iniciar temporizadores. Las órdenes directas se ejecutan en el navegador; las demás conversaciones conservan la conexión con el Worker. Las acciones se limitan al escritorio de esta web, con una lista explícita de operaciones y aplicaciones: nunca ejecutan código arbitrario ni comandos del ordenador.

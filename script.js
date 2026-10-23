@@ -1296,7 +1296,7 @@ const WM = (() => {
   });
   return { openWindow, closeWindow };
 })();
-const openWindow = WM.openWindow;
+let openWindow = WM.openWindow;
 
 /* ========================================================= TERMINAL */
 // TERMINAL: divide lo escrito en comando y argumentos. Un switch ejecuta acciones de la web, no del ordenador.
@@ -3409,6 +3409,8 @@ function atmosphereActive() {
     !document.hidden &&
     !state.motion &&
     state.atmosphere !== "none" &&
+    !document.body.classList.contains("has-pixel-wallpaper") &&
+    !document.body.classList.contains("has-god-of-war") &&
     !$("#desktop").classList.contains("hidden") &&
     $("#shutdown").classList.contains("hidden") &&
     $("#os-screensaver")?.hidden &&

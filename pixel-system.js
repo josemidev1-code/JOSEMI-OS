@@ -27,7 +27,7 @@
   desktop.prepend(topbar);
   const dock=document.createElement('div');
   dock.className='pixel-pinned';
-  const pinned=['welcome','projects','terminal','arcade','contact'];
+  const pinned=['welcome','projects','arcade','settings'];
   function renderDock() {
     dock.innerHTML=pinned.map(id=>`<button data-pixel-dock="${id}" aria-label="${id==='welcome'?'Inicio':Apps[id].title}" title="${id==='welcome'?'Inicio':Apps[id].title}">${Apps[id].icon}<span>${id==='welcome'?'Inicio':Apps[id].title}</span><i aria-hidden="true"></i></button>`).join('');
   }
@@ -43,8 +43,8 @@
   document.head.append(hiddenChips);
 
   Apps.welcome={
-    title:'Inicio // JOSEMI-OS',icon:Apps.readme.icon,size:[900,640],
-    render:()=>`<div class="pixel-home"><div class="pixel-home-status"><span><i></i>MODO EXPLORACIÓN</span><span>PERSONAL / INTERACTIVO</span></div><div class="pixel-home-hero"><div class="pixel-profile-frame"><div class="pixel-portrait">${Apps.about.icon}</div><span>JOSEMI</span><small>ESTUDIANTE DE DAM</small><div class="pixel-profile-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div><div class="pixel-home-copy"><span class="pixel-kicker">HOLA, MUNDO_</span><h1>Mi pequeño<br>universo digital<span class="pixel-cursor">_</span></h1><p>Soy José Miguel Miralles Gandia.<br>Aprendo a construir software y convierto mis ideas en proyectos que puedes explorar.</p><div class="pixel-home-actions"><button class="btn btn--accent" data-pixel-open="projects">ABRIR PROYECTOS →</button><button class="btn" data-pixel-open="about">SOBRE MÍ</button></div></div></div><div class="pixel-section-label"><span>SELECCIONA TU SIGUIENTE PASO</span><span>↓</span></div><div class="pixel-home-launchers"><button data-pixel-open="projects">${Apps.projects.icon}<span><strong>ARCHIVO DE PROYECTOS</strong><small>Código, ideas y aprendizaje.</small></span><b>01</b></button><button data-pixel-open="arcade">${Apps.arcade.icon}<span><strong>ARCADE</strong><small>Una partida antes de seguir.</small></span><b>02</b></button><button data-pixel-milo><span class="pixel-milo-spark" aria-hidden="true">✦</span><span><strong>HABLA CON MILO</strong><small>Tu ajolote con inteligencia artificial.</small></span><b>03</b></button></div><div class="pixel-home-footer"><span>CONSTRUIR · APRENDER · REPETIR</span><button data-pixel-open="contact">¿HABLAMOS? ↗</button></div></div>`,
+    title:'Inicio',icon:Apps.readme.icon,size:[900,700],
+    render:()=>`<div class="pixel-home"><div class="pixel-home-status"><span><i></i>JOSEMI-OS / PORTFOLIO</span><span>DISEÑADO PARA EXPLORAR</span></div><div class="pixel-home-hero"><div class="pixel-profile-frame home-computer"><div class="pixel-portrait">${window.PixelArt?.computer || Apps.welcome.icon}</div><span>JOSEMI-OS</span><small>ESCRITORIO PERSONAL</small></div><div class="pixel-home-copy"><span class="pixel-kicker">JOSÉ MIGUEL MIRALLES GANDIA</span><h1>Ideas que se<br>convierten en código<span class="pixel-cursor">_</span></h1><p>Estudiante de DAM en Xàtiva.<br>Este escritorio reúne lo que construyo, lo que aprendo y un pequeño Arcade para desconectar.</p><div class="pixel-home-actions"><button class="btn btn--accent" data-pixel-open="projects">VER MIS PROYECTOS →</button><button class="btn" data-pixel-open="about">CONÓCEME</button></div></div></div><div class="pixel-section-label"><span>ELIGE POR DÓNDE EMPEZAR</span><span>↓</span></div><div class="pixel-home-launchers"><button data-pixel-open="projects">${Apps.projects.icon}<span><strong>PROYECTOS</strong><small>Explora mi trabajo.</small></span></button><button data-pixel-open="arcade">${Apps.arcade.icon}<span><strong>ARCADE</strong><small>Una moneda. Tres clásicos.</small></span></button><button data-pixel-milo>${document.querySelector("#mascot-button .mascot-svg")?.outerHTML || ""}<span><strong>HABLA CON MILO</strong><small>Tu guía por este escritorio.</small></span></button></div><div class="pixel-home-footer"><span>JOSÉ MIGUEL MIRALLES GANDIA · DAM</span><button data-pixel-open="contact">CONTACTO ↗</button></div></div>`,
     bind(body){
       body.addEventListener('click',launch);
     }
@@ -57,6 +57,7 @@
   }
   topbar.addEventListener('click',launch);
   renderDock();
+  window.refreshPixelDock=renderDock;
 
   let pending=false;
   function synchronize() {
