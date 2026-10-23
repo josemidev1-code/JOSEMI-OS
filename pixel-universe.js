@@ -33,11 +33,16 @@
 
   // Una moneda física en pantalla, con la misma alternativa mediante teclado.
   const cabinet=()=>`<svg class="coin-machine" viewBox="0 0 180 240" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true"><defs><pattern id="machine-grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0H0V10" fill="none" stroke="#1d5262" stroke-width="1"/></pattern></defs><path d="M27 5H151V19H161V116L173 148V232H7V148L19 116V19H27Z" fill="#0b1526"/><path d="M27 9H147V19H155V116L167 148V226H13V148L25 116V19H27Z" fill="#604982"/><path d="M27 11H147V39H27Z" fill="#d786a8"/><path d="M32 15H142V35H32Z" fill="#211a36"/><text x="87" y="29" text-anchor="middle" fill="#ffde91" font-family="VT323,monospace" font-size="15">JOSEMI ARCADE</text><path d="M32 47H148V122H32Z" fill="#0c1122"/><path d="M38 53H142V113H38Z" fill="#102a3c"/><path d="M38 53H142V113H38Z" fill="url(#machine-grid)"/><g class="machine-stars" fill="#ffe4a4"><path d="M58 62H61V65H58ZM120 68H123V71H120ZM101 57H104V60H101Z"/><path d="M75 80H109V84H75ZM82 73H102V92H82Z" fill="#8ee5bd"/><path d="M82 84H89V88H82ZM96 84H102V88H96Z" fill="#102a3c"/></g><path d="M25 126H155L165 151H15Z" fill="#8c6ba7"/><path d="M32 138H52V143H32Z" fill="#1b1b36"/><path d="M40 126H44V140H40Z" fill="#d6e1dc"/><path d="M37 123H47V129H37Z" fill="#f38da6"/><path d="M112 136H120V143H112Z" fill="#84dcce"/><path d="M128 136H136V143H128Z" fill="#f1c674"/><path d="M21 157H159V219H21Z" fill="#392a55"/><path d="M26 161H72V213H26Z" fill="#46315b"/><path d="M90 170H146V204H90Z" fill="#1a2035"/><path d="M99 179H137V194H99Z" fill="#5c5b74"/><path d="M104 184H132V189H104Z" fill="#0a1520"/><path d="M30 219H52V225H30ZM124 219H146V225H124Z" fill="#a877a2"/><path d="M16 227H166V233H16Z" fill="#161a2c"/></svg>`;
+  const gameIds=['tetris','pacman','minesweeper'];
+  let arcadeReady=false;
+  const launchWindow=openWindow;
+  openWindow=function(id,...args){return launchWindow(gameIds.includes(id)&&!arcadeReady?'arcade':id,...args);};
+  window.openWindow=openWindow;
   const baseArcadeRender=Apps.arcade.render, baseArcadeBind=Apps.arcade.bind;
   Apps.arcade.render=()=>`<section class="arcade-entry"><div class="arcade-entry-heading"><span class="card-kicker">JOSEMI / ARCADE</span><h2>La próxima partida empieza aquí.</h2><p>Arrastra la moneda hasta la ranura de la máquina.</p></div><div class="arcade-machine-stage">${cabinet()}<div class="coin-target" aria-label="Ranura para la moneda"></div><div class="arcade-floor"></div></div><button class="arcade-coin" aria-label="Insertar moneda">${art.coin}</button><p class="coin-instruction" role="status">ARRASTRA LA MONEDA · O PULSA ENTER</p><button class="btn coin-accessible">INSERTAR MONEDA</button></section>`;
   Apps.arcade.bind=(body,win)=>{
     const root=q('.arcade-entry',body),coin=q('.arcade-coin',root),slot=q('.coin-target',root),status=q('[role="status"]',root);let entered=false,drag=null,timer=0,justDragged=false;
-    function enter(){if(entered)return;entered=true;root.classList.add('coin-inserted');status.textContent='CRÉDITO ACEPTADO · PREPARANDO LOS JUEGOS';if(state.sound)beep();timer=setTimeout(()=>{if(!win.isConnected)return;body.innerHTML=baseArcadeRender();qa('[data-game]',body).forEach(b=>{q('.game-card__number',b).innerHTML=Apps[b.dataset.game].icon;});baseArcadeBind?.(body,win);body.classList.add('arcade-revealed');},state.motion?0:1100);}
+    function enter(){if(entered)return;entered=true;root.classList.add('coin-inserted');status.textContent='CRÉDITO ACEPTADO · PREPARANDO LOS JUEGOS';if(state.sound)beep();timer=setTimeout(()=>{if(!win.isConnected)return;arcadeReady=true;body.innerHTML=baseArcadeRender();qa('[data-game]',body).forEach(b=>{q('.game-card__number',b).innerHTML=Apps[b.dataset.game].icon;});baseArcadeBind?.(body,win);body.classList.add('arcade-revealed');},state.motion?0:1100);}
     coin.addEventListener('pointerdown',e=>{if(entered)return;e.preventDefault();const r=coin.getBoundingClientRect();drag={x:e.clientX,y:e.clientY,left:r.left,top:r.top};coin.setPointerCapture(e.pointerId);coin.classList.add('dragging');});
     coin.addEventListener('pointermove',e=>{if(!drag)return;coin.style.transform=`translate(${e.clientX-drag.x}px,${e.clientY-drag.y}px)`;const s=slot.getBoundingClientRect();root.classList.toggle('coin-over',e.clientX>s.left-28&&e.clientX<s.right+28&&e.clientY>s.top-28&&e.clientY<s.bottom+28);});
     coin.addEventListener('pointerup',e=>{if(!drag)return;const moved=Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>10;drag=null;coin.classList.remove('dragging');const s=slot.getBoundingClientRect();if(e.clientX>s.left-28&&e.clientX<s.right+28&&e.clientY>s.top-28&&e.clientY<s.bottom+28)enter();else{coin.style.transform='';root.classList.remove('coin-over');if(moved)status.textContent='ACÉRCALA A LA RANURA ILUMINADA';}justDragged=moved;});
@@ -106,13 +111,24 @@
   };
   for(const [id,wall] of Object.entries(PIXEL_WALLPAPERS)){if(!wall.url.startsWith('data:image/svg+xml,'))continue;const source=decodeURIComponent(wall.url.split(',').slice(1).join(','));wall.url='data:image/svg+xml,'+encodeURIComponent(source.replace('</svg>',`<g class="universe-details">${detailLayer(id)}</g></svg>`));}
 
+  // Matrix ilumina sus propios píxeles: no añade otro alfabeto ni partículas.
+  const matrixPixels={};
+  for(const id of ['matrixCity','matrixCode']){
+    const source=decodeURIComponent(PIXEL_WALLPAPERS[id].url.split(',').slice(1).join(','));matrixPixels[id]=[];
+    for(const path of source.matchAll(/<path fill="(#[a-fA-F0-9]+)" d="([^"]+)"/g)){
+      if(!['#a1efc1','#164c57','#18523b'].includes(path[1]))continue;
+      for(const p of path[2].matchAll(/M(-?[\d.]+) (-?[\d.]+)h([\d.]+)v([\d.]+)/g))matrixPixels[id].push({x:+p[1],y:+p[2],w:+p[3],h:+p[4]});
+    }
+  }
+
   // Una única capa animada, pequeña y sin interacción. Se pausa al ocultar la pestaña.
   const canvas=document.createElement('canvas');canvas.id='pixel-scene';canvas.setAttribute('aria-hidden','true');canvas.width=960;canvas.height=540;q('#bg').append(canvas);const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
   let raf=0,last=0,sceneTime=0;const particles=Array.from({length:54},(_,i)=>({x:(i*173+37)%960,y:(i*97+71)%540,s:1+i%3,v:8+i%15}));
   function drawScene(t){
     ctx.clearRect(0,0,960,540);const id=state.wallpaper;
+    if(matrixPixels[id]){for(const p of matrixPixels[id]){if(id==='matrixCity'&&p.y>=130||id==='matrixCode'&&p.x>=150&&p.x<=330&&p.y>=46)continue;const head=(t*18+Math.floor(p.x/12)*17)%170,delta=(head-p.y+170)%170;ctx.globalAlpha=delta<9?.75:delta<28?.3:0;if(!ctx.globalAlpha)continue;ctx.fillStyle='#a1efc1';ctx.fillRect(p.x*2,p.y*2,p.w*2,p.h*2);}ctx.globalAlpha=1;return;}
     const petals=id==='sakura',underwater=id==='reef',snow=['cabin','auroraLake','godOfWar','godOfWarPixel'].includes(id),embers=['volcano','arcadeRoom'].includes(id),digital=space.has(id)||id==='matrix',rain=id==='lighthouse'||id==='library';
-    for(const [i,p] of particles.entries()){
+    for(const [i,p] of particles.slice(0,Math.max(9,Math.round(state.weatherDensity*.6))).entries()){
       let x=(p.x+t*(underwater?4:petals?12:rain?25:3))%960,y=(p.y+t*p.v*(underwater||embers?-1:1)+1080)%540;
       ctx.globalAlpha=.25+(Math.sin(t*1.6+i)+1)*.23;
       ctx.fillStyle=petals?'#ffc8dc':underwater?'#b6ecf5':snow?'#d4effb':embers?'#ffc16e':digital?'#8cebc0':rain?'#b3d5e9':'#d3e5a5';
@@ -126,18 +142,21 @@
     if(wet.has(id)||['sonic','godOfWar'].includes(id))for(let i=0;i<18;i++){ctx.fillStyle=i%2?'#b6d8db33':'#dce9e533';ctx.fillRect((i*67+t*5)%960,440+(i*11)%90,10+Math.sin(t+i)*7,1);}
     if(id==='reef'){for(let i=0;i<5;i++){const x=(i*210+t*(12+i*2))%1080-60,y=150+i*45+Math.sin(t+i)*9;ctx.fillStyle=['#f9cf61','#ef926d','#99dcce'][i%3];ctx.fillRect(x,y,18,8);ctx.fillRect(x-6,y-2,6,12);ctx.fillStyle='#163046';ctx.fillRect(x+12,y+1,2,2);}}
     if(id==='volcano'){ctx.globalAlpha=.15+Math.sin(t*2)*.06;ctx.fillStyle='#ff8844';ctx.fillRect(430,120,100,12);ctx.globalAlpha=1;}
-    if(!underwater&&!digital&&!rain&&!['library','arcadeRoom'].includes(id))for(let i=0;i<3;i++){const x=(i*317+t*7)%1050-45,y=60+i*23+Math.sin(t*.7+i)*6;ctx.fillStyle='#e4ecde77';ctx.fillRect(x,y,18,1);ctx.fillRect(x+7,y-2,4,2);}
+    if(['minecraft','sonicCoast','floating'].includes(id))for(let i=0;i<3;i++){const x=(i*317+t*7)%1050-45,y=60+i*23+Math.sin(t*.7+i)*6;ctx.fillStyle='#e4ecde77';ctx.fillRect(x,y,18,1);ctx.fillRect(x+7,y-2,4,2);}
   }
-  function sceneFrame(now){raf=0;if(document.hidden)return;if(now-last>65){const dt=last?Math.min(.15,(now-last)/1000):0;last=now;if(!state.motion)sceneTime+=dt*state.weatherSpeed;drawScene(sceneTime);}if(!state.motion)raf=requestAnimationFrame(sceneFrame);}
-  function syncScene(){cancelAnimationFrame(raf);raf=0;last=0;canvas.hidden=state.wallpaper==='static'&&state.atmosphere!=='none';drawScene(sceneTime);if(!state.motion&&!document.hidden)raf=requestAnimationFrame(sceneFrame);}
-  const applyBefore=applyTheme;applyTheme=function(){applyBefore();document.body.classList.toggle('universe-photo',state.wallpaper==='godOfWar');syncScene();};
+  function sceneFrame(now){raf=0;if(document.hidden||canvas.hidden)return;if(now-last>65){const dt=last?Math.min(.15,(now-last)/1000):0;last=now;if(!state.motion)sceneTime+=dt*state.weatherSpeed;drawScene(sceneTime);}if(!state.motion)raf=requestAnimationFrame(sceneFrame);}
+  function syncScene(){cancelAnimationFrame(raf);raf=0;last=0;canvas.hidden=!Object.hasOwn(PIXEL_WALLPAPERS,state.wallpaper);if(canvas.hidden){ctx.clearRect(0,0,960,540);return;}drawScene(sceneTime);if(!state.motion&&!document.hidden)raf=requestAnimationFrame(sceneFrame);}
+  const applyBefore=applyTheme;applyTheme=function(){if(Object.hasOwn(PIXEL_WALLPAPERS,state.wallpaper)||state.wallpaper==='godOfWar')state.atmosphere='none';applyBefore();document.body.classList.toggle('universe-photo',state.wallpaper==='godOfWar');syncScene();};
   document.addEventListener('visibilitychange',syncScene);
 
-  // Registro completo: todos los accesos del sistema aparecen en el escritorio.
+  // Catálogo completo; el escritorio muestra solo los accesos esenciales.
   const desktopApps=['welcome','readme','about','projects','portfolio','education','skills','terminal','contact','arcade','tetris','pacman','minesweeper','settings','system','easter','screensaver','gallery','notes','calculator','focus','roadmap','launchpad','motivation','trash'];
   desktopApps.forEach(id=>{if(!currentUser.apps.includes(id))currentUser.apps.push(id);if(!ICONS.includes(id))ICONS.push(id);});
   function arrangeIcons(){const rows=Math.max(2,Math.floor((innerHeight-185)/99));q('#icons').style.setProperty('--desktop-rows',rows);}
-  arrangeIcons();window.addEventListener('resize',arrangeIcons);buildIcons();buildMenu();
+  const essentialApps=['about','projects','arcade','notes','gallery','contact'];
+  const originalIcons=buildIcons;buildIcons=function(){const catalog=currentUser.apps;try{currentUser.apps=essentialApps;originalIcons();}finally{currentUser.apps=catalog;}};
+  const originalMenu=buildMenu;buildMenu=function(){const catalog=currentUser.apps;try{currentUser.apps=catalog.filter(id=>!gameIds.includes(id));originalMenu();}finally{currentUser.apps=catalog;}};
+  arrangeIcons();window.addEventListener('resize',arrangeIcons);buildIcons();buildMenu();window.refreshPixelDock?.();
 
   // Expresiones y comentarios breves de Milo, sin enviar datos a ningún servidor.
   const face=q('#mascot-button .mascot-svg');
@@ -155,6 +174,7 @@
     const id=String(value||'');
     if(['open','close','minimize','maximize'].includes(action)){
       if(!Object.hasOwn(Apps,id))return {ok:false,text:'No encuentro esa aplicación.'};
+      if(action==='open'&&gameIds.includes(id)&&!arcadeReady){openWindow('arcade');return {ok:true,text:'Te he abierto Arcade. Inserta la moneda para entrar a los juegos.'};}
       if(action==='open')openWindow(id);else {const win=q(`.window[data-id="${id}"]`);if(!win)return {ok:false,text:`${Apps[id].title} no está abierta.`};q(action==='close'?'.close':action==='minimize'?'.min':'.max',win).click();}
       return {ok:true,text:`${Apps[id].title}: ${ {open:'abierta',close:'cerrada',minimize:'minimizada',maximize:'tamaño cambiado'}[action]}.`};
     }
@@ -167,7 +187,7 @@
     if(action==='cursor'&&Object.hasOwn(CURSORS,id)){state.cursor=id;applyShell();save();return {ok:true,text:`Puntero ${CURSORS[id]} aplicado.`};}
     if(action==='sound'){state.sound=id==='on';applyShell();save();return {ok:true,text:state.sound?'Sonidos activados.':'Sonidos desactivados.'};}
     if(action==='motion'){state.motion=id==='off';applyTheme();save();return {ok:true,text:state.motion?'Movimiento reducido.':'Animaciones activadas.'};}
-    if(action==='atmosphere'&&Object.hasOwn(ATMOSPHERES,id)){if(id==='matrixBlue'&&!state.vault.matrix)return {ok:false,text:'Ese efecto se desbloquea en Secret Vault.'};state.atmosphere=id;state.universeUserAtmosphere=true;applyTheme();save();return {ok:true,text:`Animación: ${ATMOSPHERES[id]}.`};}
+    if(action==='atmosphere'&&Object.hasOwn(ATMOSPHERES,id)){if(Object.hasOwn(PIXEL_WALLPAPERS,state.wallpaper)||state.wallpaper==='godOfWar')return {ok:false,text:'Este fondo conserva su propia animación. Para usar un efecto ASCII, elige primero un fondo de color en Ajustes.'};if(id==='matrixBlue'&&!state.vault.matrix)return {ok:false,text:'Ese efecto se desbloquea en Secret Vault.'};state.atmosphere=id;state.universeUserAtmosphere=true;applyTheme();save();return {ok:true,text:`Animación: ${ATMOSPHERES[id]}.`};}
     if(action==='note'){openWindow('notes');const input=q('.window[data-id="notes"] textarea');input.value=(input.value?input.value+'\n':'')+id.slice(0,2000);input.dispatchEvent(new Event('input',{bubbles:true}));return {ok:true,text:'He añadido el texto a tus notas de este navegador.'};}
     if(action==='calculate'){try{const result=PixelTools.calculate(id);const win=openWindow('calculator');win.calculateExpression(id);return {ok:true,text:`${id} = ${result}`};}catch{return {ok:false,text:'No he podido calcular esa operación.'};}}
     if(action==='timer'){const mins=Number(id);if(!Number.isInteger(mins)||mins<1||mins>180)return {ok:false,text:'Elige entre 1 y 180 minutos.'};openWindow('focus');const b=q('.window[data-id="focus"]'),input=q('input',b);if(input.disabled)q('[data-focus-reset]',b).click();input.value=mins;input.dispatchEvent(new Event('change',{bubbles:true}));q('[data-focus-start]',b).click();return {ok:true,text:`Temporizador iniciado: ${mins} minutos.`};}
@@ -205,5 +225,13 @@
   // Los ajustes muestran la foto oficial y su procedencia sin depender de enlaces de terceros.
   const settingsRender=Apps.settings.render;
   Apps.settings.render=()=>settingsRender().replace('God of War<small>',`<span class="wallpaper-preview gow-preview"></span>God of War<small>`).replace('Imagen personalizada','Imagen oficial · Ragnarök').replace('Animación ASCII','Efecto de ASCII Studio');
+  const settingsBind=Apps.settings.bind;
+  Apps.settings.bind=(body,win)=>{
+    settingsBind(body,win);
+    const effect=q('[data-setting="atmosphere"]',body),note=document.createElement('p');
+    note.className='wallpaper-motion-note';effect.closest('label').after(note);
+    function sync(){const own=Object.hasOwn(PIXEL_WALLPAPERS,state.wallpaper)||state.wallpaper==='godOfWar';effect.disabled=own;effect.value=state.atmosphere;note.textContent=own?'Este paisaje usa su propia animación, sin efectos superpuestos. Los efectos ASCII están disponibles con los fondos de color.':'Elige un efecto para animar este fondo de color.';}
+    body.addEventListener('click',e=>{if(e.target.closest('[data-wallpaper]'))sync();});sync();
+  };
   applyTheme();save();syncScene();
 })();

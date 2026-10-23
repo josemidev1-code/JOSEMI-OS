@@ -976,7 +976,8 @@
       }
     }
     const keydown = (e) => {
-      if (e.target.closest("button, input, select, textarea, a, [contenteditable='true']")) return;
+      if (e.target.closest("input, select, textarea, a, [contenteditable='true']")) return;
+      if (e.target.closest("button") && !/^(Arrow(Up|Down|Left|Right)|[wasd])$/i.test(e.key)) return;
       const action = KEYS[e.key.toLowerCase()];
       if (!action) return;
       e.preventDefault();
@@ -1786,7 +1787,8 @@
       }
     }
     const keydown = (e) => {
-      if (e.target.closest("button, input, select, textarea, a, [contenteditable='true']")) return;
+      if (e.target.closest("input, select, textarea, a, [contenteditable='true']")) return;
+      if (e.target.closest("button") && !/^(Arrow(Up|Down|Left|Right)|[wasd])$/i.test(e.key)) return;
       const k = e.key.toLowerCase();
       if (KEYS[k]) {
         e.preventDefault();
