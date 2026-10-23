@@ -1,0 +1,20 @@
+/* FIRMA ESTABLE (ASCII Studio y salvapantallas): texto de color real y fuente local, sin depender de que el
+   navegador admita el recorte de un degradado. JS ajusta --ascii-size al ancho. */
+.ascii-stage,
+.saver-art {
+  font-family: var(--font-mono);
+  font-size: var(--ascii-size, 9px);
+  font-weight: 400;
+  line-height: 1.16;
+  font-variant-ligatures: none;
+  letter-spacing: 0;
+  white-space: pre;
+  color: var(--accent);
+  -webkit-text-fill-color: currentColor;
+  background-image: none;
+  filter: none;
+  animation: none;
+}
+body.reduce-motion .login.out {
+  filter: none;
+}

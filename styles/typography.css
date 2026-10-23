@@ -1,0 +1,23 @@
+/* Único punto de configuración tipográfica. Fuentes locales con licencia OFL. */
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  src: url("assets/fonts/atkinson-next.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("assets/fonts/jetbrains-mono.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+:root {
+  --font-ui: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --font-display: var(--font-ui);
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+:is(code, pre, .term, .ascii-stage, .saver-art) {
+  font-variant-ligatures: none;
+}

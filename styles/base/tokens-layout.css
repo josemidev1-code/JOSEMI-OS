@@ -1,0 +1,62 @@
+/* JOSEMI-OS: estilos fusionados conservando el orden de cascada. */
+
+/* ============================================================
+   JOSEMI-OS · interfaz personal de portfolio
+   Hacker limpio, legible y moderno. Sin skin Windows 95.
+   ============================================================ */
+
+/* VARIABLES: colores, fuentes y tamaños compartidos. var(--accent) reutiliza el color elegido. */
+:root {
+  --bg: #050806;
+  --panel: #0b110e;
+  --panel-2: #101914;
+  --panel-3: #142019;
+  --text: #edf7f0;
+  --muted: #8ca096;
+  --line: rgba(185, 255, 208, 0.13);
+  --line-strong: rgba(185, 255, 208, 0.25);
+  --accent: #6dff9b;
+  --accent-soft: rgba(109, 255, 155, 0.12);
+  --cyan: #5de4ff;
+  --warning: #ffd166;
+  --danger: #ff6b7a;
+  --shadow: 0 26px 80px rgba(0, 0, 0, 0.52);
+  --radius: 16px;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+body {
+  overflow: hidden;
+  background: #030504;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button,
+a {
+  outline: none;
+}
+button:focus-visible,
+a:focus-visible,
+.icon:focus-visible,
+.folder:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.hidden {
+  display: none !important;
+}

@@ -1,6 +1,30 @@
+/* GENERADO: editar src/ o styles/ y ejecutar npm run build. Orden: sources.manifest.json. */
+/* Único punto de configuración tipográfica. Fuentes locales con licencia OFL. */
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  src: url("assets/fonts/atkinson-next.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("assets/fonts/jetbrains-mono.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+:root {
+  --font-ui: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --font-display: var(--font-ui);
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+:is(code, pre, .term, .ascii-stage, .saver-art) {
+  font-variant-ligatures: none;
+}
+
 /* JOSEMI-OS: estilos fusionados conservando el orden de cascada. */
 
-/* === BEGIN style.css === */
 /* ============================================================
    JOSEMI-OS · interfaz personal de portfolio
    Hacker limpio, legible y moderno. Sin skin Windows 95.
@@ -23,9 +47,6 @@
   --danger: #ff6b7a;
   --shadow: 0 26px 80px rgba(0, 0, 0, 0.52);
   --radius: 16px;
-  --font-ui: Pixelify, monospace;
-  --font-display: Pixelify, monospace;
-  --font-mono: VT323, monospace;
 }
 * {
   box-sizing: border-box;
@@ -71,17 +92,8 @@ a:focus-visible,
   inset: -2%;
   z-index: 0;
   background:
-    radial-gradient(
-      circle at 18% 18%,
-      rgba(40, 130, 82, 0.18),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at 78% 70%,
-      rgba(40, 110, 160, 0.1),
-      transparent 30%
-    ),
-    #050806;
+    radial-gradient(circle at 18% 18%, rgba(40, 130, 82, 0.18), transparent 28%),
+    radial-gradient(circle at 78% 70%, rgba(40, 110, 160, 0.1), transparent 30%), #050806;
   transition:
     background 0.35s ease,
     transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -100,11 +112,7 @@ a:focus-visible,
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    circle at 50% 40%,
-    transparent 0 35%,
-    rgba(0, 0, 0, 0.35) 100%
-  );
+  background: radial-gradient(circle at 50% 40%, transparent 0 35%, rgba(0, 0, 0, 0.35) 100%);
   pointer-events: none;
 }
 
@@ -126,8 +134,7 @@ a:focus-visible,
   background: #010402;
   color: #d6ffe0;
   padding: 13vh 11vw;
-  font-family:
-    "Courier New", Courier, "Nimbus Mono PS", "Liberation Mono", monospace;
+  font-family: "Courier New", Courier, "Nimbus Mono PS", "Liberation Mono", monospace;
   font-weight: 700;
   transition: opacity 0.42s ease;
 }
@@ -452,11 +459,7 @@ body.reduce-motion .boot-cursor::after {
   align-items: center;
   gap: 10px;
   padding: 0 11px 0 14px;
-  background: linear-gradient(
-    180deg,
-    rgba(20, 31, 24, 0.98),
-    rgba(11, 18, 14, 0.98)
-  );
+  background: linear-gradient(180deg, rgba(20, 31, 24, 0.98), rgba(11, 18, 14, 0.98));
   border-bottom: 1px solid rgba(164, 225, 184, 0.12);
   cursor: grab;
   user-select: none;
@@ -531,11 +534,7 @@ body.reduce-motion .boot-cursor::after {
   min-height: 0;
   overflow: auto;
   padding: 24px;
-  background: linear-gradient(
-    180deg,
-    rgba(10, 17, 13, 0.92),
-    rgba(6, 10, 8, 0.96)
-  );
+  background: linear-gradient(180deg, rgba(10, 17, 13, 0.92), rgba(6, 10, 8, 0.96));
   scrollbar-color: #294233 transparent;
   scrollbar-width: thin;
 }
@@ -661,11 +660,7 @@ body.reduce-motion .boot-cursor::after {
   padding: 20px;
   border: 1px solid rgba(109, 255, 155, 0.17);
   border-radius: 14px;
-  background: linear-gradient(
-    135deg,
-    rgba(109, 255, 155, 0.06),
-    rgba(93, 228, 255, 0.025)
-  );
+  background: linear-gradient(135deg, rgba(109, 255, 155, 0.06), rgba(93, 228, 255, 0.025));
   margin-bottom: 14px;
 }
 .skill-big {
@@ -1895,9 +1890,6 @@ body.reduce-motion * {
   }
 }
 
-/* === END style.css === */
-
-/* === BEGIN shell.css === */
 /* JOSEMI / expressive desktop. Original assets, shared visual grammar. */
 
 /* VARIABLES: colores, fuentes y tamaños compartidos. var(--accent) reutiliza el color elegido. */
@@ -1970,11 +1962,7 @@ select {
   opacity: 0.5;
 }
 #bg::after {
-  background: radial-gradient(
-    ellipse at 50% 30%,
-    transparent 0 30%,
-    #0004 100%
-  );
+  background: radial-gradient(ellipse at 50% 30%, transparent 0 30%, #0004 100%);
 }
 body[data-theme="paper"] #bg::after {
   background: radial-gradient(ellipse at 50% 30%, #ffffff30, transparent 70%);
@@ -2088,8 +2076,7 @@ body[data-theme="paper"] #bg::before {
   background: transparent;
   gap: 7px;
   border-radius: 6px;
-  transform: perspective(600px) rotateX(var(--tilt-x, 0deg))
-    rotateY(var(--tilt-y, 0deg));
+  transform: perspective(600px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
   transition:
     background 0.15s,
     border-color 0.15s,
@@ -2110,8 +2097,8 @@ body[data-theme="paper"] #bg::before {
   border-radius: 3px;
 }
 .icon:hover {
-  transform: perspective(600px) rotateX(var(--tilt-x, 0deg))
-    rotateY(var(--tilt-y, 0deg)) translateY(-3px);
+  transform: perspective(600px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))
+    translateY(-3px);
   background: #ffffff05;
   box-shadow: none;
   border-color: var(--shell-border);
@@ -2585,11 +2572,7 @@ body[data-theme="paper"] .icon .lbl {
   border: 1px dashed var(--shell-border);
   font: 10px var(--font-mono);
   color: var(--shell-muted);
-  background: repeating-linear-gradient(
-    45deg,
-    #ffffff03 0 10px,
-    transparent 10px 20px
-  );
+  background: repeating-linear-gradient(45deg, #ffffff03 0 10px, transparent 10px 20px);
 }
 .preferences-main .btn {
   margin-top: 16px;
@@ -3156,12 +3139,7 @@ body[data-atmosphere]:not([data-atmosphere="none"]) #bg {
   position: absolute;
   inset: -50%;
   pointer-events: none;
-  background: linear-gradient(
-    110deg,
-    transparent 40%,
-    #fff2 50%,
-    transparent 60%
-  );
+  background: linear-gradient(110deg, transparent 40%, #fff2 50%, transparent 60%);
   transform: translateX(-100%) rotate(-12deg);
   transition: transform 0.65s ease;
 }
@@ -3201,20 +3179,13 @@ body[data-atmosphere]:not([data-atmosphere="none"]) #bg {
 .ascii-stage,
 .saver-art {
   color: var(--accent);
-  background-image: linear-gradient(
-    110deg,
-    var(--accent),
-    var(--shell-text),
-    var(--accent)
-  );
+  background-image: linear-gradient(110deg, var(--accent), var(--shell-text), var(--accent));
   background-size: 200% 100%;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: signatureColor 7s ease-in-out infinite;
-  filter: drop-shadow(
-    0 0 8px color-mix(in srgb, var(--accent) 20%, transparent)
-  );
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 20%, transparent));
 }
 .ascii-stage {
   background-color: var(--shell-raised);
@@ -3232,11 +3203,7 @@ body[data-atmosphere]:not([data-atmosphere="none"]) #bg {
   font-size: clamp(5px, 1.6vw, 20px);
 }
 #os-screensaver {
-  background: radial-gradient(
-    ellipse,
-    color-mix(in srgb, var(--accent) 10%, var(--bg)),
-    var(--bg)
-  );
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--accent) 10%, var(--bg)), var(--bg));
   color: var(--shell-text);
 }
 #os-screensaver p,
@@ -3359,17 +3326,10 @@ body[data-intensity="calm"] :is(.boot-logo--hero, .ascii-stage, .saver-art) {
   }
 }
 
-/* === END shell.css === */
-
-/* === BEGIN experience.css === */
 /* INTRO: negro real y fósforo verde. La fase cambia por data-phase en shell.js. */
 /* MATRIX: el lienzo sigue debajo del escritorio. Oscurecemos la base para dar contraste. */
 body[data-atmosphere^="matrix"] #bg {
-  background: radial-gradient(
-    ellipse at 70% 30%,
-    #071c20,
-    #030906 70%
-  ) !important;
+  background: radial-gradient(ellipse at 70% 30%, #071c20, #030906 70%) !important;
 }
 body[data-atmosphere="matrix"] #bg {
   background: #020804 !important;
@@ -3426,9 +3386,6 @@ body[data-atmosphere^="matrix"] .desktop-welcome {
 }
 /* Accesibilidad: si se reduce el movimiento, la intro y el cursor muestran estados estáticos. */
 
-/* === END experience.css === */
-
-/* === BEGIN music.css === */
 /* El reproductor queda por encima de las ventanas y conserva al menos 200 × 200 px. */
 #music-dock {
   position: fixed;
@@ -3606,8 +3563,6 @@ body[data-atmosphere^="matrix"] .desktop-welcome {
   margin-top: 24px;
 }
 
-/* === END music.css === */
-
 /* FIRMA ESTABLE (ASCII Studio y salvapantallas): texto de color real y fuente local, sin depender de que el
    navegador admita el recorte de un degradado. JS ajusta --ascii-size al ancho. */
 .ascii-stage,
@@ -3628,7 +3583,6 @@ body[data-atmosphere^="matrix"] .desktop-welcome {
 body.reduce-motion .login.out {
   filter: none;
 }
-/* === BEGIN JOSEMI-OS UPDATE CSS === */
 
 /* Eliminar barra superior de "Sistema en línea" */
 .desktop__status {
@@ -4169,9 +4123,6 @@ body.has-god-of-war .desktop-welcome {
   }
 }
 
-/* === END JOSEMI-OS UPDATE CSS === */
-/* === BEGIN updates.css === */
-
 /* Ocultar estado superior si lo que molestaba era “Sistema en línea” */
 .desktop__status {
   display: none !important;
@@ -4565,8 +4516,6 @@ body.has-god-of-war .desktop {
   display: none !important;
 }
 
-/* === END updates.css === */
-
 /* MEJORAS SOBRE JOSEMI-OS: se reutilizan colores, tipografías, Apps y ventanas. */
 /* La barra superior se retira; sus herramientas se conservan en el dock. */
 .desktop {
@@ -4933,13 +4882,7 @@ body.reduce-motion .axolotl-gills {
   pointer-events: none;
   background:
     radial-gradient(ellipse at center, #020805aa 5%, transparent 65%),
-    repeating-linear-gradient(
-      0deg,
-      #0002 0px,
-      #0002 1px,
-      transparent 1px,
-      transparent 4px
-    );
+    repeating-linear-gradient(0deg, #0002 0px, #0002 1px, transparent 1px, transparent 4px);
 }
 #os-screensaver .saver-terminal-head {
   position: absolute;
@@ -5134,8 +5077,7 @@ body.is-corrupted .window .win__bar {
 }
 body.is-corrupted .icon .glyph,
 body.is-corrupted #mascot-button svg {
-  filter: drop-shadow(-3px 0 #d9519677) drop-shadow(3px 0 #41e0d577)
-    hue-rotate(60deg);
+  filter: drop-shadow(-3px 0 #d9519677) drop-shadow(3px 0 #41e0d577) hue-rotate(60deg);
 }
 body.is-corrupted #bg {
   filter: hue-rotate(75deg) saturate(1.8);
@@ -5146,11 +5088,7 @@ body.is-corrupted #desktop::after {
   inset: 0;
   pointer-events: none;
   z-index: 5000;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent 0 5px,
-    #ce469908 5px 7px
-  );
+  background: repeating-linear-gradient(0deg, transparent 0 5px, #ce469908 5px 7px);
 }
 body.is-corrupted .icons {
   animation: corruption-slice 7s steps(1) infinite;
@@ -5276,9 +5214,15 @@ body.reduce-motion.is-corrupted .icons {
   margin: 6px 0 10px;
   list-style-position: outside;
 }
-.mascot-log > .chat-message.assistant ul { list-style-type: disc; }
-.mascot-log > .chat-message.assistant ol { list-style-type: decimal; }
-.mascot-log > .chat-message.assistant li { margin: 4px 0; }
+.mascot-log > .chat-message.assistant ul {
+  list-style-type: disc;
+}
+.mascot-log > .chat-message.assistant ol {
+  list-style-type: decimal;
+}
+.mascot-log > .chat-message.assistant li {
+  margin: 4px 0;
+}
 .mascot-log > .chat-message.assistant li > :is(ul, ol) {
   margin: 4px 0;
 }
@@ -5288,11 +5232,11 @@ body.reduce-motion.is-corrupted .icons {
   text-underline-offset: 2px;
 }
 .mascot-log > .chat-message.assistant a:hover {
-  opacity: .82;
+  opacity: 0.82;
 }
 .mascot-log > .chat-message.assistant code {
   font: 11px/1.5 var(--font-mono, monospace);
-  background: rgba(0, 0, 0, .28);
+  background: rgba(0, 0, 0, 0.28);
   padding: 1px 4px;
   border-radius: 4px;
   overflow-wrap: anywhere;
@@ -5303,7 +5247,7 @@ body.reduce-motion.is-corrupted .icons {
   padding: 10px;
   overflow-x: auto;
   border-radius: 8px;
-  background: rgba(0, 0, 0, .38);
+  background: rgba(0, 0, 0, 0.38);
 }
 .mascot-log > .chat-message.assistant pre code {
   background: none;
@@ -5341,7 +5285,7 @@ body.reduce-motion.is-corrupted .icons {
   overflow-wrap: anywhere;
 }
 .mascot-log > .chat-message.assistant th {
-  background: rgba(255, 255, 255, .06);
+  background: rgba(255, 255, 255, 0.06);
   font-weight: 700;
 }
 
@@ -5363,7 +5307,7 @@ body.reduce-motion.is-corrupted .icons {
   background: var(--shell-panel, #08110d);
   color: var(--accent);
   font: 10px var(--font-mono);
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
   perspective: 600px;
   animation: vault-entry 1.8s steps(8, end) forwards;
 }
@@ -5393,7 +5337,10 @@ body.reduce-motion.is-corrupted .icons {
   background: var(--shell-raised);
   color: var(--shell-muted);
   cursor: pointer;
-  transition: border-color .2s, color .2s, background .2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
 }
 .vault-lock:hover,
 .vault-lock:focus-visible,
@@ -5414,7 +5361,7 @@ body.reduce-motion.is-corrupted .icons {
 }
 .vault-lock-caption {
   font: 10px var(--font-mono);
-  letter-spacing: .08em;
+  letter-spacing: 0.08em;
 }
 .vault--personal .vault-challenges {
   grid-template-columns: minmax(0, 1fr);
@@ -5428,21 +5375,50 @@ body.reduce-motion.is-corrupted .icons {
   min-height: 0;
 }
 @keyframes vault-door {
-  0%, 30% { transform: rotateY(0deg); }
-  100% { transform: rotateY(-105deg); opacity: .2; }
+  0%,
+  30% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(-105deg);
+    opacity: 0.2;
+  }
 }
 @keyframes vault-entry {
-  0%, 80% { opacity: 1; visibility: visible; }
-  100% { opacity: 0; visibility: hidden; }
+  0%,
+  80% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 @media (max-width: 480px) {
-  .vault-locks { gap: 10px; }
-  .vault-lock { padding: 24px 8px; }
-  .vault-lock-art { font-size: 15px; }
-  .vault-lock-caption { font-size: 9px; }
+  .vault-locks {
+    gap: 10px;
+  }
+  .vault-lock {
+    padding: 24px 8px;
+  }
+  .vault-lock-art {
+    font-size: 15px;
+  }
+  .vault-lock-caption {
+    font-size: 9px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .vault-opening { display: none; animation: none; }
-  .vault-ascii-door { animation: none; }
+  .vault-opening {
+    display: none;
+    animation: none;
+  }
+  .vault-ascii-door {
+    animation: none;
+  }
 }
-body.reduce-motion .vault-opening { display: none; animation: none; }
+body.reduce-motion .vault-opening {
+  display: none;
+  animation: none;
+}

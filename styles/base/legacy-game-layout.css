@@ -1,0 +1,112 @@
+/* ---------- Arcade / juegos ---------- */
+.arcade-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(160px, 1fr));
+  gap: 11px;
+  margin-top: 18px;
+}
+.game-shortcut {
+  min-height: 145px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #0b1510;
+  color: #dce8e0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 7px;
+  cursor: pointer;
+  transition: 0.16s;
+}
+.game-shortcut:hover {
+  transform: translateY(-2px);
+  border-color: rgba(109, 255, 155, 0.33);
+  background: #102018;
+}
+.game-shortcut strong {
+  font: 600 14px var(--font-display);
+}
+.game-shortcut small {
+  color: #71847a;
+  font: 9px var(--font-mono);
+}
+.app-pixel-icon {
+  display: inline-block;
+  position: relative;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  image-rendering: pixelated;
+  vertical-align: middle;
+}
+.glyph .app-pixel-icon {
+  width: 32px;
+  height: 32px;
+}
+.t-ico .app-pixel-icon,
+.tb-app .app-pixel-icon {
+  width: 14px;
+  height: 14px;
+  transform: scale(0.75);
+  transform-origin: center;
+}
+
+/* JUEGOS: estructura común para Canvas, marcador e instrucciones. */
+.game {
+  min-width: 100%;
+  min-height: 100%;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  background: #040605;
+  color: #fff;
+  font-family: var(--font-mono);
+  user-select: none;
+}
+.game canvas {
+  background: #000;
+  border: 1px solid #29362e;
+  border-radius: 4px;
+  box-shadow: 0 0 36px rgba(109, 255, 155, 0.06);
+  image-rendering: pixelated;
+}
+.game-help {
+  max-width: 560px;
+  color: #718078;
+  text-align: center;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.secret-screen {
+  min-height: 100%;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 14px;
+  background: #030604;
+  color: #9affb5;
+  font-family: var(--font-mono);
+}
+.secret-skull {
+  font-size: 52px;
+}
+.secret-screen h2 {
+  max-width: 520px;
+  font-size: 16px;
+}
+.secret-screen p {
+  max-width: 580px;
+  line-height: 1.7;
+  color: #a4b6ab;
+}
+.secret-code {
+  color: #fff !important;
+}

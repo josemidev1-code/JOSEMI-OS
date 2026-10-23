@@ -1,6 +1,8 @@
+/* GENERADO: editar src/ o styles/ y ejecutar npm run build. Orden: sources.manifest.json. */
 /* Renderitzador Markdown segur de Milo. No s'usa innerHTML amb textos de la IA. */
 const MiloRender = (() => {
-  const token = /\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*\n]+)\*\*|__([^_\n]+)__|\x60([^\x60\n]+)\x60|\*([^*\n]+)\*/g;
+  const token =
+    /\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*\n]+)\*\*|__([^_\n]+)__|\x60([^\x60\n]+)\x60|\*([^*\n]+)\*/g;
 
   function inline(parent, text) {
     const source = String(text || "");
@@ -16,7 +18,9 @@ const MiloRender = (() => {
         try {
           const parsed = new URL(match[2], window.location.href);
           if (["http:", "https:", "mailto:"].includes(parsed.protocol)) url = parsed.href;
-        } catch { /* Enllaç invàlid */ }
+        } catch {
+          /* Enllaç invàlid */
+        }
         if (url) {
           const a = document.createElement("a");
           a.href = url;
@@ -48,31 +52,47 @@ const MiloRender = (() => {
   }
 
   function cells(line) {
-    return line.trim().replace(/^\|/, "").replace(/\|$/, "")
-      .split(/(?<!\\)\|/).map(cell => cell.trim().replace(/\\\|/g, "|"));
+    return line
+      .trim()
+      .replace(/^\|/, "")
+      .replace(/\|$/, "")
+      .split(/(?<!\\)\|/)
+      .map((cell) => cell.trim().replace(/\\\|/g, "|"));
   }
 
   function render(container, markdown) {
-    const lines = String(markdown || "").replace(/\r\n?/g, "\n").split("\n");
+    const lines = String(markdown || "")
+      .replace(/\r\n?/g, "\n")
+      .split("\n");
     const out = document.createDocumentFragment();
-    const bullet = line => /^(\s*)([-+*]|\d+[.)])\s+(.+)$/.exec(line);
-    const table = i => {
+    const bullet = (line) => /^(\s*)([-+*]|\d+[.)])\s+(.+)$/.exec(line);
+    const table = (i) => {
       if (i + 1 >= lines.length || !lines[i].includes("|")) return false;
       const head = cells(lines[i]);
       const rule = cells(lines[i + 1]);
-      return head.length >= 2 && head.length <= 8 &&
-        rule.length === head.length && rule.every(cell => /^:?-{3,}:?$/.test(cell));
+      return (
+        head.length >= 2 &&
+        head.length <= 8 &&
+        rule.length === head.length &&
+        rule.every((cell) => /^:?-{3,}:?$/.test(cell))
+      );
     };
-    const isBlock = i => {
+    const isBlock = (i) => {
       const line = lines[i];
-      return /^\s{0,3}(?:#{1,4}\s|>|\x60{3}|~{3})/.test(line) ||
+      return (
+        /^\s{0,3}(?:#{1,4}\s|>|\x60{3}|~{3})/.test(line) ||
         /^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/.test(line) ||
-        !!bullet(line) || table(i);
+        !!bullet(line) ||
+        table(i)
+      );
     };
 
     for (let i = 0; i < lines.length;) {
       const line = lines[i];
-      if (!line.trim()) { i++; continue; }
+      if (!line.trim()) {
+        i++;
+        continue;
+      }
 
       const fence = /^\s*(\x60{3,}|~{3,})/.exec(line);
       if (fence) {
@@ -97,7 +117,7 @@ const MiloRender = (() => {
         const tableEl = document.createElement("table");
         const head = document.createElement("thead");
         const header = document.createElement("tr");
-        names.forEach(name => {
+        names.forEach((name) => {
           const th = document.createElement("th");
           inline(th, name);
           header.appendChild(th);
@@ -193,9 +213,9 @@ const MiloRender = (() => {
       while (i < lines.length && lines[i].trim() && (count === 0 || !isBlock(i))) {
         const current = lines[i++];
         if (count) {
-          p.appendChild(/ {2}$/.test(previous)
-            ? document.createElement("br")
-            : document.createTextNode(" "));
+          p.appendChild(
+            / {2}$/.test(previous) ? document.createElement("br") : document.createTextNode(" "),
+          );
         }
         inline(p, current.trim());
         previous = current;

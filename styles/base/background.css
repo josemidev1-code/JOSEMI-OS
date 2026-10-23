@@ -1,0 +1,29 @@
+/* ---------- Fondo ---------- */
+#bg {
+  position: fixed;
+  inset: -2%;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(40, 130, 82, 0.18), transparent 28%),
+    radial-gradient(circle at 78% 70%, rgba(40, 110, 160, 0.1), transparent 30%), #050806;
+  transition:
+    background 0.35s ease,
+    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+#bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, #000 20%, transparent 92%);
+}
+#bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, transparent 0 35%, rgba(0, 0, 0, 0.35) 100%);
+  pointer-events: none;
+}

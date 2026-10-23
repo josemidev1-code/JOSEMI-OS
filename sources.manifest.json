@@ -1,0 +1,271 @@
+{
+  "version": 1,
+  "outputs": [
+    {
+      "file": "script.js",
+      "type": "script",
+      "groups": [
+        {
+          "files": [
+            "src/core/storage.js",
+            "src/core/state.js",
+            "src/wallpapers/extra-scenes.js",
+            "src/wallpapers/scenes.js",
+            "src/wallpapers/catalog.js",
+            "src/desktop/theme-base.js",
+            "src/desktop/notifications.js",
+            "src/data/profile.js",
+            "src/apps/base.js",
+            "src/desktop/windows.js",
+            "src/apps/terminal.js",
+            "src/data/projects.js",
+            "src/apps/project-window.js",
+            "src/desktop/desktop.js",
+            "src/data/user.js",
+            "src/boot/access.js",
+            "src/games/lifecycle.js",
+            "src/desktop/preferences.js",
+            "src/desktop/icons.js",
+            "src/desktop/themes.js",
+            "src/desktop/window-motion.js",
+            "src/ascii/renderer.js",
+            "src/boot/animation.js",
+            "src/apps/ascii-studio.js",
+            "src/desktop/shortcuts.js",
+            "src/ascii/scenes.js",
+            "src/ascii/screensaver.js",
+            "src/desktop/toolbar.js",
+            "src/desktop/search.js",
+            "src/desktop/window-effects.js",
+            "src/wallpapers/atmosphere-renderer.js",
+            "src/wallpapers/atmosphere.js",
+            "src/bootstrap/desktop.js"
+          ]
+        },
+        {
+          "files": [
+            "src/portfolio/preferences.js",
+            "src/portfolio/data.js",
+            "src/portfolio/icons.js",
+            "src/apps/about.js",
+            "src/apps/projects.js",
+            "src/apps/contact.js",
+            "src/apps/vault.js",
+            "src/apps/settings.js",
+            "src/portfolio/wallpaper.js"
+          ],
+          "scope": "private"
+        },
+        {
+          "files": [
+            "src/milo/local-replies.js",
+            "src/milo/panel.js",
+            "src/apps/corruption.js",
+            "src/bootstrap/viewport.js"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "games.js",
+      "type": "script",
+      "groups": [
+        {
+          "files": [
+            "src/games/shared.js",
+            "src/games/tetris.js",
+            "src/games/pacman.js",
+            "src/games/minesweeper.js",
+            "src/games/arcade.js"
+          ],
+          "scope": "private"
+        }
+      ]
+    },
+    {
+      "file": "pixel-system.js",
+      "type": "script",
+      "groups": [
+        {
+          "files": [
+            "src/shell/preferences.js",
+            "src/shell/navigation.js",
+            "src/apps/home.js",
+            "src/shell/synchronize.js"
+          ],
+          "scope": "private"
+        }
+      ]
+    },
+    {
+      "file": "pixel-extras.js",
+      "type": "script",
+      "groups": [
+        {
+          "files": [
+            "src/apps/utilities-shared.js",
+            "src/wallpapers/landscapes.js",
+            "src/apps/gallery.js",
+            "src/apps/notes.js",
+            "src/apps/calculator.js",
+            "src/apps/focus.js",
+            "src/apps/launcher.js"
+          ],
+          "scope": "private"
+        }
+      ]
+    },
+    {
+      "file": "pixel-universe.js",
+      "type": "script",
+      "groups": [
+        {
+          "files": [
+            "src/pixel/art.js",
+            "src/pixel/projects.js",
+            "src/pixel/arcade-entry.js",
+            "src/pixel/vault.js",
+            "src/pixel/cursors.js",
+            "src/wallpapers/detail.js",
+            "src/wallpapers/animation.js",
+            "src/pixel/desktop.js",
+            "src/milo/actions.js",
+            "src/pixel/ascii-studio.js",
+            "src/pixel/settings.js"
+          ],
+          "scope": "private"
+        },
+        {
+          "files": ["src/bootstrap/start.js"]
+        }
+      ]
+    },
+    {
+      "file": "milo-ai.js",
+      "type": "script",
+      "groups": [
+        {
+          "files": ["src/shared/milo-contract.js"]
+        },
+        {
+          "files": ["src/milo/ai-client.js"]
+        }
+      ]
+    },
+    {
+      "file": "milo-render.js",
+      "type": "script",
+      "groups": [
+        {
+          "files": ["src/milo/markdown.js"]
+        }
+      ]
+    },
+    {
+      "file": "pixel-tools.js",
+      "type": "script",
+      "groups": [
+        {
+          "files": ["src/core/calculator.js"]
+        }
+      ]
+    },
+    {
+      "file": "worker.js",
+      "type": "module",
+      "groups": [
+        {
+          "files": ["src/shared/milo-contract.js"]
+        },
+        {
+          "files": [
+            "src/worker/config.js",
+            "src/worker/personality.js",
+            "src/worker/tools.js",
+            "src/worker/http.js",
+            "src/worker/messages.js",
+            "src/worker/chat.js",
+            "src/worker/search.js",
+            "src/worker/weather.js",
+            "src/worker/router.js"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "style.css",
+      "type": "css",
+      "groups": [
+        {
+          "files": [
+            "styles/typography.css",
+            "styles/base/tokens-layout.css",
+            "styles/base/background.css",
+            "styles/base/boot.css",
+            "styles/base/desktop.css",
+            "styles/base/windows.css",
+            "styles/base/app-components.css",
+            "styles/base/legacy-game-layout.css",
+            "styles/base/menus.css",
+            "styles/base/taskbar.css",
+            "styles/base/misc.css",
+            "styles/base/responsive-10.css",
+            "styles/base/responsive-11.css",
+            "styles/shell.css",
+            "styles/motion.css",
+            "styles/music.css",
+            "styles/ascii-base.css",
+            "styles/pixel-base.css",
+            "styles/preferences.css",
+            "styles/interface.css"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "responsive.css",
+      "type": "css",
+      "groups": [
+        {
+          "files": ["styles/responsive.css"]
+        }
+      ]
+    },
+    {
+      "file": "games.css",
+      "type": "css",
+      "groups": [
+        {
+          "files": ["styles/games.css"]
+        }
+      ]
+    },
+    {
+      "file": "pixel-system.css",
+      "type": "css",
+      "groups": [
+        {
+          "files": ["styles/pixel-system.css"]
+        }
+      ]
+    },
+    {
+      "file": "pixel-extras.css",
+      "type": "css",
+      "groups": [
+        {
+          "files": ["styles/pixel-extras.css"]
+        }
+      ]
+    },
+    {
+      "file": "pixel-universe.css",
+      "type": "css",
+      "groups": [
+        {
+          "files": ["styles/pixel-universe.css"]
+        }
+      ]
+    }
+  ]
+}

@@ -19,7 +19,7 @@ La primera visita reproduce la intro completa, sin bloque de presentación ni bo
 
 ## Estructura
 
-La web utiliza HTML, CSS y JavaScript, sin proceso de compilación.
+La web publicada utiliza HTML, CSS y JavaScript estáticos. Las fuentes editables están separadas en `src/` y `styles/`; `npm run build` genera los archivos públicos de la raíz y sus versiones de caché. [Mapa del código y comandos de mantenimiento](docs/DESARROLLO.md).
 
 | Archivo | Contenido |
 | --- | --- |
@@ -36,7 +36,7 @@ La web utiliza HTML, CSS y JavaScript, sin proceso de compilación.
 
 ## Arquitectura
 
-**Archivos separados.** La estructura, el diseño y la interacción se mantienen en HTML, CSS y JavaScript para facilitar el mantenimiento y publicar directamente en GitHub Pages.
+**Fuentes por responsabilidad.** Aplicaciones, juegos, ventanas, fondos, arranque, Milo y proveedores tienen fuentes separadas. Un manifiesto explícito genera los archivos públicos conservando el orden de dependencias y los ámbitos privados. GitHub Pages sirve los resultados directamente.
 
 **Estado local.** Los ajustes, récords y llaves de Secret Vault utilizan `localStorage`. Se conservan al recargar en el mismo navegador y no requieren una cuenta ni un servidor. Los acertijos son una función de juego, no un sistema de autenticación.
 
@@ -77,7 +77,7 @@ Los endpoints del Worker son `POST /chat`, `POST /search`, `POST /weather` y `GE
 
 Groq tiene un tiempo máximo de 25 segundos por llamada; Tavily y cada consulta de Open-Meteo, 8 segundos. Los errores visibles están en castellano. La página tiene CSP para scripts propios, fuentes locales, fondos SVG y los servicios usados por Milo, además de una presentación de contacto sin JavaScript. Los datos que Milo utiliza sobre Josemi son públicos.
 
-Las pruebas de seguridad y del contrato cliente/servidor se ejecutan con `node --test tests/worker-security.test.mjs`, sin dependencias externas. Antes de publicar JS o CSS, actualiza su `?v=` en `index.html` y comprueba la web pública.
+`npm run verify` comprueba generación, caché, sintaxis, recursos, formato y 13 pruebas de seguridad, contrato y mantenimiento. Las pruebas del Worker también se pueden ejecutar con `node --test tests/worker-security.test.mjs`. Antes de publicar cambios de fuentes, ejecuta `npm run build`: actualiza automáticamente los `?v=` mediante huellas del contenido. Después comprueba la web pública.
 
 
 ## Publicación
@@ -96,13 +96,13 @@ GitHub Pages publica la raíz de la rama `main`. Las rutas de los estilos y scri
 
 Los contadores del proyecto leen las aplicaciones y paisajes registrados. La demo muestra una orden local de Milo, no una conversación remota simulada. La fotografía personal sigue pendiente de una imagen que Josemi decida publicar; la captura y el vídeo son medios propios del proyecto, no fotografías personales.
 
-Las fuentes se sirven en WOFF2: 55.060 bytes frente a los 232.276 bytes de los originales TTF (76 % menos). La conversión con FontTools conserva todos los glifos y las licencias OFL; los originales permanecen en `assets/fonts`. No se requiere compilar la web para publicarla.
+La interfaz utiliza Atkinson Hyperlegible Next; el terminal, el código y el ASCII utilizan JetBrains Mono, con las ligaduras desactivadas donde deben distinguirse los caracteres. Ambas se sirven localmente en WOFF2. [Procedencia y licencias de las fuentes](assets/fonts/SOURCES.md).
 
 ## Referencias gráficas
 
 Los fondos reinterpretan estéticas de ciencia ficción y videojuegos mediante dibujos propios de bloques. Milo se inspira en el ajolote de Minecraft y el terminal ASCII en el salvapantallas de Omarchy.
 
-El fondo fotográfico desbloqueable de God of War utiliza una imagen del [kit oficial de PlayStation](https://www.playstation.com/en-us/god-of-war/community/), servida desde `assets/wallpapers`. Su procedencia y atribución figuran en `assets/wallpapers/SOURCES.md`. Las fuentes Pixelify Sans y VT323 (licencia OFL, procedentes de Google Fonts) se sirven desde `assets/fonts`.
+El fondo fotográfico desbloqueable de God of War utiliza una imagen del [kit oficial de PlayStation](https://www.playstation.com/en-us/god-of-war/community/), servida desde `assets/wallpapers`. Su procedencia y atribución figuran en `assets/wallpapers/SOURCES.md`. Las licencias y procedencia de las tipografías están en `assets/fonts/SOURCES.md`.
 
 Los 22 paisajes pixel art tienen detalles específicos de su escena y una capa animada compartida; se detiene al ocultar la pestaña o activar «Reducir movimiento».
 Los paisajes utilizan exclusivamente su animación pixel art. Los efectos ASCII del escritorio se reservan para fondos de color, y la foto de God of War no recibe partículas superpuestas. ASCII Studio conserva sus propios efectos.

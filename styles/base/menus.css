@@ -1,0 +1,128 @@
+/* ---------- Menú inicio / contexto ---------- */
+.menu {
+  position: absolute;
+  left: 22px;
+  bottom: 12px;
+  z-index: 120;
+  width: 310px;
+  padding: 12px;
+  background: rgba(7, 12, 9, 0.98);
+  border: 1px solid var(--line-strong);
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+  animation: menuIn 0.15s ease;
+}
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.menu__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 5px 13px;
+  border-bottom: 1px solid var(--line);
+}
+.menu__avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  border: 1px solid rgba(109, 255, 155, 0.2);
+  color: var(--accent);
+  font: 700 11px var(--font-mono);
+}
+.menu__head strong {
+  display: block;
+  font: 600 13px var(--font-display);
+}
+.menu__head small {
+  display: block;
+  margin-top: 2px;
+  color: #76887e;
+  font-size: 9px;
+}
+.menu__label {
+  margin: 12px 5px 7px;
+  color: #5e7065;
+  font: 9px var(--font-mono);
+  letter-spacing: 0.12em;
+}
+.menu__apps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+.menu__apps button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #b9c8bf;
+  text-align: left;
+  font-size: 11px;
+  cursor: pointer;
+}
+.menu__apps button:hover {
+  background: #111c15;
+  border-color: var(--line);
+}
+.menu__power {
+  display: flex;
+  gap: 7px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.menu__power button {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0c1510;
+  color: #94a69b;
+  font: 9px var(--font-mono);
+  cursor: pointer;
+}
+.menu__power button:hover {
+  border-color: rgba(109, 255, 155, 0.3);
+  color: #dce8e0;
+}
+.ctx {
+  position: absolute;
+  z-index: 130;
+  min-width: 220px;
+  padding: 6px;
+  background: rgba(7, 12, 9, 0.98);
+  border: 1px solid var(--line-strong);
+  border-radius: 11px;
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.45);
+}
+.ctx button {
+  display: flex;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #aebdb4;
+  text-align: left;
+  font-size: 11px;
+  cursor: pointer;
+}
+.ctx button:hover {
+  background: #122018;
+  color: #e7f4eb;
+}
