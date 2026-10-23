@@ -3,30 +3,56 @@
   <!-- CONFIGURACIÓN: idioma, tamaño adaptable, título, fuentes y estilos. -->
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://milo-ai.josemidev1.workers.dev https://itunes.apple.com; media-src 'self' https://*.itunes.apple.com https://*.mzstatic.com; object-src 'none'; base-uri 'none'; form-action 'self'" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta
       name="description"
       content="JOSEMI-OS — portfolio interactivo de José Miguel Miralles Gandia, estudiante de DAM y desarrollador de software en proceso."
     />
     <meta name="theme-color" content="#050806" />
+    <link rel="canonical" href="https://josemidev1.site/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:site_name" content="JOSEMI-OS" />
+    <meta property="og:title" content="JOSEMI-OS · José Miguel Miralles Gandia" />
+    <meta property="og:description" content="Mi portfolio en forma de escritorio pixel art: proyectos, aprendizaje, Arcade y Milo, mi asistente con IA." />
+    <meta property="og:url" content="https://josemidev1.site/" />
+    <meta property="og:image" content="https://josemidev1.site/assets/og-josemi-os.png" />
+    <meta property="og:image:width" content="1440" />
+    <meta property="og:image:height" content="900" />
+    <meta property="og:image:alt" content="Escritorio pixel art de JOSEMI-OS, portfolio de José Miguel Miralles Gandia" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JOSEMI-OS · José Miguel Miralles Gandia" />
+    <meta name="twitter:description" content="Proyectos, aprendizaje y un pequeño universo digital en pixel art." />
+    <meta name="twitter:image" content="https://josemidev1.site/assets/og-josemi-os.png" />
     <title>JOSEMI-OS · Portfolio interactivo</title>
     <link
       rel="icon"
       type="image/svg+xml"
       href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%20shape-rendering%3D%22crispEdges%22%3E%3Crect%20x%3D%223%22%20y%3D%224%22%20width%3D%2226%22%20height%3D%2224%22%20fill%3D%22%23081a14%22/%3E%3Crect%20x%3D%224%22%20y%3D%223%22%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22%23486e57%22/%3E%3Crect%20x%3D%225%22%20y%3D%224%22%20width%3D%2222%22%20height%3D%2222%22%20fill%3D%22%2393d6a0%22/%3E%3Crect%20x%3D%226%22%20y%3D%225%22%20width%3D%2220%22%20height%3D%2220%22%20fill%3D%22%2310261d%22/%3E%3Crect%20x%3D%227%22%20y%3D%226%22%20width%3D%2218%22%20height%3D%222%22%20fill%3D%22%23294f37%22/%3E%3Crect%20x%3D%228%22%20y%3D%226%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%2391e6ad%22/%3E%3Crect%20x%3D%2210%22%20y%3D%226%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%235b9770%22/%3E%3Crect%20x%3D%2212%22%20y%3D%226%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%235b9770%22/%3E%3Crect%20x%3D%227%22%20y%3D%229%22%20width%3D%2218%22%20height%3D%2214%22%20fill%3D%22%230a1812%22/%3E%3Crect%20x%3D%2210%22%20y%3D%2212%22%20width%3D%222%22%20height%3D%222%22%20fill%3D%22%23bcffd1%22/%3E%3Crect%20x%3D%2212%22%20y%3D%2214%22%20width%3D%222%22%20height%3D%222%22%20fill%3D%22%23bcffd1%22/%3E%3Crect%20x%3D%2210%22%20y%3D%2216%22%20width%3D%222%22%20height%3D%222%22%20fill%3D%22%23bcffd1%22/%3E%3Crect%20x%3D%2217%22%20y%3D%2217%22%20width%3D%226%22%20height%3D%222%22%20fill%3D%22%238ceca6%22/%3E%3Crect%20x%3D%2217%22%20y%3D%2219%22%20width%3D%226%22%20height%3D%221%22%20fill%3D%22%23356346%22/%3E%3Crect%20x%3D%228%22%20y%3D%2222%22%20width%3D%2215%22%20height%3D%221%22%20fill%3D%22%23153b28%22/%3E%3Crect%20x%3D%2227%22%20y%3D%226%22%20width%3D%221%22%20height%3D%2219%22%20fill%3D%22%23406147%22/%3E%3Crect%20x%3D%226%22%20y%3D%2226%22%20width%3D%2220%22%20height%3D%221%22%20fill%3D%22%2330523a%22/%3E%3C/svg%3E"
     />
+    <!-- CACHÉ: al editar un JS/CSS, actualizar su ?v= antes de publicar y probar la versión pública. -->
     <!-- FUENTES: pixel art locales; se precargan porque el arranque y las ventanas las usan desde el primer momento. -->
     <link rel="preload" href="assets/fonts/vt323.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="preload" href="assets/fonts/pixelify-sans.ttf" as="font" type="font/ttf" crossorigin />
-    <link rel="stylesheet" href="style.css?v=20261023-coherent" />
+    <link rel="stylesheet" href="style.css?v=20261023-audit" />
     <link rel="stylesheet" href="responsive.css?v=20261022-clean" />
     <link rel="stylesheet" href="pixel-system.css?v=3" />
     <link rel="stylesheet" href="pixel-extras.css?v=1" />
-    <link rel="stylesheet" href="games.css?v=20261023-coherent" />
-    <link rel="stylesheet" href="pixel-universe.css?v=20261023-coherent" />
+    <link rel="stylesheet" href="games.css?v=20261023-audit" />
+    <link rel="stylesheet" href="pixel-universe.css?v=20261023-audit" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
   </head>
   <body>
+    <noscript>
+      <style>#login, #bg { display: none !important; } .noscript-notice { max-width: 680px; margin: 8vh auto; padding: 24px; color: #e0f4e7; background: #10231c; font: 20px/1.5 monospace; } .noscript-notice a { color: #a1efc1; }</style>
+      <section class="noscript-notice">
+        <h1>José Miguel Miralles Gandia · JOSEMI-OS</h1>
+        <p>Estudiante de DAM. Este portfolio es un escritorio interactivo en pixel art y necesita JavaScript para abrir sus aplicaciones.</p>
+        <p>Puedes conocer mis proyectos y contactar conmigo:</p>
+        <p><a href="https://github.com/josemidev1-code">GitHub</a> · <a href="https://www.linkedin.com/in/jose-miguel-miralles-gandia-74347b43a/">LinkedIn</a> · <a href="mailto:josemidev1@gmail.com">josemidev1@gmail.com</a></p>
+      </section>
+    </noscript>
     <!-- FONDO: Canvas decorativo añadido por JavaScript; aria-hidden lo oculta al lector de pantalla. -->
     <div id="bg" aria-hidden="true"></div>
 
@@ -100,14 +126,13 @@
     <div id="toasts" class="toasts" aria-live="polite"></div>
 
     <script src="milo-render.js?v=20261014-md1"></script>
-    <script src="script.js?v=20261023-coherent"></script>
-    <script src="games.js?v=20261023-coherent"></script>
-    
-    <script src="milo-ai.js?v=20261023-coherent"></script>
-    <script src="pixel-system.js?v=20261023-coherent"></script>
+    <script src="script.js?v=20261023-audit"></script>
+    <script src="games.js?v=20261023-audit"></script>
+    <script src="milo-ai.js?v=20261023-audit"></script>
+    <script src="pixel-system.js?v=20261023-audit"></script>
     <script src="pixel-tools.js?v=1"></script>
-    <script src="pixel-extras.js?v=20261023-coherent"></script>
-    <script src="pixel-universe.js?v=20261023-coherent"></script>
+    <script src="pixel-extras.js?v=20261023-audit"></script>
+    <script src="pixel-universe.js?v=20261023-audit"></script>
 
   </body>
 </html>
