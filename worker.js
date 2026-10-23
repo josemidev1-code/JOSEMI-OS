@@ -51,6 +51,7 @@ const tool = (name, description, properties, required) => ({
   function: { name, description, parameters: { type: "object", properties, required } }
 });
 
+// Mantener las listas de open_app y set_theme sincronizadas con milo-ai.js (prueba automatizada).
 const TOOLS = [
   tool("web_search", "Busca información actual en Internet, con URLs de fuentes.", {
     query: { type: "string", description: "Consulta corta de búsqueda" }
@@ -87,9 +88,11 @@ function headers(origin) {
   return h;
 }
 
-function json(data, status, origin) {
-  return new Response(JSON.stringify(data), { status, headers: headers(origin) });
+function json(data, status, origin, extraHeaders = {}) {
+  return new Response(JSON.stringify(data), { status, headers: { ...headers(origin), ...extraHeaders } });
 }
+
+const timedOut = error => error?.name === "TimeoutError" || error?.name === "AbortError";
 
 // Mai confiem en un system prompt enviat pel navegador. Sols el Worker fixa les regles.
 function cleanMessages(input) {
@@ -131,10 +134,10 @@ function cleanMessages(input) {
 }
 
 async function chat(payload, env, origin) {
-  if (!env.GROQ_API_KEY) return json({ error: "Milo no està configurat: falta GROQ_API_KEY" }, 503, origin);
+  if (!env.GROQ_API_KEY) return json({ error: "Milo no está disponible temporalmente." }, 503, origin);
   const messages = cleanMessages(payload.messages);
   if (!messages.some(m => m.role === "user")) {
-    return json({ error: "Falta el missatge de l'usuari" }, 400, origin);
+    return json({ error: "Falta el mensaje del usuario" }, 400, origin);
   }
 
   const enabledTools = env.TAVILY_API_KEY
@@ -144,6 +147,7 @@ async function chat(payload, env, origin) {
   try {
     const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
+      signal: AbortSignal.timeout(25000),
       headers: {
         "Authorization": "Bearer " + env.GROQ_API_KEY,
         "Content-Type": "application/json"
@@ -161,11 +165,11 @@ async function chat(payload, env, origin) {
     });
     if (!r.ok) {
       console.error("Groq HTTP", r.status);
-      return json({ error: "El proveïdor d'IA no ha respost correctament", provider_status: r.status }, 502, origin);
+      return json({ error: "El proveedor de IA no ha respondido correctamente", provider_status: r.status }, 502, origin);
     }
     const data = await r.json();
     const upstream = data.choices?.[0]?.message;
-    if (!upstream) return json({ error: "Resposta buida del model" }, 502, origin);
+    if (!upstream) return json({ error: "Respuesta vacía del modelo" }, 502, origin);
     // No exposem camps interns del proveïdor (p. ex. reasoning).
     // El frontend sols necessita contingut i crides a ferramentes.
     const message = {
@@ -190,18 +194,20 @@ async function chat(payload, env, origin) {
     return json({ message }, 200, origin);
   } catch (error) {
     console.error("Groq network failure", error?.name);
-    return json({ error: "No es pot connectar amb el model d'IA" }, 502, origin);
+    if (timedOut(error)) return json({ error: "La consulta de IA ha tardado demasiado. Inténtalo de nuevo." }, 504, origin);
+    return json({ error: "No se puede conectar con el modelo de IA" }, 502, origin);
   }
 }
 
 async function search(payload, env, origin) {
-  if (!env.TAVILY_API_KEY) return json({ error: "La cerca web no està configurada (TAVILY_API_KEY)" }, 503, origin);
+  if (!env.TAVILY_API_KEY) return json({ error: "La búsqueda web no está disponible temporalmente." }, 503, origin);
   const query = typeof payload.query === "string" ? payload.query.trim().slice(0, 250) : "";
-  if (!query) return json({ error: "Consulta buida" }, 400, origin);
+  if (!query) return json({ error: "Consulta vacía" }, 400, origin);
 
   try {
     const r = await fetch("https://api.tavily.com/search", {
       method: "POST",
+      signal: AbortSignal.timeout(8000),
       headers: {
         "Authorization": "Bearer " + env.TAVILY_API_KEY,
         "Content-Type": "application/json"
@@ -211,7 +217,7 @@ async function search(payload, env, origin) {
         include_answer: false, include_raw_content: false
       })
     });
-    if (!r.ok) return json({ error: "El buscador no està disponible" }, 502, origin);
+    if (!r.ok) return json({ error: "El buscador no está disponible" }, 502, origin);
     const data = await r.json();
     return json({
       source: "Tavily",
@@ -221,8 +227,9 @@ async function search(payload, env, origin) {
         content: String(item.content || "").slice(0, 600)
       }))
     }, 200, origin);
-  } catch {
-    return json({ error: "No es pot contactar amb el buscador" }, 502, origin);
+  } catch (error) {
+    if (timedOut(error)) return json({ error: "La búsqueda ha tardado demasiado. Inténtalo de nuevo." }, 504, origin);
+    return json({ error: "No se puede contactar con el buscador" }, 502, origin);
   }
 }
 
@@ -238,24 +245,24 @@ const weatherLabels = {
 
 async function weather(payload, origin) {
   const city = typeof payload.city === "string" ? payload.city.trim().slice(0, 100) : "";
-  if (city.length < 2) return json({ error: "Indica una ciutat" }, 400, origin);
+  if (city.length < 2) return json({ error: "Indica una ciudad" }, 400, origin);
   try {
     const geoURL = new URL("https://geocoding-api.open-meteo.com/v1/search");
     geoURL.searchParams.set("name", city);
     geoURL.searchParams.set("count", "1");
     geoURL.searchParams.set("language", "es");
-    const placeResponse = await fetch(geoURL.toString());
+    const placeResponse = await fetch(geoURL.toString(), { signal: AbortSignal.timeout(8000) });
     if (!placeResponse.ok) throw new Error("Geocoding API unavailable");
     const places = await placeResponse.json();
     const place = places.results?.[0];
-    if (!place) return json({ error: "No s'ha trobat la ciutat", city }, 404, origin);
+    if (!place) return json({ error: "No se ha encontrado la ciudad", city }, 404, origin);
 
     const url = new URL("https://api.open-meteo.com/v1/forecast");
     url.searchParams.set("latitude", String(place.latitude));
     url.searchParams.set("longitude", String(place.longitude));
     url.searchParams.set("current", "temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m");
     url.searchParams.set("timezone", "auto");
-    const response = await fetch(url.toString());
+    const response = await fetch(url.toString(), { signal: AbortSignal.timeout(8000) });
     if (!response.ok) throw new Error("Forecast API unavailable");
     const result = await response.json();
     const current = result.current;
@@ -273,39 +280,53 @@ async function weather(payload, origin) {
       conditions: weatherLabels[current.weather_code] || "condiciones variables",
       attribution: "https://open-meteo.com/"
     }, 200, origin);
-  } catch {
-    return json({ error: "No s'ha pogut consultar Open-Meteo" }, 502, origin);
+  } catch (error) {
+    if (timedOut(error)) return json({ error: "La consulta del tiempo ha tardado demasiado. Inténtalo de nuevo." }, 504, origin);
+    return json({ error: "No se ha podido consultar el tiempo" }, 502, origin);
   }
 }
 
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
-    if (origin && !ORIGINS.has(origin)) return json({ error: "Origen no permés" }, 403, origin);
+    if (origin && !ORIGINS.has(origin)) return json({ error: "Origen no permitido" }, 403, origin);
     if (request.method === "OPTIONS") {
+      if (!ORIGINS.has(origin)) return json({ error: "Origen no permitido" }, 403, origin);
       return new Response(null, { status: 204, headers: headers(origin) });
     }
 
     const path = new URL(request.url).pathname;
     if (path === "/health" && request.method === "GET") {
-      return json({ ok: true, groq: !!env.GROQ_API_KEY, tavily: !!env.TAVILY_API_KEY, weather: true, model: MODEL }, 200, origin);
+      return json({ ok: true }, 200, origin);
     }
-    if (!["/chat", "/search", "/weather"].includes(path)) return json({ error: "Ruta no trobada" }, 404, origin);
-    if (request.method !== "POST") return json({ error: "Cal fer POST" }, 405, origin);
+    if (!["/chat", "/search", "/weather"].includes(path)) return json({ error: "Ruta no encontrada" }, 404, origin);
+    if (request.method !== "POST") return json({ error: "Esta ruta requiere POST" }, 405, origin);
+    // CORS no autentica: el límite por IP protege también frente a un Origin falsificado.
+    if (!ORIGINS.has(origin)) return json({ error: "Origen no permitido" }, 403, origin);
     if (!request.headers.get("Content-Type")?.includes("application/json")) {
-      return json({ error: "Content-Type ha de ser application/json" }, 415, origin);
+      return json({ error: "Content-Type debe ser application/json" }, 415, origin);
     }
 
     let payload;
     try {
       const body = await request.text();
-      if (body.length > 18000) return json({ error: "Petició massa gran" }, 413, origin);
+      if (new TextEncoder().encode(body).byteLength > 18000) return json({ error: "Petición demasiado grande" }, 413, origin);
       payload = JSON.parse(body);
     } catch {
-      return json({ error: "JSON incorrecte" }, 400, origin);
+      return json({ error: "JSON incorrecto" }, 400, origin);
     }
     if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
-      return json({ error: "JSON incorrecte" }, 400, origin);
+      return json({ error: "JSON incorrecto" }, 400, origin);
+    }
+
+    // CF-Connecting-IP lo establece Cloudflare; no usamos cabeceras elegidas por el cliente.
+    const ip = request.headers.get("CF-Connecting-IP");
+    try {
+      if (!ip || !env.MILO_RATE_LIMITER) throw new Error("Rate limiter unavailable");
+      const { success } = await env.MILO_RATE_LIMITER.limit({ key: "milo-api:" + ip });
+      if (!success) return json({ error: "Has hecho demasiadas consultas. Espera un minuto e inténtalo de nuevo." }, 429, origin, { "Retry-After": "60" });
+    } catch {
+      return json({ error: "Milo no está disponible temporalmente. Inténtalo más tarde." }, 503, origin);
     }
 
     if (path === "/chat") return chat(payload, env, origin);
