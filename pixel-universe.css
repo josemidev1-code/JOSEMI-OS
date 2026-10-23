@@ -1,4 +1,10 @@
 /* Bordes y tipografía pixel, con lectura cómoda y áreas de interacción claras. */
+/* El menú encaja sus dos columnas: los nombres largos no fuerzan desplazamiento lateral. */
+body.pixel-system .menu{overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--pixel-edge) var(--pixel-panel);}
+body.pixel-system .menu__apps{grid-template-columns:repeat(2,minmax(0,1fr));}
+body.pixel-system .menu__apps button{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;}
+body.pixel-system .menu__apps button>span{flex-shrink:0;}
+@media(min-width:640px){body.pixel-system .menu{width:380px;max-width:calc(100vw - 24px);}}
 .boot-identity{position:absolute;left:6vw;right:6vw;bottom:90px;z-index:3;color:#d6ffe0;font:18px/1.5 var(--font-ui);}
 .boot-identity h1{font:600 clamp(22px,3vw,32px)/1.25 var(--font-ui);margin:8px 0;}
 .boot-identity p{margin:0;}
