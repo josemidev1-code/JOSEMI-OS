@@ -1,4 +1,21 @@
 /* Bordes y tipografía pixel, con lectura cómoda y áreas de interacción claras. */
+.boot-identity{position:absolute;left:6vw;right:6vw;bottom:90px;z-index:3;color:#d6ffe0;font:18px/1.5 var(--font-ui);}
+.boot-identity h1{font:600 clamp(22px,3vw,32px)/1.25 var(--font-ui);margin:8px 0;}
+.boot-identity p{margin:0;}
+.boot-identity p:first-child{font:17px/1.4 var(--font-mono);color:#9ae4af;}
+.login .boot-skip{opacity:1;color:#b9ffce;border:2px solid #80c998;font:17px var(--font-mono);padding:12px 16px;}
+@media(max-height:500px){.boot-identity{bottom:70px;font-size:15px;}.boot-identity h1{font-size:19px;}.boot-identity p:first-child{display:none;}.login .boot-skip{bottom:12px;padding:8px 12px;}}
+/* Los textos secundarios conservan contraste con la paleta activa. */
+body.pixel-system :is(.folder small,.clink small,#clock__date){color:var(--pixel-muted);}
+.project-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0;}
+.project-facts>div{padding:14px;border:2px solid var(--pixel-edge);background:var(--pixel-raised);}
+.project-facts dt{font:15px/1.4 var(--font-ui);color:var(--pixel-muted);}
+.project-facts dd{font:32px/1.3 var(--font-mono);color:var(--accent);margin:4px 0 0;}
+.project-demo{margin:28px 0 0;}
+.project-demo video{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#0a181c;border:2px solid var(--pixel-edge);}
+.project-demo figcaption{font:16px/1.6 var(--font-ui);margin-top:12px;color:var(--pixel-ink);}
+.project-demo a{color:var(--accent);text-underline-offset:4px;}
+@media(max-width:420px){.project-facts{grid-template-columns:1fr;}.project-facts>div{display:flex;align-items:center;justify-content:space-between;gap:12px;}.project-facts dd{margin:0;}}
 body.pixel-system .win__body{font-size:17px;line-height:1.55;}
 body.pixel-system .win__body :is(.card-kicker,.app-title,small,.game-card__bottom,.game-card__bottom span,.wall-tile small,.wallpaper-option small,.vault-status,.vault-lock-caption,.pref-row,.tag,.chip){font-family:var(--font-mono);font-size:17px!important;line-height:1.35;letter-spacing:.025em;}
 body.pixel-system .win__body :is(.bio,p){line-height:1.65;}

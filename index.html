@@ -33,14 +33,14 @@
     />
     <!-- CACHÉ: al editar un JS/CSS, actualizar su ?v= antes de publicar y probar la versión pública. -->
     <!-- FUENTES: pixel art locales; se precargan porque el arranque y las ventanas las usan desde el primer momento. -->
-    <link rel="preload" href="assets/fonts/vt323.ttf" as="font" type="font/ttf" crossorigin />
-    <link rel="preload" href="assets/fonts/pixelify-sans.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="assets/fonts/vt323.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="assets/fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="style.css?v=20261023-audit" />
     <link rel="stylesheet" href="responsive.css?v=20261022-clean" />
-    <link rel="stylesheet" href="pixel-system.css?v=3" />
+    <link rel="stylesheet" href="pixel-system.css?v=20261023-entrega" />
     <link rel="stylesheet" href="pixel-extras.css?v=1" />
     <link rel="stylesheet" href="games.css?v=20261023-audit" />
-    <link rel="stylesheet" href="pixel-universe.css?v=20261023-audit" />
+    <link rel="stylesheet" href="pixel-universe.css?v=20261023-entrega" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
   </head>
   <body>
@@ -67,7 +67,12 @@
         class="boot-terminal-output"
         aria-live="polite"
       ></pre>
-      <button id="skipBoot" class="boot-skip" type="button">Saltar ↵</button>
+      <div class="boot-identity">
+        <p>JOSEMI-OS · PORTFOLIO PERSONAL</p>
+        <h1>José Miguel Miralles Gandia</h1>
+        <p>Estudiante de DAM en Xàtiva. De jugar a construir software.</p>
+      </div>
+      <button id="skipBoot" class="boot-skip" type="button">ENTRAR AL PORTFOLIO ↵</button>
     </section>
 
     <!-- ESCRITORIO: inicia oculto y se muestra al terminar o saltar la intro. -->
@@ -132,7 +137,7 @@
     <script src="pixel-system.js?v=20261023-audit"></script>
     <script src="pixel-tools.js?v=1"></script>
     <script src="pixel-extras.js?v=20261023-audit"></script>
-    <script src="pixel-universe.js?v=20261023-audit"></script>
+    <script src="pixel-universe.js?v=20261023-entrega"></script>
 
   </body>
 </html>
