@@ -82,6 +82,18 @@ Las pruebas de seguridad y del contrato cliente/servidor se ejecutan con `node -
 
 GitHub Pages publica la raíz de la rama `main`. Las rutas de los estilos y scripts son relativas y el dominio es [josemidev1.site](https://josemidev1.site/).
 
+## Entrega y defensa
+
+- [Guía de defensa de cinco minutos y preguntas](docs/DEFENSA.md).
+- [ADR 001: web estática y Worker](docs/arquitectura/0001-web-estatica-y-worker.md) y [ADR 002: estado local](docs/arquitectura/0002-estado-local.md).
+- [Extractos de instrucciones y trazabilidad](prompts/README.md). Se archivan ahora, sin inventar una cronología anterior.
+- [Revisión de los criterios de entrega](REVISION-RUBRICA.md).
+- Demo real de 30 segundos en Proyectos → JOSEMI-OS: MP4 H.264, 1280×720, 1,16 MB, sin audio, con subtítulos y descripción. Usa controles, póster y `preload="none"`; se pausa al minimizar o dejar la pestaña. [Descripción accesible](media/demo-transcripcion.html).
+
+Los contadores del proyecto leen las aplicaciones y paisajes registrados. La demo muestra una orden local de Milo, no una conversación remota simulada. La fotografía personal sigue pendiente de una imagen que Josemi decida publicar; la captura y el vídeo son medios propios del proyecto, no fotografías personales.
+
+Las fuentes se sirven en WOFF2: 55.060 bytes frente a los 232.276 bytes de los originales TTF (76 % menos). La conversión con FontTools conserva todos los glifos y las licencias OFL; los originales permanecen en `assets/fonts`. No se requiere compilar la web para publicarla.
+
 ## Referencias gráficas
 
 Los fondos reinterpretan estéticas de ciencia ficción y videojuegos mediante dibujos propios de bloques. Milo se inspira en el ajolote de Minecraft y el terminal ASCII en el salvapantallas de Omarchy.
