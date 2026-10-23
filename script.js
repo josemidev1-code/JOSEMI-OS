@@ -1822,6 +1822,7 @@ let typeLoginArt;
 
 let enteringOS = false,
   bootRun = 0;
+const canSkipIntro = state.introSeen === true;
 const bootDelay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // SALIDA DE ARRANQUE: añade texto con textContent, evitando interpretar texto como HTML.
@@ -1875,11 +1876,14 @@ function enterOS() {
   }, 420);
 }
 
-// SALTAR INTRO: botón o Enter llaman a enterOS; siempre se puede entrar sin esperar la animación.
+// La primera visita completa el arranque; las siguientes permiten botón o Enter.
 function initDirectAccess() {
-  $("#skipBoot").addEventListener("click", enterOS);
+  $("#skipBoot").hidden = !canSkipIntro;
+  $("#skipBoot").addEventListener("click", () => {
+    if (canSkipIntro) enterOS();
+  });
   addEventListener("keydown", (e) => {
-    if (!$("#login").classList.contains("hidden") && e.key === "Enter") {
+    if (canSkipIntro && !$("#login").classList.contains("hidden") && e.key === "Enter") {
       e.preventDefault();
       enterOS();
     }
@@ -2576,11 +2580,19 @@ typeLoginArt = async function () {
     logo.textContent = final;
     hot.textContent = "";
     await bootDelay(still ? 1500 : 1100);
-    if (active()) enterOS();
+    if (active()) {
+      state.introSeen = true;
+      save();
+      enterOS();
+    }
   } catch (error) {
     // Si algo falla en un navegador raro, el visitante entra igualmente al escritorio.
     console.error("Intro de arranque:", error);
-    if (active()) enterOS();
+    if (active()) {
+      state.introSeen = true;
+      save();
+      enterOS();
+    }
   }
 };
 
