@@ -1,0 +1,17 @@
+{
+  "duration": 30,
+  "width": 1280,
+  "height": 720,
+  "bytes": 1155953,
+  "preloadNone": true,
+  "fullPlayback": true,
+  "captions": true,
+  "minimizePauses": true,
+  "mobileFits": true,
+  "metrics": [
+    25,
+    3,
+    22
+  ],
+  "errors": []
+}

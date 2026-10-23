@@ -1,0 +1,58 @@
+{
+  "url": "https://josemidev1.site/",
+  "commit_auditado": "eb7ff3185ab1165f25f3e70fc5eeb6ce0fd78924",
+  "lighthouse": {
+    "movil": {
+      "version": "13.5.0",
+      "fecha_UTC": "2026-10-23T11:27:25.816Z",
+      "url": "https://josemidev1.site/",
+      "categorias": {
+        "performance": 96,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metricas": {
+        "first-contentful-paint": "1.2 s",
+        "largest-contentful-paint": "1.5 s",
+        "total-blocking-time": "10 ms",
+        "cumulative-layout-shift": "0.079"
+      }
+    },
+    "escritorio": {
+      "version": "13.5.0",
+      "fecha_UTC": "2026-10-23T11:28:26.813Z",
+      "url": "https://josemidev1.site/",
+      "categorias": {
+        "performance": 97,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metricas": {
+        "first-contentful-paint": "0.4 s",
+        "largest-contentful-paint": "0.5 s",
+        "total-blocking-time": "0 ms",
+        "cumulative-layout-shift": "0.02"
+      }
+    }
+  },
+  "accesibilidad_antes": {
+    "welcome": 95,
+    "projects": 95,
+    "settings": 96,
+    "contact": 95,
+    "Milo abierto": 96
+  },
+  "accesibilidad_despues": {
+    "welcome": 100,
+    "projects": 100,
+    "settings": 100,
+    "contact": 100,
+    "Milo abierto": 100
+  },
+  "accesibilidad_demo": {
+    "portfolio": 100,
+    "Milo abierto": 100
+  }
+}
