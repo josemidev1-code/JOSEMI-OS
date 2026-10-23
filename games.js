@@ -68,6 +68,10 @@
     };
     button.addEventListener("click", () => {
       write(SOUND_KEY, !soundOn());
+      if (audio) {
+        if (soundOn()) audio.resume();
+        else audio.suspend();
+      }
       sync();
       tone(660, 0.06);
     });
@@ -1160,7 +1164,10 @@
     fruit: () => melody([784, 988, 1175, 1568], 0.05, { volume: 0.035 }),
     life: () => melody([1046, 0, 1046, 0, 1046], 0.08, { volume: 0.035 }),
     death: () => tone(700, 1.2, { type: "triangle", volume: 0.05, slide: -620 }),
-    start: () => melody([494, 988, 740, 622, 988, 740, 622, 0, 523, 1046, 784, 659, 1046, 784, 659], 0.11, { volume: 0.03 }),
+    start: () => {
+      melody([494, 988, 740, 622, 988, 740, 622, 0, 523, 1046, 784, 659, 1046, 784, 659, 0, 494, 988, 740, 622, 988, 740, 622, 587, 622, 659, 659, 698, 740, 784, 988], 0.105, { volume: 0.035 });
+      melody([247, 0, 247, 0, 247, 0, 247, 0, 262, 0, 262, 0, 262, 0, 262], 0.21, { type: "triangle", volume: 0.018 });
+    },
     clear: () => melody([523, 659, 784, 1046, 784, 1046], 0.08, { volume: 0.035 }),
   };
 
@@ -1821,7 +1828,15 @@
     });
     bindSound(body.querySelector('[data-act="sound"]'));
 
+    let sirenTime = 0;
     const stop = gameLoop(win, (dt) => {
+      if (game?.phase === "play" && !paused) {
+        sirenTime += dt;
+        if (sirenTime >= 0.45) {
+          sirenTime = 0;
+          tone(190, 0.38, { type: "triangle", volume: 0.012, slide: 210 });
+        }
+      }
       update(dt);
       draw();
     });

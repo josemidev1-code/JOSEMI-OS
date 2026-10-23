@@ -25,6 +25,7 @@ La web utiliza HTML, CSS y JavaScript, sin proceso de compilación.
 | `style.css` | Diseño, ventanas, iconos y adaptación a pantallas |
 | `script.js` | Aplicaciones, fondos, preferencias y chat de Milo |
 | `games.js` / `games.css` | Arcade: Tetris, Pac-Man y Buscaminas |
+| `pixel-universe.js` / `pixel-universe.css` | Iconos, entrada con moneda, animación de los paisajes, Vault y acciones locales de Milo |
 | `milo-ai.js` | Cliente de IA y acciones del chat |
 | `worker.js` | Backend serverless para Groq, Tavily y Open-Meteo |
 | `wrangler.toml` | Configuración del despliegue a Cloudflare Workers |
@@ -81,4 +82,8 @@ GitHub Pages publica la raíz de la rama `main`. Las rutas de los estilos y scri
 
 Los fondos reinterpretan estéticas de ciencia ficción y videojuegos mediante dibujos propios de bloques. Milo se inspira en el ajolote de Minecraft y el terminal ASCII en el salvapantallas de Omarchy.
 
-El fondo fotográfico desbloqueable de God of War utiliza una [imagen externa](https://i.pinimg.com/736x/f4/e8/4e/f4e84ea8a1b943cd82b816f685c04ef7.jpg). Las fuentes Pixelify Sans y VT323 (licencia OFL, procedentes de Google Fonts) se sirven desde `assets/fonts`.
+El fondo fotográfico desbloqueable de God of War utiliza una imagen del [kit oficial de PlayStation](https://www.playstation.com/en-us/god-of-war/community/), servida desde `assets/wallpapers`. Su procedencia y atribución figuran en `assets/wallpapers/SOURCES.md`. Las fuentes Pixelify Sans y VT323 (licencia OFL, procedentes de Google Fonts) se sirven desde `assets/fonts`.
+
+Los 22 paisajes pixel art tienen detalles específicos de su escena y una capa animada compartida; se detiene al ocultar la pestaña o activar «Reducir movimiento». Las animaciones ASCII pueden superponerse sin sustituir el paisaje.
+
+Milo puede abrir las 25 aplicaciones, cerrar/minimizar/maximizar ventanas, cambiar tema, fondo, cursor, sonido y movimiento, añadir notas locales, calcular e iniciar temporizadores. Las órdenes directas se ejecutan en el navegador; las demás conversaciones conservan la conexión con el Worker. Las acciones se limitan al escritorio de esta web, con una lista explícita de operaciones y aplicaciones: nunca ejecutan código arbitrario ni comandos del ordenador.

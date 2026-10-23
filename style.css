@@ -4364,7 +4364,7 @@ body.has-god-of-war .desktop-welcome {
 body.has-god-of-war #bg {
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.62)),
-    url("assets/god-of-war.jpg") center/cover no-repeat,
+    url("assets/wallpapers/god-of-war-ragnarok.jpg") center/cover no-repeat,
     var(--bg) !important;
 }
 
