@@ -54,6 +54,7 @@ const MiloAI = (() => {
 
   let player = null;
   let resultsBox = null;
+  // Mantener estas listas y tools sincronizadas con worker.js (prueba automatizada).
   const allowedApps = new Set(["welcome", "readme", "about", "projects", "education", "skills", "terminal", "contact", "arcade", "tetris", "pacman", "minesweeper", "settings", "system", "easter", "screensaver", "gallery", "notes", "calculator", "focus", "roadmap", "launchpad", "portfolio", "motivation", "trash"]);
   const allowedThemes = new Set(["night", "paper", "violet", "ocean", "sunset", "glacier", "copper"]);
 
@@ -75,7 +76,7 @@ const MiloAI = (() => {
     if (!response.ok) throw new Error("iTunes HTTP " + response.status);
     const data = await response.json();
     const tracks = (data.results || []).filter(t => t.previewUrl).slice(0, 3);
-    if (!tracks.length) return { error: "No s'han trobat cançons" };
+    if (!tracks.length) return { error: "No se han encontrado canciones" };
     if (!player) player = new Audio();
     player.src = tracks[0].previewUrl;
     player.play().catch(() => {});
@@ -100,14 +101,14 @@ const MiloAI = (() => {
         preview_seconds: 30,
         artist_link: t.artistViewUrl || ""
       })),
-      note: "S'han mostrat fins a 3 cançons, amb mostres de 30 segons."
+      note: "Se muestran hasta 3 canciones, con muestras de 30 segundos."
     };
   }
 
   async function runTool(call, signal) {
     let args;
     try { args = JSON.parse(call.function?.arguments || "{}"); }
-    catch { return { error: "Arguments JSON invàlids" }; }
+    catch { return { error: "Argumentos JSON no válidos" }; }
     try {
       switch (call.function?.name) {
         case "web_search":
@@ -117,24 +118,24 @@ const MiloAI = (() => {
         case "play_music":
           return await music(String(args.query || "chill"), signal);
         case "open_app":
-          if (!allowedApps.has(args.app)) return { error: "App desconeguda" };
+          if (!allowedApps.has(args.app)) return { error: "Aplicación desconocida" };
           if (window.PixelOS) return window.PixelOS.perform("open", args.app);
-          if (typeof window.openWindow !== "function") return { error: "No es pot obrir l'app" };
+          if (typeof window.openWindow !== "function") return { error: "No se puede abrir la aplicación" };
           window.openWindow(args.app);
           return { ok: true, app: args.app };
         case "set_theme":
-          if (!allowedThemes.has(args.theme)) return { error: "Tema desconegut" };
-          if (typeof window.chooseTheme !== "function") return { error: "No es pot canviar el tema" };
+          if (!allowedThemes.has(args.theme)) return { error: "Tema desconocido" };
+          if (typeof window.chooseTheme !== "function") return { error: "No se puede cambiar el tema" };
           window.chooseTheme(args.theme);
           return { ok: true, theme: args.theme };
         case "system_action":
           if (!window.PixelOS) return { error: "Los controles del escritorio no están disponibles" };
           return window.PixelOS.perform(String(args.action || ""), String(args.value || ""));
         default:
-          return { error: "Ferramenta no permesa" };
+          return { error: "Herramienta no permitida" };
       }
     } catch (error) {
-      return { error: error.message || "Error en ferramenta externa" };
+      return { error: error.message || "Error en una herramienta externa" };
     }
   }
 
@@ -155,7 +156,7 @@ const MiloAI = (() => {
       for (let attempt = 0; attempt < 4; attempt++) {
         const data = await post("/chat", { messages }, controller.signal);
         const message = data.message;
-        if (!message || typeof message !== "object") throw new Error("Resposta invàlida de Groq");
+        if (!message || typeof message !== "object") throw new Error("Respuesta no válida del proveedor de IA");
         const calls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
         if (calls.length) {
           messages.push({
@@ -176,9 +177,9 @@ const MiloAI = (() => {
         if (typeof message.content === "string" && message.content.trim()) {
           return { text: message.content.trim() };
         }
-        throw new Error("Resposta buida de la IA");
+        throw new Error("Respuesta vacía de la IA");
       }
-      throw new Error("Massa accions consecutives");
+      throw new Error("Demasiadas acciones consecutivas");
     } finally {
       clearTimeout(timeout);
       externalSignal?.removeEventListener("abort", abort);

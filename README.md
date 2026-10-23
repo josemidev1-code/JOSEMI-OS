@@ -46,7 +46,7 @@ La web de GitHub Pages es estática. El frontend `milo-ai.js` se comunica con el
 
 | API | Uso | Clave |
 | --- | --- | --- |
-| Groq Chat Completions | Conversación con modelo Llama 3.3 70B | `GROQ_API_KEY` (obligatoria) |
+| Groq Chat Completions | Conversación con modelo openai/gpt-oss-120b | `GROQ_API_KEY` (obligatoria) |
 | Tavily Search | Búsqueda de información actual con enlaces | `TAVILY_API_KEY` (opcional) |
 | Open-Meteo Geocoding + Forecast | Tiempo actual en ciudades | Sin clave |
 | Apple iTunes Search | Encontrar canciones y escuchar previews | Sin clave |
@@ -57,7 +57,7 @@ La web de GitHub Pages es estática. El frontend `milo-ai.js` se comunica con el
 2. Si quieres búsqueda web, ejecuta `npx wrangler secret put TAVILY_API_KEY`. Sin Tavily, Milo seguirá pudiendo hablar y consultar el tiempo.
 3. Despliega con `npx wrangler deploy`. El archivo `wrangler.toml` usa el nombre `milo-ai`. Comprueba que su URL coincide con el `endpoint` declarado en `milo-ai.js`.
 4. Publica el frontend fusionando la rama en `main` para que GitHub Pages actualice la web.
-5. Prueba `https://milo-ai.josemidev1.workers.dev/health` (debe indicar `groq: true`). El valor `tavily: true` señala que la clave de búsqueda existe.
+5. Prueba `https://milo-ai.josemidev1.workers.dev/health`: devuelve únicamente `{ "ok": true }`. Comprueba la configuración de los proveedores con una conversación y una búsqueda desde la web; el endpoint público no expone claves configuradas ni el modelo.
 
 Los endpoints del Worker son `POST /chat`, `POST /search`, `POST /weather` y `GET /health`. Las llamadas a Groq y Tavily requieren configuración previa. `/weather` usa primero geocodificación y después previsión actual con la API de Open-Meteo; la búsqueda sin clave no es posible. La música se obtiene directamente de iTunes desde el navegador, sin credenciales. Los resultados de APIs externas pueden no estar disponibles si el proveedor falla.
 
@@ -71,7 +71,11 @@ Los endpoints del Worker son `POST /chat`, `POST /search`, `POST /weather` y `GE
 
 **Arquitectura**: navegador → Worker → Groq → `tool_calls` → Worker (Tavily/Open-Meteo) o navegador (iTunes/acciones visuales) → respuesta. Las respuestas se envían como JSON.
 
-**Seguridad y despliegue**: nunca subas archivos `.dev.vars`, claves ni tokens a GitHub. Los filtros CORS no sustituyen la autenticación ni impiden abusos fuera del navegador. Antes de dar difusión a la web configura límites de peticiones/costes en Cloudflare y en los proveedores. El endpoint es público y no tiene aún un límite de cuota por visitante. Las respuestas a preguntas sobre Josemi solo utilizan datos públicos declarados en el prompt del Worker.
+**Seguridad y despliegue**: nunca subas archivos `.dev.vars`, claves ni tokens a GitHub. Los POST exigen un Origin permitido, pero este se puede falsificar fuera del navegador. El binding `MILO_RATE_LIMITER`, declarado en `wrangler.toml`, aplica un umbral conjunto de 20 peticiones por minuto por IP a `/chat`, `/search` y `/weather`. Cloudflare mantiene contadores aproximados por ubicación: no es una cuota global estricta ni protección completa contra ataques distribuidos. Conserva los límites de uso de los proveedores. Si el binding no está disponible, el Worker devuelve 503 sin consultar APIs; al superar el umbral devuelve 429 y `Retry-After: 60`. Una conversación puede utilizar varias peticiones para completar herramientas.
+
+Groq tiene un tiempo máximo de 25 segundos por llamada; Tavily y cada consulta de Open-Meteo, 8 segundos. Los errores visibles están en castellano. La página tiene CSP para scripts propios, fuentes locales, fondos SVG y los servicios usados por Milo, además de una presentación de contacto sin JavaScript. Los datos que Milo utiliza sobre Josemi son públicos.
+
+Las pruebas de seguridad y del contrato cliente/servidor se ejecutan con `node --test tests/worker-security.test.mjs`, sin dependencias externas. Antes de publicar JS o CSS, actualiza su `?v=` en `index.html` y comprueba la web pública.
 
 
 ## Publicación

@@ -152,7 +152,7 @@
   if(PIXEL_WALLPAPERS[state.wallpaper])applyTheme();
 
   Apps.gallery={title:'Fondos',icon:spriteIcon('gallery'),size:[900,680],render:()=>'<section class="wall-gallery"><div class="extra-heading"><span class="card-kicker">PERSONALIZA TU UNIVERSO</span><h2>Un escritorio. Muchos mundos.</h2><p>Fondos originales en pixel art. Elige uno o guarda tus favoritos.</p></div><div class="wall-controls"><input type="search" aria-label="Buscar fondo" placeholder="Buscar un mundo…"><div><button class="btn" data-wall-filter="all" aria-pressed="true">TODOS</button><button class="btn" data-wall-filter="new" aria-pressed="false">NUEVOS</button><button class="btn" data-wall-filter="favorite" aria-pressed="false">FAVORITOS</button></div></div><p class="wall-count" role="status"></p><div class="wall-gallery-grid"></div></section>',bind(body){
-    let filter='all',favorites=read('josemi-wall-favorites',[]);if(!Array.isArray(favorites))favorites=[];
+    let filter='all',favorites=read('josemi-wall-favorites',[]);if(!Array.isArray(favorites))favorites=[];if(favorites.includes('marioWorld')){favorites=[...new Set(favorites.map(id=>id==='marioWorld'?'platformWorld':id))];write('josemi-wall-favorites',favorites);}
     const grid=body.querySelector('.wall-gallery-grid'),input=body.querySelector('input');
     const normalize=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     function render(){

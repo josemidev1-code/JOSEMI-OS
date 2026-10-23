@@ -3,6 +3,13 @@ name = "milo-ai"
 main = "worker.js"
 compatibility_date = "2026-10-01"
 
+# Umbral compartido por /chat, /search y /weather, por IP y ubicación de Cloudflare.
+# Namespace propio de JOSEMI-OS; no almacena las IP en registros de la aplicación.
+[[ratelimits]]
+name = "MILO_RATE_LIMITER"
+namespace_id = "1380010883"
+simple = { limit = 20, period = 60 }
+
 # Required by the Cloudflare Builds preview command for pull requests.
 # Preview secrets are configured separately from the production Worker.
 [previews]

@@ -4,7 +4,7 @@
 /* =========================================================
    JOSEMI-OS · portfolio interactivo
    WM = motor de ventanas. Apps = contenido plug-in.
-   Bloques internos: núcleo, arcade, plataformas e interfaz; todos están en este archivo.
+   Este archivo conserva el núcleo y la interfaz; games.js define los juegos y las capas pixel completan las aplicaciones.
 
    ORDEN MENTAL DEL PROGRAMA
    1. Se recuperan los ajustes guardados.
@@ -181,7 +181,7 @@ function drawExtraPixelWallpaper(kind, r, rand, stars) {
     r(278, 202, 24, 5, "#784269");
     r(291, 198, 9, 5, "#ac6992");
     r(304, 199, 3, 8, "#71b9c7");
-  } else if (kind === "marioWorld") {
+  } else if (kind === "platformWorld") {
     r(0, 0, 480, 270, "#91a19a");
     ["#38495c", "#4b6570", "#657d7c", "#91a19a"].forEach((c, i) =>
       r(0, i * 47, 480, 47, c),
@@ -815,7 +815,7 @@ const PIXEL_WALLPAPERS = Object.fromEntries(
     ["minecraft", "Minecraft · valle", "Bloques, río y refugio"],
     ["jetpack", "Jetpack · laboratorio", "Arcade industrial y monedas"],
     ["cyberpunk", "Cyberpunk · neón", "Azotea, moto y ciudad nocturna"],
-    ["marioWorld", "Mario · mundo retro", "Tuberías, bloques y castillo"],
+    ["platformWorld", "Mundo plataformas · retro", "Tuberías, bloques y castillo"],
     ["zeldaForest", "Zelda · bosque sagrado", "Ruinas y espada en la piedra"],
     ["sonicCoast", "Sonic · costa", "Palmeras, anillos y bucle"],
     ["hollowCavern", "Hollow Knight · cavernas", "Santuario azul y máscara"],
@@ -1249,9 +1249,11 @@ const WM = (() => {
       const up = () => {
         document.removeEventListener("pointermove", mv);
         document.removeEventListener("pointerup", up);
+        document.removeEventListener("pointercancel", up);
       };
       document.addEventListener("pointermove", mv);
       document.addEventListener("pointerup", up);
+      document.addEventListener("pointercancel", up);
     });
   }
   // El tirador inferior derecho modifica ancho y alto respetando tamaños mínimos.
@@ -1279,9 +1281,11 @@ const WM = (() => {
       const up = () => {
         document.removeEventListener("pointermove", mv);
         document.removeEventListener("pointerup", up);
+        document.removeEventListener("pointercancel", up);
       };
       document.addEventListener("pointermove", mv);
       document.addEventListener("pointerup", up);
+      document.addEventListener("pointercancel", up);
     });
   }
   window.addEventListener("resize", () => {
@@ -1618,6 +1622,7 @@ function buildClock() {
   const t = $("#clock__time"),
     d = $("#clock__date");
   const tick = () => {
+    if (document.hidden) return;
     const n = new Date();
     t.textContent = `${pad(n.getHours())}:${pad(n.getMinutes())}`;
     d.textContent = n.toLocaleDateString("es-ES", {
@@ -1632,8 +1637,9 @@ function buildClock() {
   };
   tick();
   setInterval(tick, 1000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
 }
-// PROFUNDIDAD: desplaza el fondo unos píxeles con el ratón. Matrix y reducir movimiento lo desactivan.
+// PROFUNDIDAD: desplaza el fondo unos píxeles con el ratón. Los paisajes pixel art, Matrix ASCII y reducir movimiento lo desactivan.
 // RENDIMIENTO: como máximo un cálculo por fotograma y solo se escribe el estilo si cambia.
 function buildParallax() {
   const bg = $("#bg");
@@ -1954,7 +1960,6 @@ ICONS.push("easter");
 currentUser.apps.push("easter");
 
 // Original raycaster, no external assets or downloads required.
-Apps.arcade.size = [940, 650];
 
 /* === END upgrade.js === */
 
@@ -4621,7 +4626,6 @@ panel.id = "mascot-chat";
 panel.hidden = true;
 panel.setAttribute("role", "dialog");
 panel.setAttribute("aria-label", "Milo, asistente de Josemi");
-panel.innerHTML =
 panel.innerHTML =
   '<div class="mascot-head"><div><strong>Milo</strong><small>Tu ajolote de escritorio</small></div><button id="mascot-close" aria-label="Cerrar asistente">×</button></div><div id="mascot-log" class="mascot-log" role="log" aria-live="polite"></div><form id="mascot-form" class="mascot-form"><label class="sr-only" for="mascot-input">Mensaje para Milo</label><input id="mascot-input" maxlength="500" placeholder="Estudios, proyectos, aficiones…" autocomplete="off" required><button class="btn" type="submit">Enviar</button></form><div class="mascot-results"></div><small class="milo-mode">ASISTENTE CON IA</small>';
 document.body.append(mascot, panel);

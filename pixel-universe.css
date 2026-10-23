@@ -40,7 +40,7 @@ body.pixel-system .vault-lock{position:relative;min-height:180px;background:line
 #pixel-scene{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;z-index:2;image-rendering:pixelated;}
 body.has-pixel-wallpaper #ascii-wall{display:none!important;}body.has-pixel-wallpaper #ascii-wall[hidden]{display:none!important;}
 body.pixel-system.universe-photo.has-god-of-war #bg{background:linear-gradient(#08142022,#08142044),url('assets/wallpapers/god-of-war-ragnarok.jpg') center/cover no-repeat!important;image-rendering:auto!important;}body.universe-photo #bg::before{display:none!important;}.gow-preview{background:url('assets/wallpapers/god-of-war-ragnarok.jpg') center/cover no-repeat;}
-body.pixel-system .ascii-stage,body.pixel-system #os-screensaver .saver-art{background:none!important;-webkit-background-clip:initial!important;background-clip:initial!important;-webkit-text-fill-color:#c7f5d7!important;color:#c7f5d7!important;font-family:'Courier New',monospace!important;font-weight:700!important;text-shadow:2px 2px 0 #051912!important;letter-spacing:0!important;}
+body.pixel-system .ascii-stage,body.pixel-system #os-screensaver .saver-art{background:none!important;-webkit-background-clip:initial!important;background-clip:initial!important;-webkit-text-fill-color:#c7f5d7!important;color:#c7f5d7!important;font-family:var(--font-mono)!important;font-weight:700!important;text-shadow:2px 2px 0 #051912!important;letter-spacing:0!important;}
 body.pixel-system .ascii-stage{min-height:230px;width:100%;display:flex;align-items:center;justify-content:center;line-height:1.12!important;padding:25px 0;background:#071a22!important;border:2px solid var(--pixel-edge);overflow:hidden;}
 body.pixel-system #os-screensaver{background:#031014!important;z-index:10000;}.saver-field{opacity:.6!important;}#os-screensaver .saver-stage{inset:12% 2% 18%;gap:30px;}#os-screensaver .saver-art{line-height:1.05!important;filter:drop-shadow(0 0 6px #75e4c344);}#os-screensaver :is(.saver-subtitle,.saver-notes,.saver-scene,.saver-command,.saver-exit,.saver-meta){font:18px/1.4 var(--font-mono)!important;color:#c4e6d7!important;letter-spacing:.04em!important;}
 .milo-dialogue{position:fixed;bottom:120px;left:20px;z-index:97;max-width:260px;padding:12px 14px;border:2px solid #f2b4d1;background:#241b32;color:#ffe0ef;font:17px/1.3 var(--font-mono);box-shadow:4px 4px #08131c;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .2s,transform .2s;}.milo-dialogue.is-speaking{opacity:1;transform:none;pointer-events:auto;}.milo-dialogue::after{content:'';position:absolute;left:22px;bottom:-8px;width:10px;height:10px;background:#241b32;border-right:2px solid #f2b4d1;border-bottom:2px solid #f2b4d1;transform:rotate(45deg);}
@@ -88,3 +88,14 @@ body.pixel-system .icons{grid-template-columns:repeat(2,104px);grid-template-row
 }
 body.reduce-motion :is(.machine-stars,.coin-target,.vault-lock-pixel i){animation:none!important;}.reduce-motion .vault-door-half,.reduce-motion .vault-wheel{transition:none;}
 @media(prefers-reduced-motion:reduce){.machine-stars,.coin-target,.vault-lock-pixel i{animation:none!important;}}
+.home-brand-section{padding:24px 0;border-top:2px solid var(--pixel-edge);}
+.home-brand-section h2{font:600 23px/1.3 var(--font-ui);margin:9px 0 13px;}
+.home-brand-section h3{font:600 18px/1.3 var(--font-ui);margin:0 0 10px;}
+.home-brand-section p{font:16px/1.7 var(--font-ui);color:var(--pixel-ink);max-width:68ch;margin:0 0 16px;}
+.home-proof-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;}
+.home-proof-grid article{padding:18px;border:2px solid var(--pixel-edge);background:var(--pixel-raised);}
+.home-interest-list{display:flex;flex-wrap:wrap;gap:10px;list-style:none;padding:0;margin:0;}
+.home-interest-list li{border:2px solid var(--pixel-edge);padding:9px 12px;font:16px var(--font-ui);background:var(--pixel-raised);}
+.home-contact-links{display:flex;flex-wrap:wrap;gap:16px;}
+.home-contact-links a{color:var(--accent);text-underline-offset:4px;overflow-wrap:anywhere;font:16px/1.6 var(--font-ui);}
+@media(max-width:600px){.home-proof-grid{grid-template-columns:1fr;}.home-brand-section{padding:20px 0;}}
