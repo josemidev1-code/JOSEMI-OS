@@ -161,10 +161,7 @@
   // Expresiones y comentarios breves de Milo, sin enviar datos a ningún servidor.
   const face=q('#mascot-button .mascot-svg');
   face.insertAdjacentHTML('beforeend','<g class="milo-extra-face"><path class="milo-happy-eyes" d="M14 18h1v-2h4v2h1v2h-2v-2h-2v2h-2zM29 18h1v-2h4v2h1v2h-2v-2h-2v2h-2z" fill="#513b53"/><path class="milo-surprised-mouth" d="M22 21h4v5h-4z" fill="#9d4e77"/><path class="milo-thinking" d="M29 15h6v2h-6z" fill="#513b53"/></g>');
-  const bubble=document.createElement('button');bubble.className='milo-dialogue';bubble.type='button';bubble.setAttribute('aria-label','Abrir conversación con Milo');bubble.textContent='¡Hola! Puedo abrir las apps y cambiar tu escritorio.';q('#mascot-button').after(bubble);bubble.onclick=()=>toggleMilo(true);let bubbleTimer=0;
-  function speak(text,mood='happy'){bubble.textContent=text;bubble.classList.add('is-speaking');q('#mascot-button').dataset.mood=mood;clearTimeout(bubbleTimer);bubbleTimer=setTimeout(()=>{bubble.classList.remove('is-speaking');q('#mascot-button').dataset.mood='idle';},6500);}
-  let dialogueIndex=0;const idleLines=['¿Una partida? La máquina del Arcade acepta monedas pixel.','Prueba: «Milo, abre la calculadora».','Puedo cambiar el fondo sin salir del chat.','Tus notas se guardan aquí, en este navegador.','Código, una idea y un poquito de constancia.'];
-  setInterval(()=>{if(!document.hidden&&q('#mascot-chat').hidden&&!q('#desktop').classList.contains('hidden'))speak(idleLines[dialogueIndex++%idleLines.length]);},42000);
+  // Milo responde dentro del chat, sin bocadillos ni mensajes espontáneos en el escritorio.
   q('#mascot-input').addEventListener('input',()=>{q('#mascot-button').dataset.mood='thinking';});
   new MutationObserver(()=>{if(chatBusy)q('#mascot-button').dataset.mood='thinking';else q('#mascot-button').dataset.mood='happy';}).observe(q('#mascot-log'),{childList:true,subtree:true});
 
@@ -216,9 +213,9 @@
     }else if(/^calcula\s+/.test(text))result=perform('calculate',message.replace(/^.*?calcula\s+/i,''));
     else if(/^anota\s+/.test(text))result=perform('note',message.replace(/^.*?anota\s+/i,''));
     else if(/^(pon|inicia|activa).*(temporizador|pomodoro|concentracion)/.test(text)){const n=text.match(/\b(\d{1,3})\b/);if(n)result=perform('timer',n[1]);}
-    if(result){speak(result.text,result.ok?'happy':'surprised');return {text:result.text};}return null;
+    if(result){q('#mascot-button').dataset.mood=result.ok?'happy':'surprised';return {text:result.text};}return null;
   }
-  window.PixelOS={perform,command,apps:desktopApps.slice(),speak};
+  window.PixelOS={perform,command,apps:desktopApps.slice()};
   q('.saver-exit').textContent='Pulsa Escape o haz clic para volver ↵';
   const studioBind=Apps.screensaver.bind;
   Apps.screensaver.bind=(body,win)=>{studioBind(body,win);let effect=state.bootEffect;body.addEventListener('click',e=>{if(e.target.closest('[data-effect]'))effect=e.target.closest('[data-effect]').dataset.effect;});const timer=setInterval(()=>{if(!state.motion&&!document.hidden&&!win.classList.contains('minimized'))q(`[data-effect="${effect}"]`,body)?.click();},7200);const cleanup=win.__cleanup;win.__cleanup=()=>{clearInterval(timer);cleanup?.();};};

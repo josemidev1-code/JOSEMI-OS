@@ -15,6 +15,8 @@ Portfolio de José Miguel Miralles Gandia, estudiante de Desarrollo de Aplicacio
 - Milo, un ajolote con IA (Groq), búsqueda web (Tavily), meteorología (Open-Meteo) y música (iTunes). Las respuestas locales se conservan como respaldo.
 - Preferencias guardadas en el navegador y adaptación a móvil.
 
+La primera visita reproduce la intro completa, sin bloque de presentación ni botón para saltarla. Al completarla se guarda `introSeen` en ese navegador; en visitas posteriores se puede saltar con el botón o Enter. Si se borran los datos del navegador, vuelve a contar como primera visita. Milo conserva el chat y sus acciones, sin bocadillos ni frases espontáneas en el escritorio.
+
 ## Estructura
 
 La web utiliza HTML, CSS y JavaScript, sin proceso de compilación.
