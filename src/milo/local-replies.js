@@ -20,8 +20,20 @@ const normalizeQuestion = (text) =>
     .trim();
 const RAMAS = [
   {
-    keys: ["proyecto", "project", "repositorio", "portfolio"],
-    text: "Josemi está construyendo JOSEMI-OS y una web del Museu grec. Son proyectos de aprendizaje que puedes explorar en su GitHub.",
+    keys: [
+      "proyecto",
+      "project",
+      "repositorio",
+      "portfolio",
+      "sparktune",
+      "survivor",
+      "the fog",
+      "unity",
+      "system plast",
+      "nuria",
+      "museu",
+    ],
+    text: "Josemi tiene 7 proyectos reales: JOSEMI-OS (este escritorio), SparkTune (una CLI para optimizar Windows con cambios reversibles), DragonBall Survivor (un juego de navegador), The Fog (un juego de terror en Unity), System Plast (un catálogo web generado desde datos), la web de Nuria Cerdá (un despacho de herencias en Xàtiva) y Museu grec (un portfolio 3D con Three.js). Te abro Proyectos para que veas el reto, la solución y el resultado de cada uno.",
     app: "projects",
   },
   {
