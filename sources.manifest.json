@@ -58,12 +58,7 @@
           "scope": "private"
         },
         {
-          "files": [
-            "src/milo/local-replies.js",
-            "src/milo/panel.js",
-            "src/apps/corruption.js",
-            "src/bootstrap/viewport.js"
-          ]
+          "files": ["src/milo/local-replies.js", "src/milo/panel.js", "src/bootstrap/viewport.js"]
         }
       ]
     },

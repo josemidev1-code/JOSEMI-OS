@@ -15,11 +15,8 @@ new MutationObserver(() => {
 
 const aliases = {
   welcome: ["inicio", "escritorio", "home"],
-  readme: ["readme", "ayuda"],
-  about: ["sobre mi", "sobre josemi", "perfil"],
+  about: ["sobre mi", "sobre josemi", "perfil", "habilidades", "estudios", "formacion", "dam"],
   projects: ["proyectos"],
-  education: ["dam", "estudios", "formacion"],
-  skills: ["habilidades"],
   terminal: ["terminal", "consola"],
   contact: ["contacto"],
   arcade: ["arcade", "recreativa"],
@@ -27,18 +24,14 @@ const aliases = {
   pacman: ["pacman", "pac man", "pac-man"],
   minesweeper: ["buscaminas", "minas"],
   settings: ["ajustes", "configuracion"],
-  system: ["monitor del sistema", "monitor", "informacion del sistema"],
   easter: ["secret vault", "vault", "secretos"],
   screensaver: ["salvapantallas", "ascii studio", "ascii"],
   gallery: ["fondos", "galeria"],
   notes: ["bloc de notas", "notas"],
   calculator: ["calculadora"],
   focus: ["concentracion", "temporizador", "pomodoro"],
-  roadmap: ["ia y software", "ia + software", "roadmap"],
   launchpad: ["aplicaciones", "apps"],
   portfolio: ["josemi-os", "josemi os"],
-  motivation: ["motivacion"],
-  trash: ["papelera"],
 };
 function findApp(text) {
   return Object.entries(aliases)

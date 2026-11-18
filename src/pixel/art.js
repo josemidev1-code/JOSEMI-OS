@@ -31,4 +31,3 @@ const art = Object.fromEntries(
 window.PixelArt = art;
 for (const id of ["tetris", "pacman", "minesweeper"]) Apps[id].icon = art[id];
 Apps.welcome.icon = art.computer;
-Apps.motivation.icon = art.ai;

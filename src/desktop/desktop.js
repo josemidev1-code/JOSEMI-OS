@@ -5,18 +5,7 @@ function boot() {
 
 /* ========================================================= ESCRITORIO */
 // ACCESOS DEL ESCRITORIO: los juegos se abren desde el Arcade, el buscador o la terminal.
-const ICONS = [
-  "readme",
-  "about",
-  "projects",
-  "skills",
-  "terminal",
-  "contact",
-  "arcade",
-  "settings",
-  "system",
-  "trash",
-];
+const ICONS = ["about", "projects", "terminal", "contact", "arcade", "settings"];
 let startTime = Date.now();
 // ICONOS: construye accesos desde currentUser.apps. shell.js sustituye esta versión por botones SVG accesibles.
 function buildMenu() {
@@ -137,7 +126,6 @@ function buildContext() {
           openWindow("gallery");
         }
         if (a === "terminal") openWindow("terminal");
-        if (a === "system") openWindow("system");
         if (a === "arcade") openWindow("arcade");
       }),
   );

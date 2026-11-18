@@ -74,7 +74,6 @@ async function sendChat(message) {
     if (response.simulated) pending.textContent = response.text.slice(0, 3000);
     else if (window.MiloRender) window.MiloRender.render(pending, response.text.slice(0, 3000));
     else pending.textContent = response.text.slice(0, 3000);
-    if (response.simulated) pending.classList.add("corrupt-reply");
     if (!response.simulated)
       chatHistory.push(
         { role: "user", content: text },

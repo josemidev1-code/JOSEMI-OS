@@ -8,7 +8,7 @@ Apps.launchpad = {
     `<section class="pixel-launchpad"><div class="extra-heading"><span class="card-kicker">TODO TU SISTEMA, EN UN LUGAR</span><h2>¿Qué quieres hacer?</h2><p>También puedes buscar cualquier aplicación con Ctrl + K.</p></div><div class="pixel-app-grid">${[
       ...new Set(["welcome", ...currentUser.apps, ...extras]),
     ]
-      .filter((id) => Apps[id] && !["trash", "tetris", "pacman", "minesweeper"].includes(id))
+      .filter((id) => Apps[id] && !["tetris", "pacman", "minesweeper", "launchpad"].includes(id))
       .map(
         (id) =>
           `<button data-extra-open="${id}">${Apps[id].icon}<strong>${escape(Apps[id].title)}</strong></button>`,

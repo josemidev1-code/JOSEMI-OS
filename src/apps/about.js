@@ -30,5 +30,24 @@ Apps.about = {
           <h3>Aficiones</h3>
           <p>Gimnasio, deporte, programar, proyectos, ciencia ficción, cine y lectura.</p>
         </article>
+      </div>
+      <section class="about-section" aria-labelledby="about-stack">
+        <span class="card-kicker">05 / STACK</span>
+        <h3 id="about-stack">Con qué trabajo</h3>
+        <p>Sin porcentajes inventados: estas son las tecnologías que he usado de verdad en mis proyectos.</p>
+        <div class="chips">${["HTML", "CSS", "JavaScript", "Git y GitHub", "Python", "PowerShell", "C# y Unity", "Three.js", "APIs REST"].map((x) => `<span class="chip">${x}</span>`).join("")}</div>
+      </section>
+      <div class="content-grid">
+        <article class="content-card">
+          <span class="card-kicker">06 / FORMACIÓN</span>
+          <h3>DAM en el IES Dr. Lluís Simarro</h3>
+          <p>Estudio <strong>Desarrollo de Aplicaciones Multiplataforma</strong> en Xàtiva: programación, bases de datos y creación de aplicaciones. En clase trabajamos por proyectos y con agentes de IA.</p>
+        </article>
+        <article class="content-card">
+          <span class="card-kicker">07 / LO QUE QUIERO APRENDER</span>
+          <h3>IA y automatización</h3>
+          <p>Quiero integrar IA en aplicaciones y automatizar procesos repetitivos. Milo (asistente con APIs) y SparkTune (recomendaciones con IA) son mis primeros pasos reales en esa dirección.</p>
+        </article>
       </div>`,
+  size: [860, 760],
 };

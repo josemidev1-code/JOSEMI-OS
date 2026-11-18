@@ -2,7 +2,7 @@
 const desktop = document.querySelector("#desktop");
 const topbar = document.createElement("header");
 topbar.className = "pixel-system-bar";
-topbar.innerHTML = `<div class="pixel-brand"><span class="pixel-brand-mark" aria-hidden="true">J</span><strong>JOSEMI-OS</strong><span class="pixel-bar-divider"></span><span class="pixel-current-app">ESCRITORIO</span></div><nav aria-label="Herramientas del sistema"><button data-pixel-open="projects">ARCHIVOS</button><button data-pixel-open="readme">AYUDA</button><button data-pixel-search>BUSCAR <kbd>CTRL K</kbd></button></nav><span class="pixel-system-caption">UN PEQUEÑO UNIVERSO DIGITAL</span>`;
+topbar.innerHTML = `<div class="pixel-brand"><span class="pixel-brand-mark" aria-hidden="true">J</span><strong>JOSEMI-OS</strong><span class="pixel-bar-divider"></span><span class="pixel-current-app">ESCRITORIO</span></div><nav aria-label="Herramientas del sistema"><button data-pixel-open="projects">ARCHIVOS</button><button data-pixel-milo>AYUDA</button><button data-pixel-search>BUSCAR <kbd>CTRL K</kbd></button></nav><span class="pixel-system-caption">UN PEQUEÑO UNIVERSO DIGITAL</span>`;
 desktop.prepend(topbar);
 const dock = document.createElement("div");
 dock.className = "pixel-pinned";
