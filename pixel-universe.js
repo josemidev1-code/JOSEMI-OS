@@ -1136,7 +1136,33 @@
       q("#mascot-button").dataset.mood = result.ok ? "happy" : "surprised";
       return { text: result.text };
     }
-    return null;
+    return music(text);
+  }
+  // MÚSICA: «pon …», «reproduce …», «para la música», «sigue con la música». Se ejecuta en el
+  // navegador justo después del Enter, así el navegador permite que el audio empiece solo.
+  function music(text) {
+    if (!window.MiloPlayer) return null;
+    if (
+      /^(para|pausa|pausar|deten|detener|quita|apaga|stop)\b.*\b(musica|cancion)\b|^(para|pausa|stop)$/.test(
+        text,
+      )
+    )
+      return MiloPlayer.pause();
+    if (/^(sigue|continua|reanuda|vuelve a poner)\b.*\b(musica|cancion)\b/.test(text))
+      return MiloPlayer.resume();
+    if (/^(quita|cierra|apaga) (la |el )?(musica|reproductor) del todo/.test(text))
+      return MiloPlayer.stop();
+    const match = text.match(
+      /^(?:por favor[, ]+)?(?:ponme|pon|reproduce|reproducir|toca|play|quiero escuchar|escucha|ponnos)\s+(.+)/,
+    );
+    if (!match) return null;
+    const query =
+      match[1]
+        .replace(/^(la |una )?(cancion|musica|tema)( de| del)?\s*/, "")
+        .replace(/^(algo|un poco) (de |del )?/, "")
+        .trim() || "lofi chill";
+    q("#mascot-button").dataset.mood = "happy";
+    return MiloPlayer.play(query).then((r) => ({ text: r.text }));
   }
   window.PixelOS = { perform, command, apps: desktopApps.slice() };
 
