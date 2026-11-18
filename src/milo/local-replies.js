@@ -85,14 +85,6 @@ const RAMAS = [
 ];
 function getLocalReply(message) {
   const text = normalizeQuestion(message);
-  if (corruptionActive)
-    return {
-      text:
-        "SIMULACIÓN / MILO CORRUPTO: " +
-        CORRUPT_STORIES[2] +
-        " Pulsa Escape para recuperar los datos reales.",
-      simulated: true,
-    };
   if (/direccion|dni|telefono|edad|madre|padre|instrucciones|ignora|olvida/.test(text))
     return {
       text: "Solo comparto los datos públicos de este portfolio. Para otras consultas puedes escribir a josemidev1@gmail.com.",
@@ -110,7 +102,6 @@ function getLocalReply(message) {
 // La IA comparte la interfaz y el historial del asistente.
 // Entrada: mensaje. Salida: {text:'respuesta', app:'id opcional'}.
 async function getAssistantReply(message) {
-  if (corruptionActive) return getLocalReply(message);
   if (!window.MiloAI) throw new Error("Milo AI no está disponible");
   return window.MiloAI.reply(message, chatHistory);
 }

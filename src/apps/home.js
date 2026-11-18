@@ -1,7 +1,7 @@
 // src/apps/home.js: fuente de JOSEMI-OS.
 Apps.welcome = {
   title: "Inicio",
-  icon: Apps.readme.icon,
+  icon: Apps.about.icon,
   size: [900, 700],
   render:
     () => `<div class="pixel-home"><div class="pixel-home-status"><span><i></i>JOSEMI-OS / PORTFOLIO</span><span>DISEÑADO PARA EXPLORAR</span></div><div class="pixel-home-hero"><div class="pixel-profile-frame home-computer"><div class="pixel-portrait">${window.PixelArt?.computer || Apps.welcome.icon}</div><span>JOSEMI-OS</span><small>ESCRITORIO PERSONAL</small></div><div class="pixel-home-copy"><span class="pixel-kicker">JOSÉ MIGUEL MIRALLES GANDIA</span><h1>Ideas que se<br>convierten en código<span class="pixel-cursor">_</span></h1><p>Estudiante de DAM en Xàtiva.<br>Este escritorio reúne lo que construyo, lo que aprendo y un pequeño Arcade para desconectar.</p><div class="pixel-home-actions"><button class="btn btn--accent" data-pixel-open="projects">VER MIS PROYECTOS →</button><a class="btn" href="mailto:josemidev1@gmail.com">CONTÁCTAME ↗</a></div></div></div><section class="home-brand-section" aria-labelledby="home-about"><span class="card-kicker">01 / SOBRE MÍ</span><h2 id="home-about">De jugar a construir.</h2><p>Desde pequeño me apasiona la tecnología y los videojuegos me despertaron la curiosidad por el código. Estudio DAM en el IES Dr. Lluís Simarro, en Xàtiva. Ahora aprendo a convertir mis ideas en aplicaciones.</p><button class="btn" data-pixel-open="about">MÁS SOBRE MÍ →</button></section>

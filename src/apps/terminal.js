@@ -9,34 +9,14 @@ function runCommand(raw, print, openWin) {
     case "help":
     case "ayuda":
       print(
-        'Comandos: <span class="ok">ayuda readme quien-soy sobre-mi proyectos habilidades contacto limpiar fecha eco ls cat sudo secreto matrix fondo tetris pacman buscaminas vault arcade cafe hola 42</span>',
+        'Comandos: <span class="ok">ayuda quien-soy sobre-mi proyectos habilidades contacto limpiar fecha eco ls cat sudo secreto matrix fondo tetris pacman buscaminas vault arcade cafe hola 42</span>',
       );
-      break;
-    case "infectar":
-    case "virus":
-      startCorruption();
-      print(
-        '<span class="err">0xMILO: simulación activada. Datos ficticios cargados. Escribe antivirus, pulsa Escape o usa Restaurar sistema.</span>',
-      );
-      break;
-    case "antivirus":
-    case "restaurar":
-      stopCorruption();
-      print('<span class="ok">Integridad recuperada. La información original está intacta.</span>');
       break;
     case "whoami":
     case "quien-soy":
-      if (corruptionActive) {
-        print(escapeHTML(CORRUPT_STORIES[0] + " · " + CORRUPT_STORIES[1]));
-        break;
-      }
       print(
         "José Miguel Miralles Gandia<br>Estudiante de DAM en IES Dr. Lluís Simarro<br>Desarrollador de software en proceso.",
       );
-      break;
-    case "readme":
-      print("Abriendo README.md...");
-      openWin("readme");
       break;
     case "about":
     case "sobre-mi":
@@ -50,8 +30,8 @@ function runCommand(raw, print, openWin) {
       break;
     case "skills":
     case "habilidades":
-      print("Abriendo Habilidades...");
-      openWin("skills");
+      print("Abriendo el stack en Sobre mí...");
+      openWin("about");
       break;
     case "contact":
     case "contacto":

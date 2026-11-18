@@ -34,7 +34,6 @@
   window.PixelArt = art;
   for (const id of ["tetris", "pacman", "minesweeper"]) Apps[id].icon = art[id];
   Apps.welcome.icon = art.computer;
-  Apps.motivation.icon = art.ai;
 
   // src/pixel/github.js: datos en directo de GitHub con la API pública, sin clave.
   // Recorrido: navegador → api.github.com → JSON → resumen → pantalla.
@@ -164,24 +163,7 @@
   window.hydrateGithub = hydrateGithub;
 
   // src/pixel/projects.js: fuente de JOSEMI-OS.
-  Apps.motivation.render = () =>
-    `<section class="pixel-project-detail"><span class="project-large-art">${art.ai}</span><span class="card-kicker">UNA IDEA PARA SEGUIR</span><h2>Sigue construyendo.</h2><p>No hace falta saberlo todo para empezar. Aprende algo, pruébalo y mejora la siguiente versión.</p></section>`;
 
-  Apps.education = {
-    title: "DAM · Mi formación",
-    icon: art.code,
-    size: [720, 570],
-    render: () =>
-      `<section class="pixel-project-detail"><span class="project-large-art">${art.code}</span><span class="card-kicker">FORMACIÓN / EN CURSO</span><h2>Aprendiendo a construir software.</h2><p>Estudio <strong>Desarrollo de Aplicaciones Multiplataforma (DAM)</strong> en el <strong>IES Dr. Lluís Simarro, en Xàtiva</strong>.</p><p>Mi formación gira en torno a la programación, las bases de datos y la creación de aplicaciones. En JOSEMI-OS pongo en práctica HTML, CSS, JavaScript, Git y GitHub.</p><div class="pixel-study-line"><span>APRENDER</span><i></i><span>CONSTRUIR</span><i></i><span>MEJORAR</span></div></section>`,
-  };
-  Apps.roadmap = {
-    title: "IA + software",
-    icon: art.ai,
-    size: [720, 570],
-    render: () =>
-      `<section class="pixel-project-detail"><span class="project-large-art">${art.ai}</span><span class="card-kicker">ÁREA DE EXPLORACIÓN</span><h2>Código con nuevas posibilidades.</h2><p>Estoy explorando cómo integrar inteligencia artificial en aplicaciones y automatizaciones útiles.</p><p>Milo es una parte real de ese aprendizaje: conecta esta interfaz con un asistente, búsqueda web y meteorología. Esta sección reúne lo que quiero seguir aprendiendo; no presenta proyectos futuros como terminados.</p><button class="btn btn--accent" data-project-milo>HABLAR CON MILO</button></section>`,
-    bind: (b) => (q("[data-project-milo]", b).onclick = () => toggleMilo(true)),
-  };
   Apps.portfolio = {
     title: "JOSEMI-OS",
     icon: art.computer,
@@ -220,7 +202,7 @@
     `<button class="folder" data-project-app="${id}"><span class="g">${icon}</span><small class="project-kicker">${kicker}</small><span class="n">${name}</span><small>${text}</small>${repo ? `<small class="case-updated" data-gh-pushed="${repo}"></small>` : ""}<span class="project-go">${go}</span></button>`;
 
   Apps.projects.render = () =>
-    `<section class="pixel-projects"><span class="card-kicker">/PROYECTOS</span><h2>Código que puedes explorar.</h2><p class="bio">${CASE_STUDIES.length + 1} proyectos reales. Cada uno cuenta el reto, cómo lo resolví y qué salió.</p>${githubWidget()}<div class="folder-grid universe-projects">${projectCard("portfolio", art.computer, "JOSEMI-OS", "PORTFOLIO · ESTA WEB", "Un escritorio en el navegador con Arcade y Milo.", "EXPLORAR →", "JOSEMI-OS")}${CASE_STUDIES.map((c) => projectCard("case-" + c.id, art[c.art], c.name, c.kicker, c.tagline, "VER EL CASO →", c.repo)).join("")}</div><div class="project-more"><span class="card-kicker">TAMBIÉN</span><button class="btn" data-project-app="education">FORMACIÓN DAM →</button><button class="btn" data-project-app="roadmap">IA + SOFTWARE →</button></div></section>`;
+    `<section class="pixel-projects"><span class="card-kicker">/PROYECTOS</span><h2>Código que puedes explorar.</h2><p class="bio">${CASE_STUDIES.length + 1} proyectos reales. Cada uno cuenta el reto, cómo lo resolví y qué salió.</p>${githubWidget()}<div class="folder-grid universe-projects">${projectCard("portfolio", art.computer, "JOSEMI-OS", "PORTFOLIO · ESTA WEB", "Un escritorio en el navegador con Arcade y Milo.", "EXPLORAR →", "JOSEMI-OS")}${CASE_STUDIES.map((c) => projectCard("case-" + c.id, art[c.art], c.name, c.kicker, c.tagline, "VER EL CASO →", c.repo)).join("")}</div><div class="project-more"><span class="card-kicker">TAMBIÉN</span><button class="btn" data-project-app="about">MI FORMACIÓN Y STACK →</button></div></section>`;
   Apps.projects.size = [900, 780];
   Apps.projects.bind = (b) => {
     b.addEventListener("click", (e) => {
@@ -849,12 +831,9 @@
   // src/pixel/desktop.js: fuente de JOSEMI-OS.
   const desktopApps = [
     "welcome",
-    "readme",
     "about",
     "projects",
     "portfolio",
-    "education",
-    "skills",
     "terminal",
     "contact",
     "arcade",
@@ -862,17 +841,13 @@
     "pacman",
     "minesweeper",
     "settings",
-    "system",
     "easter",
     "screensaver",
     "gallery",
     "notes",
     "calculator",
     "focus",
-    "roadmap",
     "launchpad",
-    "motivation",
-    "trash",
   ];
   desktopApps.forEach((id) => {
     if (!currentUser.apps.includes(id)) currentUser.apps.push(id);
@@ -926,11 +901,8 @@
 
   const aliases = {
     welcome: ["inicio", "escritorio", "home"],
-    readme: ["readme", "ayuda"],
-    about: ["sobre mi", "sobre josemi", "perfil"],
+    about: ["sobre mi", "sobre josemi", "perfil", "habilidades", "estudios", "formacion", "dam"],
     projects: ["proyectos"],
-    education: ["dam", "estudios", "formacion"],
-    skills: ["habilidades"],
     terminal: ["terminal", "consola"],
     contact: ["contacto"],
     arcade: ["arcade", "recreativa"],
@@ -938,18 +910,14 @@
     pacman: ["pacman", "pac man", "pac-man"],
     minesweeper: ["buscaminas", "minas"],
     settings: ["ajustes", "configuracion"],
-    system: ["monitor del sistema", "monitor", "informacion del sistema"],
     easter: ["secret vault", "vault", "secretos"],
     screensaver: ["salvapantallas", "ascii studio", "ascii"],
     gallery: ["fondos", "galeria"],
     notes: ["bloc de notas", "notas"],
     calculator: ["calculadora"],
     focus: ["concentracion", "temporizador", "pomodoro"],
-    roadmap: ["ia y software", "ia + software", "roadmap"],
     launchpad: ["aplicaciones", "apps"],
     portfolio: ["josemi-os", "josemi os"],
-    motivation: ["motivacion"],
-    trash: ["papelera"],
   };
   function findApp(text) {
     return Object.entries(aliases)

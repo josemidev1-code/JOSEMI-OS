@@ -2,11 +2,8 @@
 // Contrato común del cliente y el Worker. No incluir credenciales.
 const MILO_APP_IDS = [
   "welcome",
-  "readme",
   "about",
   "projects",
-  "education",
-  "skills",
   "terminal",
   "contact",
   "arcade",
@@ -14,18 +11,14 @@ const MILO_APP_IDS = [
   "pacman",
   "minesweeper",
   "settings",
-  "system",
   "easter",
   "screensaver",
   "gallery",
   "notes",
   "calculator",
   "focus",
-  "roadmap",
   "launchpad",
   "portfolio",
-  "motivation",
-  "trash",
 ];
 const MILO_THEME_IDS = ["night", "paper", "violet", "ocean", "sunset", "glacier", "copper"];
 

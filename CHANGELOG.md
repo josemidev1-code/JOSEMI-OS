@@ -2,6 +2,12 @@
 
 Los hitos v1.0.0 y v2.0.0 identifican dos estados reales del historial. Se etiquetan el 23 de octubre de 2026 para facilitar la comparación; no se alteran las fechas de los commits ni se inventa un desarrollo anterior.
 
+## Sin publicar · Escritorio más claro
+
+- Se retiran motivacion.exe, Monitor del sistema, Papelera, README.md, Habilidades, DAM e IA + software: no hablaban de Josemi o repetían otras ventanas. Su contenido útil (stack, formación DAM y objetivos de aprendizaje) pasa a Sobre mí, con un stack que solo lista tecnologías usadas en los proyectos.
+- Se elimina el easter egg de «corrupción» del terminal, que sustituía la bio por datos ficticios.
+- El botón AYUDA de la barra superior abre Milo. El menú de Aplicaciones queda en 15 entradas.
+
 ## v3.0.0 · Projectes reals i univers pixel (18 de novembre de 2026)
 
 - Proyectos: siete casos reales (JOSEMI-OS, SparkTune, DragonBall Survivor, The Fog, System Plast, la web de Nuria Cerdá y Museu grec) con reto, solución, resultado, datos y enlaces. Sustituyen a los huecos de «roadmap».

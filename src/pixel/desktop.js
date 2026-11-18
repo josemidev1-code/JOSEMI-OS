@@ -1,12 +1,9 @@
 // src/pixel/desktop.js: fuente de JOSEMI-OS.
 const desktopApps = [
   "welcome",
-  "readme",
   "about",
   "projects",
   "portfolio",
-  "education",
-  "skills",
   "terminal",
   "contact",
   "arcade",
@@ -14,17 +11,13 @@ const desktopApps = [
   "pacman",
   "minesweeper",
   "settings",
-  "system",
   "easter",
   "screensaver",
   "gallery",
   "notes",
   "calculator",
   "focus",
-  "roadmap",
   "launchpad",
-  "motivation",
-  "trash",
 ];
 desktopApps.forEach((id) => {
   if (!currentUser.apps.includes(id)) currentUser.apps.push(id);

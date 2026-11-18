@@ -3,17 +3,6 @@ const currentUser = {
   nom: "José Miguel",
   rol: "Desarrollador en proceso · DAM",
   color: "#6dff9b",
-  apps: [
-    "readme",
-    "about",
-    "projects",
-    "skills",
-    "terminal",
-    "contact",
-    "arcade",
-    "settings",
-    "system",
-    "trash",
-  ],
+  apps: ["about", "projects", "terminal", "contact", "arcade", "settings"],
   auto: [],
 };

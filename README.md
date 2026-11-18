@@ -7,10 +7,10 @@ Portfolio de José Miguel Miralles Gandia, estudiante de Desarrollo de Aplicacio
 ## Funciones
 
 - Arranque Matrix y escritorio con ventanas que se pueden mover, minimizar y cerrar.
-- Sobre mí, habilidades y contacto.
+- Sobre mí (con stack, formación DAM y lo que quiero aprender) y contacto.
 - Proyectos: siete casos reales (JOSEMI-OS, SparkTune, DragonBall Survivor, The Fog, System Plast, la web de Nuria Cerdá y Museu grec) con reto, solución y resultado, enlace al código y a la versión publicada.
 - Widget en directo de GitHub (API pública, sin clave): repos públicos, lenguajes más usados y último cambio de cada proyecto. Se guarda 10 minutos en `sessionStorage` y muestra un aviso si la API no responde.
-- Terminal, buscador de aplicaciones y monitor del sistema.
+- Terminal y buscador de aplicaciones.
 - Arcade con Tetris (Maratón, Sprint 40 y Ultra, rotación SRS, pieza guardada y T-spins), Pac-Man (laberinto propio, cuatro fantasmas con personalidad, frutas y niveles) y Buscaminas (cuatro dificultades, primer clic seguro, acordes, pistas y estadísticas).
 - Secret Vault con acertijos y fondos desbloqueables.
 - 22 fondos pixel art (galería con buscador y favoritos), iconos personalizados y salvapantallas ASCII.
@@ -113,4 +113,4 @@ Los paisajes utilizan exclusivamente su animación pixel art. Los efectos ASCII 
 
 El escritorio muestra seis accesos esenciales: Sobre mí, Proyectos, Arcade, Bloc de notas, Fondos y Contacto. El resto está en Aplicaciones y el buscador; los tres juegos se agrupan dentro de Arcade. La primera entrada a un juego pasa por la máquina y su moneda, también si se solicita a Milo. Inicio, Proyectos, Arcade y Ajustes permanecen en la barra de tareas.
 
-Milo puede abrir las 25 aplicaciones, cerrar/minimizar/maximizar ventanas, cambiar tema, fondo, cursor, sonido y movimiento, añadir notas locales, calcular e iniciar temporizadores. Las órdenes directas se ejecutan en el navegador; las demás conversaciones conservan la conexión con el Worker. Las acciones se limitan al escritorio de esta web, con una lista explícita de operaciones y aplicaciones: nunca ejecutan código arbitrario ni comandos del ordenador.
+Milo puede abrir las aplicaciones del escritorio (15 en el menú, más los tres juegos del Arcade), cerrar/minimizar/maximizar ventanas, cambiar tema, fondo, cursor, sonido y movimiento, añadir notas locales, calcular e iniciar temporizadores. Las órdenes directas se ejecutan en el navegador; las demás conversaciones conservan la conexión con el Worker. Las acciones se limitan al escritorio de esta web, con una lista explícita de operaciones y aplicaciones: nunca ejecutan código arbitrario ni comandos del ordenador.

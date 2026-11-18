@@ -372,10 +372,6 @@
     white-space: normal;
     padding: 12px;
   }
-  #corruption-recovery {
-    max-width: calc(100vw - 2 * var(--edge));
-    flex-wrap: wrap;
-  }
 }
 @media (max-width: 480px) {
   .icons {
