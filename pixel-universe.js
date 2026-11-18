@@ -147,11 +147,203 @@
         rect(14, 18, 4, 4, "#3f4541") +
         rect(15, 22, 2, 4, "#3f4541"),
     ),
+    // Iconos de los casos de proyecto.
+    terminal: svg(
+      rect(2, 5, 28, 22, "#2a3f47") +
+        rect(2, 5, 28, 4, "#4c6e78") +
+        rect(4, 6, 2, 2, "#f49ac1") +
+        rect(7, 6, 2, 2, "#ffce74") +
+        rect(10, 6, 2, 2, "#8ce6ac") +
+        rect(4, 10, 24, 15, "#0b1a22") +
+        rect(7, 13, 2, 2, "#8ce6ac") +
+        rect(9, 15, 2, 2, "#8ce6ac") +
+        rect(7, 17, 2, 2, "#8ce6ac") +
+        rect(13, 18, 8, 2, "#e9f1d7") +
+        rect(22, 12, 4, 1, "#ffce74") +
+        rect(24, 14, 2, 4, "#ffce74"),
+    ),
+    controller: svg(
+      rect(5, 10, 22, 12, "#78cbe2") +
+        rect(3, 13, 4, 11, "#5aa4bb") +
+        rect(25, 13, 4, 11, "#5aa4bb") +
+        rect(7, 10, 18, 2, "#b8e6f2") +
+        rect(8, 14, 6, 2, "#101e24") +
+        rect(10, 12, 2, 6, "#101e24") +
+        rect(20, 13, 3, 3, "#f49ac1") +
+        rect(23, 16, 3, 3, "#ffce74") +
+        rect(13, 19, 6, 2, "#3f6f80") +
+        rect(14, 5, 4, 5, "#ffce74") +
+        rect(15, 3, 2, 2, "#fff1ad"),
+    ),
+    fog: svg(
+      rect(13, 6, 6, 3, "#c4413b") +
+        rect(14, 9, 4, 16, "#6b7f86") +
+        rect(14, 9, 1, 16, "#9bb0b5") +
+        rect(11, 4, 10, 2, "#3b4b52") +
+        rect(15, 7, 2, 1, "#ffe9a2") +
+        rect(18, 7, 10, 1, "#ffe9a2") +
+        rect(20, 6, 6, 1, "#ffdf75") +
+        rect(2, 18, 12, 2, "#c9d8dc") +
+        rect(18, 20, 12, 2, "#c9d8dc") +
+        rect(0, 24, 32, 3, "#e4eef0") +
+        rect(4, 27, 26, 2, "#b6c8cc"),
+    ),
+    factory: svg(
+      rect(3, 14, 26, 15, "#87a3ab") +
+        rect(3, 10, 6, 4, "#87a3ab") +
+        rect(9, 12, 6, 2, "#6d8a93") +
+        rect(15, 10, 6, 4, "#87a3ab") +
+        rect(22, 4, 5, 10, "#596f79") +
+        rect(23, 2, 3, 2, "#c9d8dc") +
+        [6, 12, 18].map((x) => rect(x, 17, 4, 4, "#ffce74")).join("") +
+        rect(22, 21, 5, 8, "#2a3f47") +
+        rect(3, 28, 26, 2, "#3b4b52"),
+    ),
+    scales: svg(
+      rect(15, 4, 2, 22, "#d6bd8c") +
+        rect(14, 3, 4, 2, "#ffe9a2") +
+        rect(5, 8, 22, 2, "#d6bd8c") +
+        rect(6, 10, 1, 7, "#b99c6c") +
+        rect(25, 10, 1, 7, "#b99c6c") +
+        rect(2, 17, 9, 2, "#ffce74") +
+        rect(3, 19, 7, 1, "#b99c6c") +
+        rect(21, 17, 9, 2, "#ffce74") +
+        rect(22, 19, 7, 1, "#b99c6c") +
+        rect(10, 26, 12, 3, "#b99c6c") +
+        rect(8, 29, 16, 2, "#e8cca0"),
+    ),
   };
   window.PixelArt = art;
   for (const id of ["tetris", "pacman", "minesweeper"]) Apps[id].icon = art[id];
   Apps.welcome.icon = art.computer;
   Apps.motivation.icon = art.ai;
+
+  // src/pixel/github.js: datos en directo de GitHub con la API pública, sin clave.
+  // Recorrido: navegador → api.github.com → JSON → resumen → pantalla.
+  const GITHUB_CACHE_KEY = "josemi-github-v1";
+  const GITHUB_CACHE_MS = 10 * 60 * 1000;
+  let githubRequest = null;
+
+  function readGithubCache() {
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(GITHUB_CACHE_KEY) || "null");
+      if (cached && Date.now() - cached.at < GITHUB_CACHE_MS && Array.isArray(cached.repos))
+        return cached.repos;
+    } catch {
+      // Sin almacenamiento disponible: se vuelve a pedir.
+    }
+    return null;
+  }
+
+  function loadGithubRepos() {
+    const cached = readGithubCache();
+    if (cached) return Promise.resolve(cached);
+    if (githubRequest) return githubRequest;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    githubRequest = fetch(
+      `https://api.github.com/users/${GITHUB_USER}/repos?per_page=100&sort=pushed`,
+      {
+        signal: controller.signal,
+        headers: { Accept: "application/vnd.github+json" },
+      },
+    )
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status === 403 ? "limit" : "http");
+        return response.json();
+      })
+      .then((list) => {
+        const repos = list
+          .filter((repo) => !repo.fork)
+          .map((repo) => ({
+            name: repo.name,
+            stars: repo.stargazers_count,
+            lang: repo.language,
+            pushed: repo.pushed_at,
+          }));
+        try {
+          sessionStorage.setItem(GITHUB_CACHE_KEY, JSON.stringify({ at: Date.now(), repos }));
+        } catch {
+          // La caché es opcional.
+        }
+        return repos;
+      })
+      .finally(() => {
+        clearTimeout(timer);
+        githubRequest = null;
+      });
+    return githubRequest;
+  }
+
+  const githubRelative = new Intl.RelativeTimeFormat("es", { numeric: "auto" });
+  function githubAgo(date) {
+    const seconds = (new Date(date).getTime() - Date.now()) / 1000;
+    const units = [
+      ["year", 31536000],
+      ["month", 2592000],
+      ["week", 604800],
+      ["day", 86400],
+      ["hour", 3600],
+      ["minute", 60],
+    ];
+    for (const [unit, size] of units) {
+      if (Math.abs(seconds) >= size) return githubRelative.format(Math.round(seconds / size), unit);
+    }
+    return "ahora mismo";
+  }
+
+  function githubSummary(repos) {
+    const languages = {};
+    repos.forEach((repo) => repo.lang && (languages[repo.lang] = (languages[repo.lang] || 0) + 1));
+    const top = Object.entries(languages)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([name]) => name);
+    const latest = [...repos].sort((a, b) => new Date(b.pushed) - new Date(a.pushed))[0];
+    return {
+      count: repos.length,
+      stars: repos.reduce((sum, repo) => sum + repo.stars, 0),
+      top,
+      latest,
+    };
+  }
+
+  const githubWidget = () =>
+    `<section class="gh-live" data-gh-live aria-live="polite" aria-busy="true"><div class="gh-live__head"><span class="gh-live__dot" aria-hidden="true"></span><span class="card-kicker">EN DIRECTO DESDE GITHUB</span></div><div class="gh-live__body"><span class="gh-skeleton"></span><span class="gh-skeleton"></span><span class="gh-skeleton"></span></div></section>`;
+
+  function paintGithubWidget(box, repos) {
+    const s = githubSummary(repos);
+    box.setAttribute("aria-busy", "false");
+    q(".gh-live__body", box).innerHTML =
+      `<dl class="gh-live__stats"><div><dt>Repos públicos</dt><dd>${s.count}</dd></div><div><dt>Lenguajes más usados</dt><dd class="gh-live__langs">${s.top.join(" · ") || "—"}</dd></div><div><dt>Último cambio</dt><dd class="gh-live__latest">${s.latest ? `${s.latest.name}<small>${githubAgo(s.latest.pushed)}</small>` : "—"}</dd></div></dl><a class="gh-live__link" href="https://github.com/${GITHUB_USER}" target="_blank" rel="noopener">VER MI PERFIL ↗</a>`;
+  }
+
+  function failGithubWidget(box) {
+    box.setAttribute("aria-busy", "false");
+    box.classList.add("is-error");
+    q(".gh-live__body", box).innerHTML =
+      `<p>No he podido cargar los datos de GitHub ahora mismo. Los proyectos siguen disponibles abajo.</p><a class="gh-live__link" href="https://github.com/${GITHUB_USER}" target="_blank" rel="noopener">VER MI PERFIL ↗</a>`;
+  }
+
+  // Rellena el widget y las fechas «actualizado» que haya dentro de root.
+  function hydrateGithub(root) {
+    const box = q("[data-gh-live]", root);
+    const stamps = qa("[data-gh-pushed]", root);
+    if (!box && !stamps.length) return;
+    loadGithubRepos()
+      .then((repos) => {
+        if (!root.isConnected) return;
+        if (box) paintGithubWidget(box, repos);
+        stamps.forEach((el) => {
+          const repo = repos.find((r) => r.name === el.dataset.ghPushed);
+          if (repo) el.textContent = `Último cambio ${githubAgo(repo.pushed)}`;
+        });
+      })
+      .catch(() => {
+        if (root.isConnected && box) failGithubWidget(box);
+      });
+  }
+  window.hydrateGithub = hydrateGithub;
 
   // src/pixel/projects.js: fuente de JOSEMI-OS.
   Apps.motivation.render = () =>
@@ -177,7 +369,7 @@
     icon: art.computer,
     size: [760, 580],
     render: () =>
-      `<section class="pixel-project-detail"><span class="project-large-art">${art.computer}</span><span class="card-kicker">PROYECTO PERSONAL / EN EVOLUCIÓN</span><h2>Un PC dentro de tu navegador.</h2><p>JOSEMI-OS es mi portfolio interactivo: un escritorio con ventanas, aplicaciones, juegos y Milo, mi ajolote con IA. Todo está construido con HTML, CSS y JavaScript.</p><dl class="project-facts"><div><dt>Aplicaciones integradas</dt><dd>${Object.keys(Apps).length}</dd></div><div><dt>Juegos en Arcade</dt><dd>3</dd></div><div><dt>Paisajes pixel art</dt><dd>${Object.keys(PIXEL_WALLPAPERS).length}</dd></div></dl><div class="proj"><span class="chip">JavaScript</span><span class="chip">Pixel art</span><span class="chip">APIs</span><span class="chip">Aprendizaje</span></div><a class="btn btn--accent" href="https://github.com/josemidev1-code/JOSEMI-OS" target="_blank" rel="noopener">VER REPOSITORIO ↗</a><figure class="project-demo"><video controls playsinline preload="none" poster="media/demo-poster.png" width="1280" height="720" aria-label="Demostración de JOSEMI-OS: Milo, proyectos y Arcade"><source src="media/josemi-os-demo.mp4" type="video/mp4"><track kind="captions" src="media/demo-es.vtt" srclang="es" label="Español" default>Tu navegador no reproduce este vídeo. <a href="media/josemi-os-demo.mp4">Descargar la demo MP4</a>.</video><figcaption>Un recorrido real de unos 30 segundos: presentación, Milo abriendo Proyectos, entrada al Arcade y contacto. Sin audio. <a href="media/demo-transcripcion.html" target="_blank" rel="noopener">Leer la descripción del vídeo ↗</a></figcaption></figure></section>`,
+      `<section class="pixel-project-detail"><span class="project-large-art">${art.computer}</span><span class="card-kicker">PROYECTO PERSONAL / EN EVOLUCIÓN</span><h2>Un PC dentro de tu navegador.</h2><p>JOSEMI-OS es mi portfolio interactivo: un escritorio con ventanas, aplicaciones, juegos y Milo, mi ajolote con IA. Todo está construido con HTML, CSS y JavaScript.</p><dl class="project-facts"><div><dt>Aplicaciones integradas</dt><dd>${Object.keys(Apps).filter((id) => !id.startsWith("case-")).length}</dd></div><div><dt>Juegos en Arcade</dt><dd>3</dd></div><div><dt>Paisajes pixel art</dt><dd>${Object.keys(PIXEL_WALLPAPERS).length}</dd></div></dl><div class="proj"><span class="chip">JavaScript</span><span class="chip">Pixel art</span><span class="chip">APIs</span><span class="chip">Aprendizaje</span></div><a class="btn btn--accent" href="https://github.com/josemidev1-code/JOSEMI-OS" target="_blank" rel="noopener">VER REPOSITORIO ↗</a><figure class="project-demo"><video controls playsinline preload="none" poster="media/demo-poster.png" width="1280" height="720" aria-label="Demostración de JOSEMI-OS: Milo, proyectos y Arcade"><source src="media/josemi-os-demo.mp4" type="video/mp4"><track kind="captions" src="media/demo-es.vtt" srclang="es" label="Español" default>Tu navegador no reproduce este vídeo. <a href="media/josemi-os-demo.mp4">Descargar la demo MP4</a>.</video><figcaption>Un recorrido real de unos 30 segundos: presentación, Milo abriendo Proyectos, entrada al Arcade y contacto. Sin audio. <a href="media/demo-transcripcion.html" target="_blank" rel="noopener">Leer la descripción del vídeo ↗</a></figcaption></figure></section>`,
     bind: (body, win) => {
       const video = q("video", body);
       const pause = () => video.pause();
@@ -193,14 +385,32 @@
       };
     },
   };
+  // Un caso por proyecto real: reto → solución → resultado, con fecha en directo de GitHub.
+  const caseLinks = (c) =>
+    `<div class="btn-row">${c.live ? `<a class="btn btn--accent" href="${c.live}" target="_blank" rel="noopener">VER EN DIRECTO ↗</a>` : ""}<a class="btn${c.live ? "" : " btn--accent"}" href="https://github.com/${GITHUB_USER}/${c.repo}" target="_blank" rel="noopener">VER CÓDIGO ↗</a></div>`;
+  const caseApp = (c) => ({
+    title: c.name,
+    icon: art[c.art],
+    size: [760, 680],
+    render: () =>
+      `<section class="pixel-project-detail case-study"><span class="project-large-art">${art[c.art]}</span><span class="card-kicker">${c.kicker} · ${c.status === "done" ? "PUBLICADO" : "EN DESARROLLO"}</span><h2>${c.tagline}</h2><ol class="case-steps"><li><h3>Reto</h3><p>${c.reto}</p></li><li><h3>Solución</h3><p>${c.solucion}</p></li><li><h3>Resultado</h3><p>${c.resultado}</p></li></ol><dl class="project-facts">${c.facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl><div class="proj">${c.stack.map((t) => `<span class="chip">${t}</span>`).join("")}</div>${c.note ? `<p class="case-note">${c.note}</p>` : ""}<p class="case-updated" data-gh-pushed="${c.repo}"></p>${caseLinks(c)}</section>`,
+    bind: (body) => hydrateGithub(body),
+  });
+  CASE_STUDIES.forEach((c) => (Apps["case-" + c.id] = caseApp(c)));
+
+  const projectCard = (id, icon, name, kicker, text, go, repo) =>
+    `<button class="folder" data-project-app="${id}"><span class="g">${icon}</span><small class="project-kicker">${kicker}</small><span class="n">${name}</span><small>${text}</small>${repo ? `<small class="case-updated" data-gh-pushed="${repo}"></small>` : ""}<span class="project-go">${go}</span></button>`;
+
   Apps.projects.render = () =>
-    `<section class="pixel-projects"><span class="card-kicker">/PROYECTOS Y APRENDIZAJE</span><h2>Código que puedes explorar.</h2><p class="bio">Lo que construyo, dónde aprendo y lo que quiero explorar después.</p><div class="folder-grid universe-projects"><button class="folder" data-project-app="portfolio"><span class="g">${art.computer}</span><span class="n">JOSEMI-OS</span><small>Mi escritorio interactivo</small><span class="project-go">EXPLORAR →</span></button><a class="folder" href="https://github.com/josemidev1-code/portafolio-web" target="_blank" rel="noopener"><span class="g">${art.temple}</span><span class="n">Museu grec</span><small>Portfolio web · formación</small><span class="project-go">VER GITHUB ↗</span></a><button class="folder" data-project-app="education"><span class="g">${art.code}</span><span class="n">DAM</span><small>IES Dr. Lluís Simarro</small><span class="project-go">MI FORMACIÓN →</span></button><button class="folder" data-project-app="roadmap"><span class="g">${art.ai}</span><span class="n">IA + software</span><small>Exploración y aprendizaje</small><span class="project-go">DESCUBRIR →</span></button></div></section>`;
-  Apps.projects.size = [860, 760];
-  Apps.projects.bind = (b) =>
+    `<section class="pixel-projects"><span class="card-kicker">/PROYECTOS</span><h2>Código que puedes explorar.</h2><p class="bio">${CASE_STUDIES.length + 1} proyectos reales. Cada uno cuenta el reto, cómo lo resolví y qué salió.</p>${githubWidget()}<div class="folder-grid universe-projects">${projectCard("portfolio", art.computer, "JOSEMI-OS", "PORTFOLIO · ESTA WEB", "Un escritorio en el navegador con Arcade y Milo.", "EXPLORAR →", "JOSEMI-OS")}${CASE_STUDIES.map((c) => projectCard("case-" + c.id, art[c.art], c.name, c.kicker, c.tagline, "VER EL CASO →", c.repo)).join("")}</div><div class="project-more"><span class="card-kicker">TAMBIÉN</span><button class="btn" data-project-app="education">FORMACIÓN DAM →</button><button class="btn" data-project-app="roadmap">IA + SOFTWARE →</button></div></section>`;
+  Apps.projects.size = [900, 780];
+  Apps.projects.bind = (b) => {
     b.addEventListener("click", (e) => {
       const id = e.target.closest("[data-project-app]")?.dataset.projectApp;
       if (id) openWindow(id);
     });
+    hydrateGithub(b);
+  };
 
   // src/pixel/arcade-entry.js: fuente de JOSEMI-OS.
   const cabinet = () =>

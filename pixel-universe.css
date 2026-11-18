@@ -901,3 +901,180 @@ body.reduce-motion :is(.machine-stars, .coin-target, .vault-lock-pixel i) {
     padding: 20px 0;
   }
 }
+
+/* Casos de proyecto y datos en directo de GitHub. */
+.gh-live {
+  margin: 20px 0 24px;
+  padding: 16px 18px;
+  border: 2px solid var(--pixel-edge);
+  background: var(--pixel-raised);
+}
+.gh-live__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.gh-live__dot {
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  animation: gh-pulse 1.6s steps(2, jump-none) infinite;
+}
+.gh-live.is-error .gh-live__dot {
+  background: var(--pixel-muted);
+  animation: none;
+}
+.gh-live__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+.gh-live__body p {
+  margin: 0;
+  font: 16px/1.6 var(--font-ui);
+}
+.gh-live__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin: 0;
+}
+.gh-live__stats dt {
+  font: 14px/1.4 var(--font-ui);
+  color: var(--pixel-muted);
+}
+.gh-live__stats dd {
+  margin: 2px 0 0;
+  font: 22px/1.3 var(--font-mono);
+  color: var(--accent);
+}
+.gh-live__stats .gh-live__langs,
+.gh-live__stats .gh-live__latest {
+  font-size: 17px;
+  color: var(--pixel-ink);
+}
+.gh-live__latest small {
+  display: block;
+  font: 14px var(--font-ui);
+  color: var(--pixel-muted);
+}
+.gh-live__link {
+  font: 16px var(--font-mono);
+  color: var(--accent);
+  text-underline-offset: 4px;
+}
+.gh-skeleton {
+  display: block;
+  flex: 1 1 140px;
+  height: 44px;
+  background: var(--pixel-edge);
+  opacity: 0.5;
+  animation: gh-pulse 1.2s steps(2, jump-none) infinite;
+}
+@keyframes gh-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+.project-kicker {
+  display: block;
+  font: 13px/1.4 var(--font-mono);
+  letter-spacing: 0.06em;
+  color: var(--pixel-muted);
+}
+body.pixel-system .universe-projects .folder .project-kicker {
+  margin-top: 2px;
+}
+.case-updated {
+  font: 14px/1.4 var(--font-ui);
+  color: var(--pixel-muted);
+  min-height: 1.4em;
+  margin: 0;
+}
+.case-steps {
+  list-style: none;
+  padding: 0;
+  margin: 22px 0 0;
+  display: grid;
+  gap: 14px;
+}
+.case-steps li {
+  padding: 14px 16px;
+  border-left: 4px solid var(--accent);
+  background: var(--pixel-raised);
+}
+.case-steps h3 {
+  font: 600 15px/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 6px;
+}
+.case-steps p {
+  margin: 0;
+  font: 16px/1.65 var(--font-ui);
+}
+.case-study h2 {
+  font: 600 24px/1.3 var(--font-ui);
+  margin: 8px 0 0;
+}
+.case-note {
+  font: 14px/1.5 var(--font-ui);
+  color: var(--pixel-muted);
+  margin: 12px 0 0;
+}
+.case-study .btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+.project-more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 2px solid var(--pixel-edge);
+}
+.home-proof-grid .project-kicker {
+  margin-bottom: 6px;
+}
+.home-all-projects {
+  margin-top: 18px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gh-live__dot,
+  .gh-skeleton {
+    animation: none;
+  }
+}
+body.reduce-motion :is(.gh-live__dot, .gh-skeleton) {
+  animation: none;
+}
+/* Tarjetas de proyecto: nombre visible, descripción legible y datos secundarios discretos. */
+body.pixel-system .universe-projects .folder .n {
+  font: 600 22px/1.25 var(--font-ui);
+  text-transform: none;
+  color: var(--pixel-ink);
+}
+body.pixel-system .universe-projects .folder small {
+  font: 16px/1.5 var(--font-ui);
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--pixel-ink);
+}
+body.pixel-system .universe-projects .folder small.project-kicker {
+  font: 13px/1.4 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pixel-muted);
+}
+body.pixel-system .universe-projects .folder small.case-updated {
+  font-size: 14px;
+  color: var(--pixel-muted);
+}

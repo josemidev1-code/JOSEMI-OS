@@ -7,7 +7,9 @@ Portfolio de José Miguel Miralles Gandia, estudiante de Desarrollo de Aplicacio
 ## Funciones
 
 - Arranque Matrix y escritorio con ventanas que se pueden mover, minimizar y cerrar.
-- Sobre mí, proyectos, habilidades y contacto.
+- Sobre mí, habilidades y contacto.
+- Proyectos: siete casos reales (JOSEMI-OS, SparkTune, DragonBall Survivor, The Fog, System Plast, la web de Nuria Cerdá y Museu grec) con reto, solución y resultado, enlace al código y a la versión publicada.
+- Widget en directo de GitHub (API pública, sin clave): repos públicos, lenguajes más usados y último cambio de cada proyecto. Se guarda 10 minutos en `sessionStorage` y muestra un aviso si la API no responde.
 - Terminal, buscador de aplicaciones y monitor del sistema.
 - Arcade con Tetris (Maratón, Sprint 40 y Ultra, rotación SRS, pieza guardada y T-spins), Pac-Man (laberinto propio, cuatro fantasmas con personalidad, frutas y niveles) y Buscaminas (cuatro dificultades, primer clic seguro, acordes, pistas y estadísticas).
 - Secret Vault con acertijos y fondos desbloqueables.

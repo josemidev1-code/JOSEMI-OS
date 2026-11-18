@@ -122,6 +122,7 @@
         {
           "files": [
             "src/pixel/art.js",
+            "src/pixel/github.js",
             "src/pixel/projects.js",
             "src/pixel/arcade-entry.js",
             "src/pixel/vault.js",
