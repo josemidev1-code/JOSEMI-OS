@@ -1,11 +1,22 @@
 /* Único punto de configuración tipográfica. Fuentes locales con licencia OFL. */
+/* Interfaz y títulos en pixel art: Pixelify Sans. Terminal, etiquetas y código: VT323. */
 @font-face {
-  font-family: "Atkinson Hyperlegible Next";
-  src: url("assets/fonts/atkinson-next.woff2") format("woff2");
+  font-family: "Pixelify Sans";
+  src: url("assets/fonts/pixelify-sans.woff2") format("woff2");
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 400 700;
   font-display: swap;
 }
+/* VT323 dibuja los glifos más pequeños: se compensa para conservar los tamaños actuales. */
+@font-face {
+  font-family: "VT323";
+  src: url("assets/fonts/vt323.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  size-adjust: 120%;
+}
+/* JetBrains Mono se conserva solo para el arte ASCII, que necesita una rejilla exacta. */
 @font-face {
   font-family: "JetBrains Mono";
   src: url("assets/fonts/jetbrains-mono.woff2") format("woff2");
@@ -14,9 +25,14 @@
   font-display: swap;
 }
 :root {
-  --font-ui: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --font-ui: "Pixelify Sans", ui-monospace, monospace;
   --font-display: var(--font-ui);
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-mono: "VT323", ui-monospace, monospace;
+  --font-ascii: "JetBrains Mono", ui-monospace, monospace;
+}
+body {
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
 }
 :is(code, pre, .term, .ascii-stage, .saver-art) {
   font-variant-ligatures: none;

@@ -98,7 +98,7 @@ GitHub Pages publica la raíz de la rama `main`. Las rutas de los estilos y scri
 
 Los contadores del proyecto leen las aplicaciones y paisajes registrados. La demo muestra una orden local de Milo, no una conversación remota simulada. La fotografía personal sigue pendiente de una imagen que Josemi decida publicar; la captura y el vídeo son medios propios del proyecto, no fotografías personales.
 
-La interfaz utiliza Atkinson Hyperlegible Next; el terminal, el código y el ASCII utilizan JetBrains Mono, con las ligaduras desactivadas donde deben distinguirse los caracteres. Ambas se sirven localmente en WOFF2. [Procedencia y licencias de las fuentes](assets/fonts/SOURCES.md).
+La interfaz utiliza Pixelify Sans y los datos, el terminal y el código VT323, las dos en pixel art. El arte ASCII conserva JetBrains Mono para mantener la rejilla exacta. Todas se sirven localmente en WOFF2. [Procedencia y licencias de las fuentes](assets/fonts/SOURCES.md).
 
 ## Referencias gráficas
 

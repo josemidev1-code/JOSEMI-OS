@@ -77,7 +77,7 @@ function setupCanvas(canvas, width, height, scale = 2) {
   return ctx;
 }
 function label(ctx, str, x, y, size = 16, color = "#dbe9e0", align = "left", shadow = false) {
-  ctx.font = `${size}px JetBrains Mono, monospace`;
+  ctx.font = `${size}px VT323, monospace`;
   ctx.textAlign = align;
   ctx.textBaseline = "alphabetic";
   if (shadow) {

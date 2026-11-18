@@ -934,12 +934,10 @@ body.pixel-system .toast {
   font: 16px var(--font-ui);
 }
 body.pixel-system .login {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
 }
 body.pixel-system .boot-skip {
-  font:
-    18px "JetBrains Mono",
-    monospace;
+  font: 18px var(--font-mono);
   border: 2px solid var(--accent);
 }
 body.pixel-system .boot-logo {
@@ -948,17 +946,17 @@ body.pixel-system .boot-logo {
 body.pixel-system
   #os-screensaver
   :is(.saver-terminal-head, .saver-terminal-foot, .saver-notes, .saver-meta) {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 18px;
 }
 body.pixel-system #os-screensaver .saver-art {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ascii);
 }
 body.pixel-system .vault {
   font-family: var(--font-ui);
 }
 body.pixel-system .vault :is(pre, .vault-ascii-door) {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ascii);
 }
 
 @media (min-width: 1600px) {
