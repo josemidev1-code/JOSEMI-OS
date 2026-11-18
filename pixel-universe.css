@@ -1078,3 +1078,10 @@ body.pixel-system .universe-projects .folder small.case-updated {
   font-size: 14px;
   color: var(--pixel-muted);
 }
+/* Móvil: Milo ocupa la esquina inferior izquierda; el contenido deja sitio para que nada
+   quede tapado al llegar al final de la ventana. */
+@media (max-width: 600px) {
+  body.pixel-system .window .win__body {
+    padding-bottom: 84px;
+  }
+}
