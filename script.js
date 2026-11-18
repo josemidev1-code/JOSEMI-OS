@@ -2644,6 +2644,14 @@ Object.assign(THEMES, {
   glacier: { name: "Glaciar azul", accent: "#3879b5", bg: "#e0edf2" },
   copper: { name: "Cobre cálido", accent: "#f5bc7c", bg: "#292119" },
 });
+// ESTILOS: cambian la forma de ventanas, botones y barras. Se combinan con cualquier tema de color.
+const SKINS = {
+  classic: { name: "Clásico", detail: "Pixel sobrio, el original" },
+  arcade: { name: "Consola arcade", detail: "Neón, CRT y marcos recortados" },
+  retro: { name: "Retro 90s", detail: "Biseles, menús y barra de estado" },
+  cozy: { name: "Acogedor", detail: "Madera, papel y tonos cálidos" },
+};
+if (!Object.hasOwn(SKINS, state.skin)) state.skin = "classic";
 const EFFECTS = {
   cinematic: "Singularidad → órbita → firma",
   storm: "Tormenta eléctrica //",
@@ -2752,6 +2760,9 @@ function cursorSVG(kind, size) {
 // APARIENCIA: aplica tema, textura, cursor y fondo al DOM. Los atributos data-* activan reglas CSS.
 function applyShell() {
   document.body.dataset.theme = state.theme;
+  document.body.dataset.skin = state.skin;
+  // Los estilos claros derivan de aquí un acento oscuro legible sin perder el tono del tema.
+  document.documentElement.style.setProperty("--theme-accent", state.accent);
   document.body.dataset.intensity = state.intensity;
   document.body.classList.toggle("with-grain", !!state.grain);
   document.body.classList.toggle("immersive-desktop", !state.welcomeVisible);
@@ -2776,6 +2787,12 @@ applyTheme = function () {
   baseApplyTheme();
   applyShell();
 };
+function chooseSkin(id) {
+  if (!Object.hasOwn(SKINS, id)) return;
+  state.skin = id;
+  applyTheme();
+  save();
+}
 function chooseTheme(id) {
   if (!THEMES[id]) return;
   state.theme = id;
@@ -4462,6 +4479,16 @@ initDirectAccess();
           <section id="pref-theme">
             <span class="card-kicker">01 / APARIENCIA</span>
             <h3>Un ambiente para cada idea.</h3>
+            <p class="pref-label">Estilo</p>
+            <div class="skin-picker">
+              ${Object.entries(SKINS)
+                .map(
+                  ([id, s]) =>
+                    `<button data-skin="${id}" class="skin-option skin-option--${id} ${state.skin === id ? "selected" : ""}" aria-pressed="${state.skin === id}"><span class="skin-mini" aria-hidden="true"><i></i><b></b><em></em></span><strong>${s.name}</strong><small>${s.detail}</small></button>`,
+                )
+                .join("")}
+            </div>
+            <p class="pref-label">Tema de color</p>
             <div class="theme-picker">
               ${Object.entries(THEMES)
                 .map(
@@ -4611,6 +4638,17 @@ initDirectAccess();
           save();
         });
       }
+
+      $$("[data-skin]", body).forEach((button) => {
+        button.onclick = () => {
+          chooseSkin(button.dataset.skin);
+          $$("[data-skin]", body).forEach((b) => {
+            const on = b === button;
+            b.classList.toggle("selected", on);
+            b.setAttribute("aria-pressed", on);
+          });
+        };
+      });
 
       $$("[data-theme]", body).forEach((button) => {
         button.onclick = () => {

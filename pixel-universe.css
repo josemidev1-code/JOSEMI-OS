@@ -1236,3 +1236,621 @@ body.reduce-motion #mascot-button[data-music="on"]::after {
 .milo-mode {
   order: 3;
 }
+
+/* ESTILOS (Ajustes → Apariencia → Estilo). body[data-skin] cambia la forma de la interfaz;
+   el tema de color sigue aportando --accent, así que cada estilo se ve distinto con cada tema.
+   «classic» no tiene reglas: es el diseño original. */
+
+/* ---------- Selector en Ajustes ---------- */
+.pref-label {
+  font: 14px/1.3 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pixel-muted);
+  margin: 18px 0 8px;
+}
+.skin-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.skin-option {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  text-align: left;
+  padding: 10px;
+  border: 2px solid var(--pixel-edge);
+  background: var(--pixel-raised);
+  color: var(--pixel-ink);
+  cursor: var(--os-pointer, pointer);
+}
+.skin-option strong {
+  font: 15px/1.2 var(--font-ui);
+}
+.skin-option small {
+  font: 13px/1.35 var(--font-ui);
+  color: var(--pixel-muted);
+}
+.skin-option.selected,
+.skin-option:hover,
+.skin-option:focus-visible {
+  border-color: var(--accent);
+}
+.skin-option.selected strong::after {
+  content: " ✓";
+  color: var(--accent);
+}
+.skin-mini {
+  position: relative;
+  width: 100%;
+  height: 54px;
+  margin-bottom: 4px;
+  display: block;
+}
+.skin-mini i,
+.skin-mini b,
+.skin-mini em {
+  position: absolute;
+  display: block;
+}
+/* Miniaturas: un escritorio y una ventana dibujados con tres capas. */
+.skin-option--classic .skin-mini {
+  background: #0d1614;
+}
+.skin-option--classic .skin-mini i {
+  inset: 8px 22px 10px 12px;
+  background: #101a18;
+  border: 2px solid #455c4f;
+  box-shadow: 3px 3px 0 #020806;
+}
+.skin-option--classic .skin-mini b {
+  left: 14px;
+  right: 24px;
+  top: 10px;
+  height: 7px;
+  background: #18231f;
+}
+.skin-option--arcade .skin-mini {
+  background: #05080f;
+}
+.skin-option--arcade .skin-mini i {
+  inset: 8px 22px 10px 12px;
+  background: #0a0f1f;
+  border: 2px solid var(--accent);
+  box-shadow: 4px 4px 0 #f49ac1;
+}
+.skin-option--arcade .skin-mini b {
+  left: 14px;
+  right: 24px;
+  top: 10px;
+  height: 7px;
+  background: var(--accent);
+}
+.skin-option--arcade .skin-mini em {
+  left: 18px;
+  top: 24px;
+  width: 30px;
+  height: 4px;
+  background: #ffce74;
+}
+.skin-option--retro .skin-mini {
+  background: #3b6e8f;
+}
+.skin-option--retro .skin-mini i {
+  inset: 8px 22px 10px 12px;
+  background: #c3cdd2;
+  border: 2px solid;
+  border-color: #eef6f4 #2c3e55 #2c3e55 #eef6f4;
+}
+.skin-option--retro .skin-mini b {
+  left: 14px;
+  right: 24px;
+  top: 10px;
+  height: 7px;
+  background: #1d3550;
+}
+.skin-option--retro .skin-mini em {
+  left: 16px;
+  right: 26px;
+  bottom: 13px;
+  height: 5px;
+  border: 1px solid;
+  border-color: #7d97a8 #eef6f4 #eef6f4 #7d97a8;
+}
+.skin-option--cozy .skin-mini {
+  background: #2a3b2f;
+}
+.skin-option--cozy .skin-mini i {
+  inset: 8px 22px 10px 12px;
+  background: #f6ecd4;
+  border: 4px solid #8a5a3b;
+  box-shadow: 0 0 0 2px #4a2e1e;
+}
+.skin-option--cozy .skin-mini b {
+  left: 16px;
+  right: 26px;
+  top: 12px;
+  height: 5px;
+  background: #8a5a3b;
+}
+.skin-option--cozy .skin-mini em {
+  right: 28px;
+  top: 12px;
+  width: 4px;
+  height: 4px;
+  background: #e8604f;
+  box-shadow: -6px 0 0 #ffce74;
+}
+
+/* =========================================================
+   CONSOLA ARCADE: neón sobre negro, sombras rosas, barras invertidas y líneas de CRT.
+   ========================================================= */
+body.pixel-system[data-skin="arcade"] {
+  --shell-text: #e6f4ff;
+  --shell-muted: #8fb3c9;
+  --shell-panel: #0a0f1f;
+  --shell-raised: #111a33;
+  --shell-border: #34679a;
+  --text: #e6f4ff;
+  --muted: #8fb3c9;
+  --pixel-shadow: #f49ac1;
+  --skin-glow: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+/* Líneas de CRT encima de todo; no capturan clics. */
+body.pixel-system[data-skin="arcade"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, 0.16) 2px 3px);
+}
+body.pixel-system[data-skin="arcade"] .window {
+  background: #0a0f1f;
+  border: 2px solid var(--accent);
+  box-shadow: 6px 6px 0 #f49ac1 !important;
+}
+body.pixel-system[data-skin="arcade"] .window:not(:focus-within) {
+  border-color: #34679a;
+  box-shadow: 6px 6px 0 #5f4a8f !important;
+}
+body.pixel-system[data-skin="arcade"] .window .win__bar {
+  background: var(--accent);
+  border-bottom: 2px solid #05080f;
+}
+body.pixel-system[data-skin="arcade"] .window:not(:focus-within) .win__bar {
+  background: #1b2a4a;
+}
+body.pixel-system[data-skin="arcade"] .window .win__title {
+  font: 18px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #05080f;
+}
+body.pixel-system[data-skin="arcade"] .window:not(:focus-within) .win__title {
+  color: #8fb3c9;
+}
+body.pixel-system[data-skin="arcade"] .win__title::after {
+  content: ".EXE";
+  opacity: 0.6;
+}
+body.pixel-system[data-skin="arcade"] .win-btn {
+  background: #05080f;
+  border-color: #05080f;
+  color: var(--accent);
+  box-shadow: none;
+}
+body.pixel-system[data-skin="arcade"] .win-btn:hover {
+  background: #f49ac1;
+  color: #05080f;
+}
+body.pixel-system[data-skin="arcade"] :is(.card-kicker, .pixel-kicker, .project-kicker) {
+  color: #ffce74;
+}
+body.pixel-system[data-skin="arcade"] :is(.win__body h1, .win__body h2) {
+  text-shadow:
+    2px 2px 0 #5f4a8f,
+    0 0 12px var(--skin-glow);
+}
+body.pixel-system[data-skin="arcade"]
+  :is(
+    .folder,
+    .content-card,
+    .home-proof-grid article,
+    .case-steps li,
+    .project-facts > div,
+    .gh-live,
+    .skin-option,
+    .theme-option,
+    .home-interest-list li
+  ) {
+  background: #0d1428;
+  border: 2px dashed #34679a;
+}
+body.pixel-system[data-skin="arcade"] :is(.folder, .home-proof-grid article):hover {
+  border-style: solid;
+  border-color: var(--accent);
+  box-shadow: 4px 4px 0 #f49ac1;
+}
+body.pixel-system[data-skin="arcade"] .btn {
+  background: #05080f;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  box-shadow: 3px 3px 0 #f49ac1;
+  text-transform: uppercase;
+}
+body.pixel-system[data-skin="arcade"] .btn--accent,
+body.pixel-system[data-skin="arcade"] .pixel-home .btn--accent {
+  background: var(--accent) !important;
+  color: #05080f !important;
+}
+body.pixel-system[data-skin="arcade"] :is(.pixel-system-bar, .taskbar) {
+  background: #05080f;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px #05080f;
+}
+body.pixel-system[data-skin="arcade"] .taskbar {
+  box-shadow: 4px 4px 0 #f49ac1;
+}
+body.pixel-system[data-skin="arcade"] .pixel-cursor {
+  animation: arcade-blink 1s steps(1) infinite;
+}
+body.pixel-system[data-skin="arcade"] :is(#mascot-chat, .menu, .ctx, #command-palette) {
+  background: #0a0f1f;
+  border: 2px solid var(--accent);
+  box-shadow: 5px 5px 0 #f49ac1;
+}
+body.pixel-system[data-skin="arcade"] .toast {
+  background: #05080f;
+  border-color: #ffce74;
+  box-shadow: 4px 4px 0 #f49ac1;
+}
+@keyframes arcade-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* =========================================================
+   RETRO 90s: gris claro, biseles en relieve, barra de título oscura y botones que se hunden.
+   ========================================================= */
+body.pixel-system[data-skin="retro"] {
+  --shell-text: #101e24;
+  --shell-muted: #44545c;
+  --shell-panel: #c9d2d6;
+  --shell-raised: #dbe2e5;
+  --shell-border: #2c3e55;
+  --text: #101e24;
+  --muted: #44545c;
+  --pixel-shadow: #101e24;
+  --bevel-light: #f4f8f8;
+  --bevel-dark: #5d6f78;
+  --accent: color-mix(in srgb, var(--theme-accent, #8be9a8) 38%, #14263a);
+  --retro-title: var(--accent);
+}
+body.pixel-system[data-skin="retro"] .window {
+  background: #c9d2d6;
+  border: 3px solid;
+  border-color: var(--bevel-light) #101e24 #101e24 var(--bevel-light);
+  box-shadow: 2px 2px 0 #101e24 !important;
+}
+body.pixel-system[data-skin="retro"] .window .win__bar {
+  margin: 2px;
+  background: var(--retro-title);
+  border-bottom: 0;
+}
+body.pixel-system[data-skin="retro"] .window .win__title {
+  color: #f4f8f8;
+  font-weight: 700;
+}
+body.pixel-system[data-skin="retro"] .win-btn {
+  background: #c9d2d6;
+  color: #101e24;
+  border: 2px solid;
+  border-color: var(--bevel-light) #101e24 #101e24 var(--bevel-light);
+  box-shadow: none;
+}
+body.pixel-system[data-skin="retro"] .win-btn:active {
+  border-color: #101e24 var(--bevel-light) var(--bevel-light) #101e24;
+}
+body.pixel-system[data-skin="retro"] .win__body {
+  margin: 0 2px 2px;
+  background: #eef3f4;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+}
+body.pixel-system[data-skin="retro"]
+  :is(
+    .folder,
+    .content-card,
+    .home-proof-grid article,
+    .case-steps li,
+    .project-facts > div,
+    .gh-live,
+    .skin-option,
+    .theme-option,
+    .home-interest-list li
+  ) {
+  background: #f8fbfb;
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  box-shadow: none;
+}
+body.pixel-system[data-skin="retro"] .case-steps li {
+  border-left: 4px solid var(--retro-title);
+}
+body.pixel-system[data-skin="retro"] :is(.card-kicker, .pixel-kicker, .project-kicker) {
+  color: var(--retro-title);
+}
+body.pixel-system[data-skin="retro"] .btn {
+  background: #c9d2d6;
+  color: #101e24;
+  border: 2px solid;
+  border-color: var(--bevel-light) #101e24 #101e24 var(--bevel-light);
+  box-shadow: none;
+  transform: none;
+}
+body.pixel-system[data-skin="retro"] .btn:hover {
+  transform: none;
+  box-shadow: none;
+  outline: 1px dotted #101e24;
+  outline-offset: -5px;
+}
+body.pixel-system[data-skin="retro"] .btn:active {
+  border-color: #101e24 var(--bevel-light) var(--bevel-light) #101e24;
+  transform: translate(1px, 1px);
+}
+body.pixel-system[data-skin="retro"] .btn--accent,
+body.pixel-system[data-skin="retro"] .pixel-home .btn--accent {
+  background: var(--retro-title) !important;
+  color: #f4f8f8 !important;
+  border-color: var(--bevel-light) #101e24 #101e24 var(--bevel-light) !important;
+}
+body.pixel-system[data-skin="retro"] :is(.pixel-system-bar, .taskbar) {
+  background: #c9d2d6;
+  color: #101e24;
+  border: 2px solid;
+  border-color: var(--bevel-light) #101e24 #101e24 var(--bevel-light);
+  box-shadow: none;
+}
+body.pixel-system[data-skin="retro"] .pixel-system-bar :is(a, button, span, strong, small) {
+  color: #101e24;
+}
+body.pixel-system[data-skin="retro"] :is(#mascot-chat, .menu, .ctx, #command-palette) {
+  background: #c9d2d6;
+  color: #101e24;
+  border: 3px solid;
+  border-color: var(--bevel-light) #101e24 #101e24 var(--bevel-light);
+  box-shadow: 2px 2px 0 #101e24;
+}
+body.pixel-system[data-skin="retro"] .toast {
+  background: #fff8c4;
+  color: #101e24;
+  border: 2px solid #101e24;
+  box-shadow: 2px 2px 0 #101e24;
+}
+body.pixel-system[data-skin="retro"] .gh-live__stats dd {
+  color: var(--retro-title);
+}
+
+/* =========================================================
+   ACOGEDOR: marco de madera, papel crema, botones de colores y sombra suave en bloque.
+   ========================================================= */
+body.pixel-system[data-skin="cozy"] {
+  --shell-text: #4a2e1e;
+  --shell-muted: #7d5a42;
+  --shell-panel: #f6ecd4;
+  --shell-raised: #efe0bf;
+  --shell-border: #8a5a3b;
+  --text: #4a2e1e;
+  --muted: #7d5a42;
+  --pixel-shadow: #4a2e1e;
+  --wood: #8a5a3b;
+  --wood-dark: #4a2e1e;
+  --accent: color-mix(in srgb, var(--theme-accent, #8be9a8) 40%, #5a3420);
+  --cozy-ink: var(--accent);
+}
+body.pixel-system[data-skin="cozy"] .window {
+  background: #f6ecd4;
+  border: 6px solid var(--wood);
+  box-shadow:
+    0 0 0 2px var(--wood-dark),
+    6px 8px 0 2px #00000055 !important;
+}
+body.pixel-system[data-skin="cozy"] .window .win__bar {
+  background: repeating-linear-gradient(to bottom, transparent 0 5px, #7a4e32 5px 6px), var(--wood);
+  border-bottom: 2px solid var(--wood-dark);
+}
+body.pixel-system[data-skin="cozy"] .window .win__title {
+  color: #fff1ad;
+  text-shadow: 2px 2px 0 var(--wood-dark);
+}
+body.pixel-system[data-skin="cozy"] .win-btn {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--wood-dark);
+  box-shadow: none;
+  color: transparent;
+}
+body.pixel-system[data-skin="cozy"] .win-btn.min {
+  background: #ffce74;
+}
+body.pixel-system[data-skin="cozy"] .win-btn.max {
+  background: #8ce6ac;
+}
+body.pixel-system[data-skin="cozy"] .win-btn.close {
+  background: #e8604f;
+}
+body.pixel-system[data-skin="cozy"] .win-btn:hover {
+  color: var(--wood-dark);
+}
+body.pixel-system[data-skin="cozy"] .win-btn::after {
+  font-size: 14px;
+}
+body.pixel-system[data-skin="cozy"]
+  :is(
+    .folder,
+    .content-card,
+    .home-proof-grid article,
+    .case-steps li,
+    .project-facts > div,
+    .gh-live,
+    .skin-option,
+    .theme-option,
+    .home-interest-list li
+  ) {
+  background: #fff8e6;
+  border: 2px solid #d9c3a0;
+  box-shadow: 0 3px 0 #d9c3a0;
+}
+body.pixel-system[data-skin="cozy"] :is(.folder, .home-proof-grid article):hover {
+  border-color: var(--wood);
+  box-shadow: 0 3px 0 var(--wood);
+}
+body.pixel-system[data-skin="cozy"] .case-steps li {
+  border-left: 4px solid var(--cozy-ink);
+}
+body.pixel-system[data-skin="cozy"] :is(.card-kicker, .pixel-kicker, .project-kicker) {
+  color: #9c4a22;
+}
+body.pixel-system[data-skin="cozy"] :is(.gh-live__stats dd, .project-facts dd, .case-steps h3) {
+  color: var(--cozy-ink);
+}
+body.pixel-system[data-skin="cozy"] .btn {
+  background: #fff8e6;
+  color: var(--wood-dark);
+  border: 2px solid var(--wood);
+  box-shadow: 0 4px 0 var(--wood);
+}
+body.pixel-system[data-skin="cozy"] .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 var(--wood);
+}
+body.pixel-system[data-skin="cozy"] .btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--wood);
+}
+body.pixel-system[data-skin="cozy"] .btn--accent,
+body.pixel-system[data-skin="cozy"] .pixel-home .btn--accent {
+  background: var(--cozy-ink) !important;
+  color: #fff8e6 !important;
+  border-color: var(--wood-dark) !important;
+}
+body.pixel-system[data-skin="cozy"] :is(.pixel-system-bar, .taskbar) {
+  background: var(--wood);
+  border: 2px solid var(--wood-dark);
+  box-shadow: 0 4px 0 #00000055;
+}
+body.pixel-system[data-skin="cozy"] .pixel-system-bar :is(a, button, span, strong, small) {
+  color: #fff1ad;
+}
+body.pixel-system[data-skin="cozy"] .taskbar :is(span, small, strong) {
+  color: #fff1ad;
+}
+body.pixel-system[data-skin="cozy"] :is(#mascot-chat, .menu, .ctx, #command-palette) {
+  background: #f6ecd4;
+  color: var(--wood-dark);
+  border: 4px solid var(--wood);
+  box-shadow:
+    0 0 0 2px var(--wood-dark),
+    4px 6px 0 2px #00000044;
+}
+body.pixel-system[data-skin="cozy"] .toast {
+  background: #fff8e6;
+  color: var(--wood-dark);
+  border: 3px solid var(--wood);
+  box-shadow: 0 4px 0 var(--wood-dark);
+}
+
+/* ---------- Textos que el CSS antiguo o los temas claros pintan con color fijo ---------- */
+body.pixel-system:is([data-skin="retro"], [data-skin="cozy"], [data-skin="arcade"])
+  :is(
+    .markdown-view :is(h1, h2, h3, p, li, strong),
+    .content-card p,
+    .skill-focus p,
+    .skill-big span,
+    .sys-card b,
+    .clink b,
+    .file-row,
+    .wall-tile-state,
+    .pixel-project-detail p,
+    .pixel-project-detail strong,
+    .profile-hero p,
+    .profile-hero strong,
+    .contact p,
+    .focus-clock,
+    .bio
+  ) {
+  color: var(--shell-text);
+}
+body.pixel-system:is([data-skin="retro"], [data-skin="cozy"], [data-skin="arcade"])
+  :is(.sys-card span, .gh-live__latest small, .case-updated) {
+  color: var(--shell-muted);
+}
+body.pixel-system:is([data-skin="retro"], [data-skin="cozy"]) .chip {
+  color: var(--shell-text);
+  border-color: var(--shell-border);
+  background: transparent;
+}
+body.pixel-system:is([data-skin="retro"], [data-skin="cozy"]) :is(.clink .g, .project-demo a) {
+  color: var(--accent);
+}
+/* Terminal, Arcade, Vault y juegos son escenas oscuras: conservan su fondo en cualquier estilo. */
+body.pixel-system:is([data-skin="retro"], [data-skin="cozy"], [data-skin="arcade"])
+  .window:is(
+    [data-id="terminal"],
+    [data-id="arcade"],
+    [data-id="easter"],
+    [data-id="tetris"],
+    [data-id="pacman"],
+    [data-id="minesweeper"],
+    [data-id="screensaver"]
+  )
+  .win__body {
+  background: #0b1a22;
+  --shell-text: #e6f4ff;
+  --shell-muted: #9cc4c6;
+  --text: #e6f4ff;
+  --muted: #9cc4c6;
+  --pixel-ink: #e6f4ff;
+  --pixel-muted: #9cc4c6;
+  color: #e6f4ff;
+}
+body.pixel-system:is([data-skin="retro"], [data-skin="cozy"], [data-skin="arcade"])
+  .window[data-id="terminal"]
+  .win__body
+  * {
+  color: #c9f1f7;
+}
+body.pixel-system:is([data-skin="retro"], [data-skin="cozy"])
+  .window:is([data-id="arcade"], [data-id="easter"])
+  :is(.coin-instruction, .vault-copy, .vault-status, .card-kicker) {
+  color: #ffce74;
+}
+body.pixel-system:is([data-skin="retro"], [data-skin="cozy"]) .win__body strong {
+  color: inherit;
+}
+body.pixel-system:is([data-skin="retro"], [data-skin="cozy"])
+  .window:is([data-id="arcade"], [data-id="easter"])
+  .btn {
+  background: #0b1a22 !important;
+  color: #e6f4ff !important;
+  border: 2px solid #9cc4c6 !important;
+}
+body.pixel-system[data-skin="retro"] .window:not(:focus-within) .win__bar {
+  background: #5d6f78;
+}
+body.pixel-system[data-skin="arcade"] .project-demo a {
+  color: #ffce74;
+}
+
+/* Movimiento reducido: sin parpadeo del cursor arcade. */
+body.reduce-motion[data-skin="arcade"] .pixel-cursor {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.pixel-system[data-skin="arcade"] .pixel-cursor {
+    animation: none;
+  }
+}

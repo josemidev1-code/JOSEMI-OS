@@ -78,6 +78,10 @@ function perform(action, value) {
       return { ok: false, text: "Ese fondo no existe en la galería." };
     return { ok: true, text: `Fondo cambiado a ${PIXEL_WALLPAPERS[id]?.name || "God of War"}.` };
   }
+  if (action === "skin" && Object.hasOwn(SKINS, id)) {
+    chooseSkin(id);
+    return { ok: true, text: `Estilo ${SKINS[id].name} aplicado.` };
+  }
   if (action === "theme" && Object.hasOwn(THEMES, id)) {
     chooseTheme(id);
     return { ok: true, text: `Tema ${THEMES[id].name} aplicado.` };
@@ -189,6 +193,19 @@ function command(message) {
         text: "Aquí tienes todos los fondos. Dime el nombre del que prefieres.",
       };
     }
+  } else if (/^(pon|cambia|activa|elige|usa).*\b(estilo|look|aspecto)\b/.test(text)) {
+    const skin = /arcade|neon|consola/.test(text)
+      ? "arcade"
+      : /retro|90|noventa|windows/.test(text)
+        ? "retro"
+        : /acogedor|madera|calido|cozy/.test(text)
+          ? "cozy"
+          : /clasico|original|normal/.test(text)
+            ? "classic"
+            : "";
+    result = skin
+      ? perform("skin", skin)
+      : { ok: false, text: "Hay cuatro estilos: clásico, consola arcade, retro 90s y acogedor." };
   } else if (/^(pon|cambia|activa|elige|usa).*(tema)/.test(text)) {
     const found = Object.entries(THEMES).find(
       ([id, t]) => text.includes(norm(t.name)) || text.includes(id),
