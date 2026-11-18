@@ -74,8 +74,6 @@ const MiloAI = (() => {
     },
   ];
 
-  let player = null;
-  let resultsBox = null;
   // Mantener estas listas y tools sincronizadas con worker.js (prueba automatizada).
   const allowedApps = new Set(MILO_APP_IDS);
   const allowedThemes = new Set(MILO_THEME_IDS);
@@ -92,44 +90,8 @@ const MiloAI = (() => {
     return data;
   }
 
-  async function music(query, signal) {
-    const url =
-      "https://itunes.apple.com/search?term=" +
-      encodeURIComponent(query.slice(0, 100)) +
-      "&media=music&entity=song&limit=3";
-    const response = await fetch(url, { signal });
-    if (!response.ok) throw new Error("iTunes HTTP " + response.status);
-    const data = await response.json();
-    const tracks = (data.results || []).filter((t) => t.previewUrl).slice(0, 3);
-    if (!tracks.length) return { error: "No se han encontrado canciones" };
-    if (!player) player = new Audio();
-    player.src = tracks[0].previewUrl;
-    player.play().catch(() => {});
-    if (!resultsBox) resultsBox = document.querySelector(".mascot-results");
-    if (resultsBox) {
-      resultsBox.replaceChildren();
-      for (const track of tracks) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = track.trackName + " — " + track.artistName + " ▶";
-        button.addEventListener("click", () => {
-          player.src = track.previewUrl;
-          player.play().catch(() => {});
-        });
-        resultsBox.appendChild(button);
-      }
-    }
-    return {
-      source: "iTunes Search API",
-      tracks: tracks.map((t) => ({
-        name: t.trackName,
-        artist: t.artistName,
-        preview_seconds: 30,
-        artist_link: t.artistViewUrl || "",
-      })),
-      note: "Se muestran hasta 3 canciones, con muestras de 30 segundos.",
-    };
-  }
+  // La música la reproduce MiloPlayer (src/milo/player.js), igual que la orden directa «pon …».
+  const music = (query, signal) => window.MiloPlayer.play(query, signal);
 
   async function runTool(call, signal) {
     let args;

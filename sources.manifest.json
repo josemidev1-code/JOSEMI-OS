@@ -150,6 +150,9 @@
           "files": ["src/shared/milo-contract.js"]
         },
         {
+          "files": ["src/milo/player.js"]
+        },
+        {
           "files": ["src/milo/ai-client.js"]
         }
       ]
@@ -265,7 +268,7 @@
       "type": "css",
       "groups": [
         {
-          "files": ["styles/pixel-universe.css"]
+          "files": ["styles/pixel-universe.css", "styles/skins.css"]
         }
       ]
     }

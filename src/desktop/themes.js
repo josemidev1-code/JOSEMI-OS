@@ -13,6 +13,9 @@ function cursorSVG(kind, size) {
 // APARIENCIA: aplica tema, textura, cursor y fondo al DOM. Los atributos data-* activan reglas CSS.
 function applyShell() {
   document.body.dataset.theme = state.theme;
+  document.body.dataset.skin = state.skin;
+  // Los estilos claros derivan de aquí un acento oscuro legible sin perder el tono del tema.
+  document.documentElement.style.setProperty("--theme-accent", state.accent);
   document.body.dataset.intensity = state.intensity;
   document.body.classList.toggle("with-grain", !!state.grain);
   document.body.classList.toggle("immersive-desktop", !state.welcomeVisible);
@@ -37,6 +40,12 @@ applyTheme = function () {
   baseApplyTheme();
   applyShell();
 };
+function chooseSkin(id) {
+  if (!Object.hasOwn(SKINS, id)) return;
+  state.skin = id;
+  applyTheme();
+  save();
+}
 function chooseTheme(id) {
   if (!THEMES[id]) return;
   state.theme = id;

@@ -15,6 +15,8 @@ Portfolio de José Miguel Miralles Gandia, estudiante de Desarrollo de Aplicacio
 - Secret Vault con acertijos y fondos desbloqueables.
 - 22 fondos pixel art (galería con buscador y favoritos), iconos personalizados y salvapantallas ASCII.
 - Milo, un ajolote con IA (Groq), búsqueda web (Tavily), meteorología (Open-Meteo) y música (iTunes). Las respuestas locales se conservan como respaldo.
+- Cuatro estilos de interfaz en Ajustes → Apariencia (Clásico, Consola arcade, Retro 90s y Acogedor), combinables con los siete temas de color. En los estilos claros el acento se oscurece a partir del color del tema para que los textos sigan siendo legibles. Milo también los cambia: «pon el estilo arcade».
+- Milo reproduce música: «pon Bohemian Rhapsody», «para la música». Busca en la API pública de iTunes y reproduce la muestra de 30 s con un reproductor pixel; Milo baila mientras suena.
 - Preferencias guardadas en el navegador y adaptación a móvil.
 
 La intro Matrix se puede saltar siempre, también en la primera visita, con el botón «Saltar animación» o con Enter: quien entra ve el nombre y la presentación en segundos, no al cabo de 23. Milo conserva el chat y sus acciones, sin bocadillos ni frases espontáneas en el escritorio.

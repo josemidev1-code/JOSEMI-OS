@@ -29,6 +29,14 @@ Object.assign(THEMES, {
   glacier: { name: "Glaciar azul", accent: "#3879b5", bg: "#e0edf2" },
   copper: { name: "Cobre cálido", accent: "#f5bc7c", bg: "#292119" },
 });
+// ESTILOS: cambian la forma de ventanas, botones y barras. Se combinan con cualquier tema de color.
+const SKINS = {
+  classic: { name: "Clásico", detail: "Pixel sobrio, el original" },
+  arcade: { name: "Consola arcade", detail: "Neón, CRT y marcos recortados" },
+  retro: { name: "Retro 90s", detail: "Biseles, menús y barra de estado" },
+  cozy: { name: "Acogedor", detail: "Madera, papel y tonos cálidos" },
+};
+if (!Object.hasOwn(SKINS, state.skin)) state.skin = "classic";
 const EFFECTS = {
   cinematic: "Singularidad → órbita → firma",
   storm: "Tormenta eléctrica //",

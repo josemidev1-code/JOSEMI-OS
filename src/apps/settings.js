@@ -19,6 +19,16 @@ Apps.settings = {
           <section id="pref-theme">
             <span class="card-kicker">01 / APARIENCIA</span>
             <h3>Un ambiente para cada idea.</h3>
+            <p class="pref-label">Estilo</p>
+            <div class="skin-picker">
+              ${Object.entries(SKINS)
+                .map(
+                  ([id, s]) =>
+                    `<button data-skin="${id}" class="skin-option skin-option--${id} ${state.skin === id ? "selected" : ""}" aria-pressed="${state.skin === id}"><span class="skin-mini" aria-hidden="true"><i></i><b></b><em></em></span><strong>${s.name}</strong><small>${s.detail}</small></button>`,
+                )
+                .join("")}
+            </div>
+            <p class="pref-label">Tema de color</p>
             <div class="theme-picker">
               ${Object.entries(THEMES)
                 .map(
@@ -168,6 +178,17 @@ Apps.settings = {
         save();
       });
     }
+
+    $$("[data-skin]", body).forEach((button) => {
+      button.onclick = () => {
+        chooseSkin(button.dataset.skin);
+        $$("[data-skin]", body).forEach((b) => {
+          const on = b === button;
+          b.classList.toggle("selected", on);
+          b.setAttribute("aria-pressed", on);
+        });
+      };
+    });
 
     $$("[data-theme]", body).forEach((button) => {
       button.onclick = () => {
