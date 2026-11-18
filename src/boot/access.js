@@ -3,7 +3,6 @@ let typeLoginArt;
 
 let enteringOS = false,
   bootRun = 0;
-const canSkipIntro = state.introSeen === true;
 const bootDelay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // SALIDA DE ARRANQUE: añade texto con textContent, evitando interpretar texto como HTML.
@@ -54,14 +53,12 @@ function enterOS() {
   }, 420);
 }
 
-// La primera visita completa el arranque; las siguientes permiten botón o Enter.
+// La intro se puede saltar siempre, también en la primera visita: botón visible o Enter.
 function initDirectAccess() {
-  $("#skipBoot").hidden = !canSkipIntro;
-  $("#skipBoot").addEventListener("click", () => {
-    if (canSkipIntro) enterOS();
-  });
+  $("#skipBoot").hidden = false;
+  $("#skipBoot").addEventListener("click", enterOS);
   addEventListener("keydown", (e) => {
-    if (canSkipIntro && !$("#login").classList.contains("hidden") && e.key === "Enter") {
+    if (!$("#login").classList.contains("hidden") && e.key === "Enter") {
       e.preventDefault();
       enterOS();
     }

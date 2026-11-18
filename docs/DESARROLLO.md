@@ -55,7 +55,7 @@ Esta organización permite localizar y revisar cada responsabilidad conservando 
 - `OSStorage` centraliza lecturas y escrituras tolerantes a datos incompletos o almacenamiento bloqueado.
 - Cada juego y aplicación limpia temporizadores y eventos al cerrar su ventana.
 - No se incluyen claves de APIs, documentos privados ni datos sensibles en las fuentes. Las claves del Worker siguen en Secrets de Cloudflare.
-- La primera visita conserva la intro completa; las siguientes permiten saltarla. Milo responde dentro del chat y no muestra mensajes espontáneos en el escritorio.
+- La intro se puede saltar siempre con el botón o Enter, también en la primera visita. Milo responde dentro del chat y no muestra mensajes espontáneos en el escritorio.
 
 ## Qué se comprobó en esta reorganización
 
