@@ -7,7 +7,7 @@ El código editable vive en `src/` y `styles/`. Los archivos de la raíz que car
 | Carpeta | Responsabilidad |
 | --- | --- |
 | `src/data/` | Perfil, proyectos y datos del usuario |
-| `src/core/` | Preferencias locales, almacenamiento seguro y cálculo |
+| `src/core/` | Preferencias locales, almacenamiento seguro, cálculo y el sistema único de iconos pixel art (`pixel-icons.js`: paleta cerrada y mapas de 16×16) |
 | `src/desktop/` | Ventanas, menús, iconos, temas, búsqueda y barra de tareas |
 | `src/boot/` y `src/bootstrap/` | Primera visita, animación y puesta en marcha |
 | `src/apps/` | Contenido y eventos de cada aplicación |
