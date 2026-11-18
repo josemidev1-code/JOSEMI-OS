@@ -22,6 +22,49 @@
     blue: "#78cbe2",
     pink: "#f49ac1",
   };
+  // Paleta cerrada de los iconos dibujados como mapa: rampas de 3 tonos con cambio de matiz
+  // (sombras hacia el azul o el rojo, luces hacia el amarillo) y contorno de tinta.
+  const PIXEL_PAL = {
+    k: "#101e24",
+    D: "#0b1a22",
+    s: "#2c3e55",
+    S: "#5d8297",
+    l: "#9cc4c6",
+    w: "#e9f1d7",
+    M: "#3e9a7a",
+    m: "#8ce6ac",
+    Y: "#c96a34",
+    y: "#ffce74",
+    h: "#fff1ad",
+    P: "#b4507e",
+    p: "#f49ac1",
+    B: "#34679a",
+    b: "#78cbe2",
+    c: "#c9f1f7",
+    F: "#7d97a8",
+    f: "#c3d6da",
+    e: "#eef6f4",
+    R: "#a8323e",
+    r: "#e8604f",
+  };
+  // Convierte un mapa de 16 filas × 16 caracteres en un icono 32×32: cada carácter es un
+  // píxel de 2×2 unidades y "." es transparente. Une los píxeles iguales seguidos en un rect.
+  const pix = (name, rows) =>
+    svg(
+      rows
+        .map((row, y) => {
+          let out = "";
+          for (let x = 0; x < row.length;) {
+            let w = 1;
+            while (row[x + w] === row[x]) w++;
+            if (row[x] !== ".") out += rect(x * 2, y * 2, w * 2, 2, PIXEL_PAL[row[x]]);
+            x += w;
+          }
+          return out;
+        })
+        .join(""),
+      "pixel-map " + name,
+    );
   const art = {
     computer: svg(
       rect(3, 3, 26, 20, "#172b30") +
@@ -147,71 +190,97 @@
         rect(14, 18, 4, 4, "#3f4541") +
         rect(15, 22, 2, 4, "#3f4541"),
     ),
-    // Iconos de los casos de proyecto.
-    terminal: svg(
-      rect(2, 5, 28, 22, "#2a3f47") +
-        rect(2, 5, 28, 4, "#4c6e78") +
-        rect(4, 6, 2, 2, "#f49ac1") +
-        rect(7, 6, 2, 2, "#ffce74") +
-        rect(10, 6, 2, 2, "#8ce6ac") +
-        rect(4, 10, 24, 15, "#0b1a22") +
-        rect(7, 13, 2, 2, "#8ce6ac") +
-        rect(9, 15, 2, 2, "#8ce6ac") +
-        rect(7, 17, 2, 2, "#8ce6ac") +
-        rect(13, 18, 8, 2, "#e9f1d7") +
-        rect(22, 12, 4, 1, "#ffce74") +
-        rect(24, 14, 2, 4, "#ffce74"),
-    ),
-    controller: svg(
-      rect(5, 10, 22, 12, "#78cbe2") +
-        rect(3, 13, 4, 11, "#5aa4bb") +
-        rect(25, 13, 4, 11, "#5aa4bb") +
-        rect(7, 10, 18, 2, "#b8e6f2") +
-        rect(8, 14, 6, 2, "#101e24") +
-        rect(10, 12, 2, 6, "#101e24") +
-        rect(20, 13, 3, 3, "#f49ac1") +
-        rect(23, 16, 3, 3, "#ffce74") +
-        rect(13, 19, 6, 2, "#3f6f80") +
-        rect(14, 5, 4, 5, "#ffce74") +
-        rect(15, 3, 2, 2, "#fff1ad"),
-    ),
-    fog: svg(
-      rect(13, 6, 6, 3, "#c4413b") +
-        rect(14, 9, 4, 16, "#6b7f86") +
-        rect(14, 9, 1, 16, "#9bb0b5") +
-        rect(11, 4, 10, 2, "#3b4b52") +
-        rect(15, 7, 2, 1, "#ffe9a2") +
-        rect(18, 7, 10, 1, "#ffe9a2") +
-        rect(20, 6, 6, 1, "#ffdf75") +
-        rect(2, 18, 12, 2, "#c9d8dc") +
-        rect(18, 20, 12, 2, "#c9d8dc") +
-        rect(0, 24, 32, 3, "#e4eef0") +
-        rect(4, 27, 26, 2, "#b6c8cc"),
-    ),
-    factory: svg(
-      rect(3, 14, 26, 15, "#87a3ab") +
-        rect(3, 10, 6, 4, "#87a3ab") +
-        rect(9, 12, 6, 2, "#6d8a93") +
-        rect(15, 10, 6, 4, "#87a3ab") +
-        rect(22, 4, 5, 10, "#596f79") +
-        rect(23, 2, 3, 2, "#c9d8dc") +
-        [6, 12, 18].map((x) => rect(x, 17, 4, 4, "#ffce74")).join("") +
-        rect(22, 21, 5, 8, "#2a3f47") +
-        rect(3, 28, 26, 2, "#3b4b52"),
-    ),
-    scales: svg(
-      rect(15, 4, 2, 22, "#d6bd8c") +
-        rect(14, 3, 4, 2, "#ffe9a2") +
-        rect(5, 8, 22, 2, "#d6bd8c") +
-        rect(6, 10, 1, 7, "#b99c6c") +
-        rect(25, 10, 1, 7, "#b99c6c") +
-        rect(2, 17, 9, 2, "#ffce74") +
-        rect(3, 19, 7, 1, "#b99c6c") +
-        rect(21, 17, 9, 2, "#ffce74") +
-        rect(22, 19, 7, 1, "#b99c6c") +
-        rect(10, 26, 12, 3, "#b99c6c") +
-        rect(8, 29, 16, 2, "#e8cca0"),
-    ),
+    // Iconos de los casos de proyecto: mapas de 16×16 con la paleta cerrada PIXEL_PAL.
+    terminal: pix("terminal", [
+      "................",
+      ".kkkkkkkkkkkkkk.",
+      ".kwlllllllllllk.",
+      ".klplylmlllllsk.",
+      ".kkkkkkkkkkkkkk.",
+      ".kDDDDDDDDDDDDk.",
+      ".kDmDDDDDDDDDDk.",
+      ".kDDmDDDDDDDDDk.",
+      ".kDmDDwwwDDDkkkk",
+      ".kDDDDDDDDDkhyyk",
+      ".kDDDDDDDDkhyyk.",
+      ".kkkkkkkkkhyyyyk",
+      ".........kkkyyk.",
+      "...........kyk..",
+      "..........kyk...",
+      "..........kk....",
+    ]),
+    controller: pix("controller", [
+      "................",
+      "......kkkk......",
+      ".....khyyYk.....",
+      ".....kyrYYk.....",
+      "..kkkkkkkkkkkk..",
+      ".kccccbbbbbbbbk.",
+      "kcbbkbbbbbbbpbbk",
+      "kcbkkkbbbbbybpBk",
+      "kbbbkbbbbbbbybBk",
+      "kbbbbbbBBbbbbBBk",
+      "kbbbbbBkkBbbbbBk",
+      "kBBBBBk..kBBBBBk",
+      ".kBBBk....kBBBk.",
+      "..kkk......kkk..",
+      "................",
+      "................",
+    ]),
+    fog: pix("fog", [
+      "....kkkkk.......",
+      "...kRrrrRk......",
+      "...kkkkkkk......",
+      "...ksyhysk.hh...",
+      "...ksyyyskhhhhh.",
+      "...kkkkkkk.hhhhh",
+      "....klSsk.......",
+      "....klSsk.......",
+      "....klSsk.......",
+      "...klSSssk......",
+      "...klSSssk......",
+      "..eeeefffeee....",
+      ".effffFFfffffe..",
+      "fffFFFFffffFFfff",
+      "FFFFffFFFFFFffFF",
+      "................",
+    ]),
+    factory: pix("factory", [
+      "............ff..",
+      "...........feef.",
+      "............ff..",
+      "...........kkk..",
+      "...........kSk..",
+      "k...k...k..kSk..",
+      "kk..kk..kk.kSk..",
+      "klk.klk.klkkSk..",
+      "kllkkllkkllkSk..",
+      "kSSSSSSSSSSSSsk.",
+      "kSyySyySyySSSsk.",
+      "kSYYSYYSYYSkkSk.",
+      "kSSSSSSSSSSkkSk.",
+      "ksssssssssskksk.",
+      "kkkkkkkkkkkkkkk.",
+      "................",
+    ]),
+    scales: pix("scales", [
+      ".......kk.......",
+      "......khyk......",
+      ".kkkkkkyYkkkkkk.",
+      ".khhhhhyYyyyyYk.",
+      ".kkkkkkyYkkkkkk.",
+      "..y....yY....Y..",
+      ".y.y...yY...Y.Y.",
+      ".y..y..yY..Y..Y.",
+      "y....y.yY.Y....Y",
+      "kkkkkk.yY.kkkkkk",
+      "khyyYk.yY.khyyYk",
+      ".kYYk..yY..kYYk.",
+      "......kyYk......",
+      ".....khyyYk.....",
+      "....khyyyyYk....",
+      "....kkkkkkkk....",
+    ]),
   };
   window.PixelArt = art;
   for (const id of ["tetris", "pacman", "minesweeper"]) Apps[id].icon = art[id];
