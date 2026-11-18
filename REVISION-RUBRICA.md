@@ -1,4 +1,22 @@
-# Revisión de la entrega · 23 de octubre de 2026
+# Revisión de la entrega
+
+## Actualización · 18 de noviembre de 2026
+
+Revisión contra la rúbrica de «Web personal de marca» (Aula en la nube) sobre la web publicada.
+
+| Criterio | Estado |
+| --- | --- |
+| Contenido | Siete casos reales con reto → solución → resultado y datos propios de cada repositorio, y widget en directo de GitHub (métricas propias). Sin clientes inventados: System Plast y Nuria Cerdá no se presentan como encargos. |
+| Diseño | Identidad pixel art coherente: tipografía Pixelify Sans/VT323, 26 iconos de un sistema único (`src/core/pixel-icons.js`) y favicon generado con el mismo mapa. |
+| Interactividad | Ventanas, ajustes persistentes, Arcade, Milo con APIs y widget de GitHub con estado de carga y de error. |
+| Contacto | Correo, GitHub y LinkedIn desde Inicio; Milo responde con los siete proyectos y remite al correo real. La personalidad del Worker requiere `npx wrangler deploy` para publicarse. |
+| Proceso | Commits atómicos en valenciano, rama y PR para esta iteración, instrucciones clave archivadas en `prompts/` y CHANGELOG v3. |
+| Arquitectura | Lighthouse del 18/11 antes de estos cambios: escritorio 100/100/100/100; móvil 89/100/100/100. Los scripts pasan a `defer`; repetir la medición en producción. |
+| Medios | SVG pixel art propios y demo MP4. Pendiente: fotografía propia y volver a grabar la demo y la imagen social con el diseño actual. |
+
+Pendientes que dependen de Josemi: fotografía propia, confirmar la relación con System Plast y Nuria Cerdá, desplegar el Worker y grabar la demo nueva.
+
+## Revisión del 23 de octubre de 2026
 
 Revisión basada en la anatomía de marca personal y los cuatro tutoriales facilitados por Josemi. No sustituye a la rúbrica completa ni permite asignar una nota final.
 

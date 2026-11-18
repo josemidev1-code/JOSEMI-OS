@@ -2,6 +2,30 @@
 
 Archivo preparado el 23 de octubre de 2026 con extractos literales de instrucciones de Josemi ya presentes en la conversación de trabajo. No es un registro completo ni se ha creado una cronología ficticia de prompts antiguos. Se excluyen documentos privados y credenciales.
 
+## Iteración del 18 de noviembre de 2026
+
+Extractos literales de las instrucciones de Josemi en la sesión de trabajo de este día.
+
+> hay que mejorarla mucho, mira aulaenlanube una pagina de edu torregrosa y ves a docencia programacion con ia y lo de web personal y mira los requisitos
+
+Resultado: comparación con la rúbrica del proyecto. El hueco principal era Contenido: Proyectos tenía huecos de roadmap. Se sustituyen por siete casos reales con reto, solución y resultado, y se añade el widget de GitHub (commit `d949d74`).
+
+> la tipografia la quiero como pixel
+
+Resultado: Pixelify Sans y VT323 en toda la interfaz (commit `84aeb3b`).
+
+> como puedo mejorar el diseño de los pixelarts
+
+Resultado: reglas de contorno, luz, rampas de tres tonos y paleta cerrada, aplicadas primero a los cinco iconos de proyectos (`fedd9df`) y después a los 26 iconos en un sistema único (`0f54366`).
+
+> haz una revision y dime que le falta a la web
+
+Resultado: revisión con Lighthouse, móvil, Milo y repositorio. Se corrigen el rendimiento móvil, el favicon, Milo y la documentación.
+
+> pon que se pueda saltar
+
+Resultado: la intro se puede saltar también en la primera visita.
+
 ## Coherencia del escritorio
 
 > pon en el escritorio solo lo esencial, porque si se puede entrar a pacman y a todos los juegos sin abrir arcade no tiene sentido lo de la animacion entonces

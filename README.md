@@ -17,7 +17,7 @@ Portfolio de José Miguel Miralles Gandia, estudiante de Desarrollo de Aplicacio
 - Milo, un ajolote con IA (Groq), búsqueda web (Tavily), meteorología (Open-Meteo) y música (iTunes). Las respuestas locales se conservan como respaldo.
 - Preferencias guardadas en el navegador y adaptación a móvil.
 
-La primera visita reproduce la intro completa, sin bloque de presentación ni botón para saltarla. Al completarla se guarda `introSeen` en ese navegador; en visitas posteriores se puede saltar con el botón o Enter. Si se borran los datos del navegador, vuelve a contar como primera visita. Milo conserva el chat y sus acciones, sin bocadillos ni frases espontáneas en el escritorio.
+La intro Matrix se puede saltar siempre, también en la primera visita, con el botón «Saltar animación» o con Enter: quien entra ve el nombre y la presentación en segundos, no al cabo de 23. Milo conserva el chat y sus acciones, sin bocadillos ni frases espontáneas en el escritorio.
 
 ## Estructura
 
